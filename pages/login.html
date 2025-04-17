@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Feeding Humanity</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/login.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-box">
+            <div class="auth-header">
+                <h2>Welcome Back</h2>
+                <p>Login to your account</p>
+            </div>
+            <form class="auth-form" id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <div class="input-group">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                    </div>
+                </div>
+                <div id="loginError" class="error-message" style="display: none; color: #ff6b6b; margin-bottom: 15px; text-align: center;"></div>
+                <div class="form-options">
+                    <label class="remember-me">
+                        <input type="checkbox" id="remember">
+                        <span>Remember me</span>
+                    </label>
+                    <a href="#" class="forgot-password">Forgot Password?</a>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Login</button>
+                <div class="auth-footer">
+                    <p>Don't have an account? <a href="signup.html">Sign Up</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form values
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            // Clear any previous errors
+            const errorElement = document.getElementById('loginError');
+            errorElement.style.display = 'none';
+            
+            // Call the API to login
+            fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message === 'Login successful') {
+                    // Store user info in localStorage
+                    localStorage.setItem('userEmail', email);
+                    localStorage.setItem('userId', data.userId);
+                    
+                    // Fetch user details to get the name
+                    fetch(`/api/auth/user?email=${email}`)
+                        .then(response => response.json())
+                        .then(user => {
+                            if (user && user.fullname) {
+                                localStorage.setItem('userName', user.fullname);
+                                console.log("Stored user data:", { email, name: user.fullname });
+                            } else {
+                                // If no name found, use email as fallback
+                                localStorage.setItem('userName', email.split('@')[0]);
+                                console.log("No user fullname found, using email prefix instead");
+                            }
+                            // Redirect to dashboard
+                            window.location.href = 'dashboard.html';
+                        })
+                        .catch(error => {
+                            console.error('Error fetching user details:', error);
+                            // Use email as fallback for name
+                            localStorage.setItem('userName', email.split('@')[0]);
+                            // Still redirect to dashboard even if getting user details fails
+                            window.location.href = 'dashboard.html';
+                        });
+                } else {
+                    // Show error message
+                    errorElement.textContent = data.message || 'Invalid email or password';
+                    errorElement.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Login error:', error);
+                errorElement.textContent = 'An error occurred during login. Please try again.';
+                errorElement.style.display = 'block';
+            });
+        });
+    </script>
+</body>
+</html>
