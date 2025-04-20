@@ -443,43 +443,80 @@
     </div>
     
     <script>
-        // Initial page setup
         document.addEventListener('DOMContentLoaded', function() {
-            // Check if user is logged in as admin
-            if (!isLoggedInAsAdmin()) {
-                window.location.href = 'login.html?admin=true';
-                return;
-            }
+            // Initialize dashboard data
+            initializeDashboard();
             
-            // Set admin name
-            const adminName = localStorage.getItem('userName') || 'Admin User';
-            document.getElementById('adminName').textContent = adminName;
+            // Set up tabs
+            setupTabs();
             
-            // Load dashboard tab by default
-            loadTab('dashboard');
+            // Load initial data
+            loadRecentDonations();
+            loadRecentPayments();
+            loadRecentRequirements();
+            loadRecentFeedback();
             
-            // Add event listeners to navigation items
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const tabName = this.getAttribute('data-tab');
+            // Show dashboard tab by default
+            showDashboardTab();
+        });
+        
+        function initializeDashboard() {
+            // Fetch dashboard statistics
+            fetch('/api/admin/dashboard/stats')
+                .then(response => response.json())
+                .then(data => {
+                    // Update dashboard numbers
+                    document.getElementById('totalDonations').textContent = data.donationCount || '0';
+                    document.getElementById('totalPayments').textContent = '₹' + (data.paymentTotal || '0');
+                    document.getElementById('totalRequirements').textContent = data.requirementCount || '0';
+                    document.getElementById('totalFeedback').textContent = data.feedbackCount || '0';
+                })
+                .catch(error => {
+                    console.error('Error fetching dashboard stats:', error);
+                    // Use placeholder data on error
+                    document.getElementById('totalDonations').textContent = '--';
+                    document.getElementById('totalPayments').textContent = '₹--';
+                    document.getElementById('totalRequirements').textContent = '--';
+                    document.getElementById('totalFeedback').textContent = '--';
+                });
+        }
+        
+        function setupTabs() {
+            const navItems = document.querySelectorAll('.nav-item');
+            
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    // Remove active class from all nav items
+                    navItems.forEach(navItem => navItem.classList.remove('active'));
                     
-                    // Update active tab
-                    document.querySelectorAll('.nav-item').forEach(navItem => {
-                        navItem.classList.remove('active');
-                    });
+                    // Add active class to clicked item
                     this.classList.add('active');
                     
-                    // Load tab content
-                    loadTab(tabName);
+                    // Show corresponding tab
+                    const tabName = this.getAttribute('data-tab');
+                    showTab(tabName);
                 });
             });
-            
-            // Add logout event listener
-            document.getElementById('logoutBtn').addEventListener('click', function() {
-                logout();
+        }
+        
+        function showTab(tabName) {
+            // Hide all content sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.style.display = 'none';
             });
-        });
+            
+            // Show selected section
+            document.getElementById(tabName + 'Section').style.display = 'block';
+            
+            // If this is the dashboard, refresh its data
+            if (tabName === 'dashboard') {
+                initializeDashboard();
+            }
+        }
+        
+        function showDashboardTab() {
+            document.querySelector('.nav-item[data-tab="dashboard"]').click();
+        }
         
         // Check if user is logged in as admin
         function isLoggedInAsAdmin() {
@@ -812,6 +849,9 @@
                     // Use mock data on error
                     updateDonationsTable(tableBody, getMockDonations().slice(0, 3));
                 });
+                
+            // Set up real-time updates for donations
+            setupDonationListener();
         }
         
         // Helper to update donations table
@@ -856,6 +896,37 @@
                     viewDonationDetails(donationId);
                 });
             });
+        }
+        
+        // Set up real-time listener for new donations
+        function setupDonationListener() {
+            // Check for new donations every 30 seconds
+            setInterval(() => {
+                fetch('/api/donations/recent?timestamp=' + Date.now())
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.length > 0) {
+                            // Update dashboard stats
+                            fetch('/api/donations/count')
+                                .then(response => response.json())
+                                .then(countData => {
+                                    document.getElementById('totalDonations').textContent = countData.count || '0';
+                                });
+                                
+                            // Update the donations table
+                            const tableBody = document.querySelector('#recentDonationsTable tbody');
+                            updateDonationsTable(tableBody, data);
+                            
+                            // Show notification
+                            if (document.querySelector('.nav-item.active').getAttribute('data-tab') !== 'dashboard') {
+                                showNotification('New donation received');
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error checking for new donations:', error);
+                    });
+            }, 30000);
         }
         
         // Load recent payments
@@ -911,6 +982,74 @@
                     console.error('Error fetching recent payments:', error);
                     tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Error loading payments</td></tr>';
                 });
+                
+            // Set up real-time updates for payments
+            setupPaymentListener();
+        }
+        
+        // Set up real-time listener for new payments
+        function setupPaymentListener() {
+            // Check for new payments every 30 seconds
+            setInterval(() => {
+                fetch('/api/payments/recent?timestamp=' + Date.now())
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.length > 0) {
+                            // Update dashboard stats
+                            fetch('/api/payments/total')
+                                .then(response => response.json())
+                                .then(totalData => {
+                                    document.getElementById('totalPayments').textContent = '₹' + (totalData.total || '0');
+                                });
+                                
+                            // Update the payments table
+                            const tableBody = document.querySelector('#recentPaymentsTable tbody');
+                            
+                            // Clear table and add new data
+                            tableBody.innerHTML = '';
+                            data.forEach(payment => {
+                                const row = document.createElement('tr');
+                                
+                                // Format the date
+                                const date = new Date(payment.createdAt);
+                                const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+                                
+                                // Create status badge class
+                                const statusClass = payment.status.toLowerCase();
+                                
+                                row.innerHTML = `
+                                    <td>${payment._id.substring(0, 8)}</td>
+                                    <td>${payment.donationId}</td>
+                                    <td>₹${payment.amount}</td>
+                                    <td>${payment.category}</td>
+                                    <td>${formattedDate}</td>
+                                    <td><span class="status-badge ${statusClass}">${payment.status}</span></td>
+                                    <td>
+                                        <button class="action-btn view-btn" data-id="${payment._id}">View</button>
+                                    </td>
+                                `;
+                                
+                                tableBody.appendChild(row);
+                            });
+                            
+                            // Add event listeners for view buttons
+                            document.querySelectorAll('#recentPaymentsTable .view-btn').forEach(btn => {
+                                btn.addEventListener('click', function() {
+                                    const paymentId = this.getAttribute('data-id');
+                                    viewPaymentDetails(paymentId);
+                                });
+                            });
+                            
+                            // Show notification
+                            if (document.querySelector('.nav-item.active').getAttribute('data-tab') !== 'dashboard') {
+                                showNotification('New payment received');
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error checking for new payments:', error);
+                    });
+            }, 30000);
         }
         
         // Load recent requirements
@@ -967,6 +1106,75 @@
                     console.error('Error fetching recent requirements:', error);
                     tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Error loading requirements</td></tr>';
                 });
+                
+            // Set up real-time updates for requirements
+            setupRequirementListener();
+        }
+        
+        // Set up real-time listener for new requirements
+        function setupRequirementListener() {
+            // Check for new requirements every 30 seconds
+            setInterval(() => {
+                fetch('/api/requirements/recent?timestamp=' + Date.now())
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.length > 0) {
+                            // Update dashboard stats
+                            fetch('/api/requirements/count')
+                                .then(response => response.json())
+                                .then(countData => {
+                                    document.getElementById('totalRequirements').textContent = countData.count || '0';
+                                });
+                                
+                            // Update the requirements table
+                            const tableBody = document.querySelector('#recentRequirementsTable tbody');
+                            
+                            // Clear table and add new data
+                            tableBody.innerHTML = '';
+                            data.forEach(req => {
+                                const row = document.createElement('tr');
+                                
+                                // Format the date
+                                const date = new Date(req.createdAt);
+                                const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+                                
+                                // Create status badge class
+                                const statusClass = req.status ? req.status.toLowerCase() : 'pending';
+                                const status = req.status || 'Pending';
+                                
+                                row.innerHTML = `
+                                    <td>${req.donationId}</td>
+                                    <td>${req.orgName}</td>
+                                    <td>${req.requirementType}</td>
+                                    <td>₹${req.amount}</td>
+                                    <td>${formattedDate}</td>
+                                    <td><span class="status-badge ${statusClass}">${status}</span></td>
+                                    <td>
+                                        <button class="action-btn view-btn" data-id="${req._id}">View</button>
+                                    </td>
+                                `;
+                                
+                                tableBody.appendChild(row);
+                            });
+                            
+                            // Add event listeners for view buttons
+                            document.querySelectorAll('#recentRequirementsTable .view-btn').forEach(btn => {
+                                btn.addEventListener('click', function() {
+                                    const reqId = this.getAttribute('data-id');
+                                    viewRequirementDetails(reqId);
+                                });
+                            });
+                            
+                            // Show notification
+                            if (document.querySelector('.nav-item.active').getAttribute('data-tab') !== 'dashboard') {
+                                showNotification('New requirement received');
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error checking for new requirements:', error);
+                    });
+            }, 30000);
         }
         
         // Load recent feedback
@@ -1034,6 +1242,119 @@
                     console.error('Error fetching recent feedback:', error);
                     tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Error loading feedback</td></tr>';
                 });
+                
+            // Set up real-time updates for feedback
+            setupFeedbackListener();
+        }
+        
+        // Set up real-time listener for new feedback
+        function setupFeedbackListener() {
+            // Check for new feedback every 30 seconds
+            setInterval(() => {
+                fetch('/api/feedback/recent?timestamp=' + Date.now())
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.length > 0) {
+                            // Update dashboard stats
+                            fetch('/api/feedback/count')
+                                .then(response => response.json())
+                                .then(countData => {
+                                    document.getElementById('totalFeedback').textContent = countData.count || '0';
+                                });
+                                
+                            // Update the feedback table
+                            const tableBody = document.querySelector('#recentFeedbackTable tbody');
+                            
+                            // Clear table and add new data
+                            tableBody.innerHTML = '';
+                            data.forEach(feedback => {
+                                const row = document.createElement('tr');
+                                
+                                // Format the date
+                                const date = new Date(feedback.createdAt);
+                                const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+                                
+                                // Truncate feedback text if it's too long
+                                const truncatedFeedback = feedback.feedbackText.length > 50 
+                                    ? feedback.feedbackText.substring(0, 50) + '...' 
+                                    : feedback.feedbackText;
+                                
+                                // Generate stars for rating
+                                const rating = parseInt(feedback.ratingValue) || 0;
+                                let stars = '';
+                                for (let i = 0; i < 5; i++) {
+                                    if (i < rating) {
+                                        stars += '<i class="fas fa-star" style="color: gold;"></i>';
+                                    } else {
+                                        stars += '<i class="far fa-star" style="color: #ccc;"></i>';
+                                    }
+                                }
+                                
+                                row.innerHTML = `
+                                    <td>${feedback.fullName}</td>
+                                    <td>${feedback.feedbackEmail}</td>
+                                    <td>${stars}</td>
+                                    <td>${truncatedFeedback}</td>
+                                    <td>${formattedDate}</td>
+                                    <td>
+                                        <button class="action-btn view-btn" data-id="${feedback._id}">View</button>
+                                    </td>
+                                `;
+                                
+                                tableBody.appendChild(row);
+                            });
+                            
+                            // Add event listeners for view buttons
+                            document.querySelectorAll('#recentFeedbackTable .view-btn').forEach(btn => {
+                                btn.addEventListener('click', function() {
+                                    const feedbackId = this.getAttribute('data-id');
+                                    viewFeedbackDetails(feedbackId);
+                                });
+                            });
+                            
+                            // Show notification
+                            if (document.querySelector('.nav-item.active').getAttribute('data-tab') !== 'dashboard') {
+                                showNotification('New feedback received');
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error checking for new feedback:', error);
+                    });
+            }, 30000);
+        }
+        
+        // Add notification system for real-time updates
+        function showNotification(message) {
+            // Create notification element if it doesn't exist
+            if (!document.getElementById('adminNotification')) {
+                const notificationElement = document.createElement('div');
+                notificationElement.id = 'adminNotification';
+                notificationElement.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background-color: #f5a623;
+                    color: white;
+                    padding: 10px 20px;
+                    border-radius: 4px;
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                    z-index: 1000;
+                    display: none;
+                    font-weight: 600;
+                `;
+                document.body.appendChild(notificationElement);
+            }
+            
+            // Show notification with message
+            const notification = document.getElementById('adminNotification');
+            notification.textContent = message;
+            notification.style.display = 'block';
+            
+            // Hide notification after 3 seconds
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
         }
         
         // Functions for individual tab content
