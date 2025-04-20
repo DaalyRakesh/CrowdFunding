@@ -7,13 +7,48 @@
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="../css/login.css">
+    <style>
+        .auth-box.admin-mode {
+            border-top: 4px solid #f5a623;
+            box-shadow: 0 10px 25px rgba(245, 166, 35, 0.15);
+        }
+        
+        .auth-header .admin-badge {
+            display: inline-block;
+            background-color: #f5a623;
+            color: #fff;
+            padding: 3px 10px;
+            border-radius: 3px;
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+        }
+        
+        .error-message {
+            color: #ff6b6b;
+            margin-bottom: 15px;
+            text-align: center;
+            padding: 8px;
+            border-radius: 4px;
+            background-color: rgba(255, 107, 107, 0.1);
+            display: none;
+        }
+        
+        .btn-primary.admin-login {
+            background-color: #f5a623;
+        }
+        
+        .btn-primary.admin-login:hover {
+            background-color: #e09010;
+        }
+    </style>
 </head>
 <body>
     <div class="auth-container">
-        <div class="auth-box">
+        <div class="auth-box" id="authBox">
             <div class="auth-header">
-                <h2>Welcome Back</h2>
-                <p>Login to your account</p>
+                <div id="adminBadge" style="display: none;" class="admin-badge">Admin Access</div>
+                <h2 id="loginTitle">Welcome Back</h2>
+                <p id="loginSubtitle">Login to your account</p>
             </div>
             <form class="auth-form" id="loginForm">
                 <div class="form-group">
@@ -30,7 +65,7 @@
                         <input type="password" id="password" name="password" placeholder="Enter your password" required>
                     </div>
                 </div>
-                <div id="loginError" class="error-message" style="display: none; color: #ff6b6b; margin-bottom: 15px; text-align: center;"></div>
+                <div id="loginError" class="error-message"></div>
                 <div class="form-options">
                     <label class="remember-me">
                         <input type="checkbox" id="remember">
@@ -38,15 +73,29 @@
                     </label>
                     <a href="#" class="forgot-password">Forgot Password?</a>
                 </div>
-                <button type="submit" class="btn btn-primary btn-block">Login</button>
+                <button type="submit" class="btn btn-primary btn-block" id="loginButton">Login</button>
                 <div class="auth-footer">
-                    <p>Don't have an account? <a href="signup.html">Sign Up</a></p>
+                    <p id="signupLinkContainer">Don't have an account? <a href="signup.html">Sign Up</a></p>
                 </div>
             </form>
         </div>
     </div>
 
     <script>
+        // Check if the admin parameter is present in the URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const isAdminLogin = urlParams.get('admin') === 'true';
+        
+        // Update the UI based on login mode
+        if (isAdminLogin) {
+            document.getElementById('adminBadge').style.display = 'inline-block';
+            document.getElementById('loginTitle').textContent = 'Admin Login';
+            document.getElementById('loginSubtitle').textContent = 'Access administrator dashboard';
+            document.getElementById('loginButton').classList.add('admin-login');
+            document.getElementById('authBox').classList.add('admin-mode');
+            document.getElementById('signupLinkContainer').style.display = 'none'; // Hide signup link for admin login
+        }
+        
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
@@ -58,13 +107,23 @@
             const errorElement = document.getElementById('loginError');
             errorElement.style.display = 'none';
             
+            // Set button to loading state
+            const loginButton = document.getElementById('loginButton');
+            const originalButtonText = loginButton.textContent;
+            loginButton.disabled = true;
+            loginButton.textContent = 'Logging in...';
+            
             // Call the API to login
             fetch('/api/auth/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ email, password })
+                body: JSON.stringify({ 
+                    email, 
+                    password,
+                    isAdminLogin: isAdminLogin // Tell the backend if this is an admin login attempt
+                })
             })
             .then(response => response.json())
             .then(data => {
@@ -72,14 +131,43 @@
                     // Store user info in localStorage
                     localStorage.setItem('userEmail', email);
                     localStorage.setItem('userId', data.userId);
+                    localStorage.setItem('isAdmin', data.isAdmin);
                     
-                    // Fetch user details to get the name
+                    // For admin login, the admin must have admin privileges
+                    if (isAdminLogin && !data.isAdmin) {
+                        errorElement.textContent = 'You do not have administrator privileges';
+                        errorElement.style.display = 'block';
+                        loginButton.disabled = false;
+                        loginButton.textContent = originalButtonText;
+                        return;
+                    }
+                    
+                    // For regular login, the user must not be an admin
+                    if (!isAdminLogin && data.isAdmin) {
+                        errorElement.textContent = 'Please use the admin login for administrator accounts';
+                        errorElement.style.display = 'block';
+                        loginButton.disabled = false;
+                        loginButton.textContent = originalButtonText;
+                        return;
+                    }
+                    
+                    // If admin login was successful, set admin fullname directly
+                    if (isAdminLogin && data.fullname) {
+                        localStorage.setItem('userName', data.fullname);
+                        console.log("Stored admin data:", { email, name: data.fullname });
+                        
+                        // Redirect to admin dashboard
+                        window.location.href = 'admin-dashboard.html';
+                        return;
+                    }
+                    
+                    // For regular users, fetch user details
                     fetch(`/api/auth/user?email=${email}`)
                         .then(response => response.json())
                         .then(user => {
                             if (user && user.fullname) {
                                 localStorage.setItem('userName', user.fullname);
-                                console.log("Stored user data:", { email, name: user.fullname });
+                                console.log("Stored user data:", { email, name: user.fullname, isAdmin: data.isAdmin });
                             } else {
                                 // If no name found, use email as fallback
                                 localStorage.setItem('userName', email.split('@')[0]);
@@ -96,15 +184,23 @@
                             window.location.href = 'dashboard.html';
                         });
                 } else {
-                    // Show error message
-                    errorElement.textContent = data.message || 'Invalid email or password';
+                    // Show appropriate error message based on login type
+                    if (isAdminLogin) {
+                        errorElement.textContent = data.message || 'Invalid administrator credentials';
+                    } else {
+                        errorElement.textContent = data.message || 'Invalid email or password';
+                    }
                     errorElement.style.display = 'block';
+                    loginButton.disabled = false;
+                    loginButton.textContent = originalButtonText;
                 }
             })
             .catch(error => {
                 console.error('Login error:', error);
                 errorElement.textContent = 'An error occurred during login. Please try again.';
                 errorElement.style.display = 'block';
+                loginButton.disabled = false;
+                loginButton.textContent = originalButtonText;
             });
         });
     </script>

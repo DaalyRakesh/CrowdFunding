@@ -1,8 +1,15 @@
 const User = require('../models/User');
+const Admin = require('../models/Admin');
 const bcrypt = require('bcrypt');
+const mongoose = require('mongoose');
 
 const loginUser = async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password, isAdminLogin } = req.body;
+
+    // If this is an admin login attempt, use the admin authentication flow
+    if (isAdminLogin) {
+        return loginAdmin(req, res);
+    }
 
     try {
         // Find the user by email
@@ -21,7 +28,7 @@ const loginUser = async (req, res) => {
             return res.status(200).json({ 
                 message: 'Login successful', 
                 userId: user._id,
-                isAdmin: user.isAdmin 
+                isAdmin: false // Regular users are never admins now
             });
         } else {
             return res.status(401).json({ message: 'Invalid credentials' });
@@ -29,6 +36,43 @@ const loginUser = async (req, res) => {
     } catch (error) {
         console.error('Login error:', error);
         res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// Separate admin login function
+const loginAdmin = async (req, res) => {
+    const { email, password } = req.body;
+    
+    try {
+        console.log('Admin login attempt:', email);
+        
+        // Find the admin by username (which is an email)
+        const admin = await Admin.findOne({ username: email.toLowerCase() });
+        
+        // Check if admin exists
+        if (!admin) {
+            console.log('Admin not found:', email);
+            return res.status(401).json({ message: 'Invalid admin credentials' });
+        }
+        
+        // Compare the password
+        const isPasswordValid = await admin.comparePassword(password);
+        
+        if (isPasswordValid) {
+            console.log('Admin login successful:', email);
+            return res.status(200).json({
+                message: 'Login successful',
+                userId: admin._id,
+                isAdmin: true,
+                fullname: admin.fullname
+            });
+        } else {
+            console.log('Admin password invalid for:', email);
+            return res.status(401).json({ message: 'Invalid admin credentials' });
+        }
+    } catch (error) {
+        console.error('Admin login error:', error);
+        return res.status(500).json({ message: 'Server error during admin login' });
     }
 };
 
@@ -42,41 +86,88 @@ const registerUser = async (req, res) => {
         return res.status(400).json({ message: 'All fields are required' });
     }
 
+    // Check MongoDB connection state
+    if (mongoose.connection.readyState !== 1) {
+        console.error('MongoDB is not connected. Current state:', mongoose.connection.readyState);
+        return res.status(500).json({ message: 'Database connection error. Please try again later.' });
+    }
+
     try {
-        // Check if user already exists
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
+        // Check if user already exists using the static method
+        console.log('Checking if email exists:', email);
+        const emailExists = await User.emailExists(email);
+        
+        if (emailExists) {
             console.log('User already exists:', email);
-            return res.status(400).json({ message: 'User already exists' });
+            return res.status(400).json({ message: 'User already exists with this email' });
         }
 
-        // Check if this is the first user (make them admin)
-        const totalUsers = await User.countDocuments();
-        const isAdmin = totalUsers === 0;
+        // Check if an admin exists with this email
+        const adminWithSameEmail = await Admin.findOne({ username: email.toLowerCase() });
+        if (adminWithSameEmail) {
+            console.log('Email already registered as admin:', email);
+            return res.status(400).json({ message: 'This email is reserved for administrator use' });
+        }
 
         // Hash the password
+        console.log('Hashing password...');
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
         // Create a new user
+        console.log('Creating new user object...');
         const newUser = new User({
             fullname,
             email,
             password: hashedPassword,
-            isAdmin
+            isAdmin: false // Users registered through signup are never admins now
         });
 
-        console.log('Saving new user:', { fullname, email, isAdmin });
+        console.log('Validating user object...');
+        const validationError = newUser.validateSync();
+        if (validationError) {
+            console.error('Validation error:', validationError);
+            const errorMessages = Object.values(validationError.errors).map(err => err.message);
+            return res.status(400).json({ message: 'Validation error', errors: errorMessages });
+        }
+
+        console.log('Saving new user:', { fullname, email, isAdmin: false });
         
         // Save the user to the database
-        const savedUser = await newUser.save();
-        console.log('User saved successfully:', savedUser._id);
-
-        res.status(201).json({ 
-            message: 'User registered successfully', 
-            userId: savedUser._id,
-            isAdmin: savedUser.isAdmin
-        });
+        try {
+            const savedUser = await newUser.save();
+            console.log('User saved successfully:', savedUser._id);
+            
+            // Return success response with user ID and admin status
+            return res.status(201).json({ 
+                message: 'User registered successfully', 
+                userId: savedUser._id,
+                isAdmin: false
+            });
+        } catch (saveError) {
+            console.error('Database save error:', saveError);
+            
+            // Check for MongoDB specific errors
+            if (saveError.name === 'MongoServerError') {
+                if (saveError.code === 11000) {
+                    // Duplicate key error (likely email)
+                    return res.status(400).json({ 
+                        message: 'Email already in use. Please use a different email address.' 
+                    });
+                }
+            }
+            
+            // Handle validation errors
+            if (saveError.name === 'ValidationError') {
+                const validationErrors = Object.values(saveError.errors).map(err => err.message);
+                return res.status(400).json({ 
+                    message: 'Validation error', 
+                    errors: validationErrors 
+                });
+            }
+            
+            throw saveError; // Re-throw for the outer catch
+        }
     } catch (error) {
         console.error('Registration error details:', error.name, error.message);
         if (error.errors) {
@@ -85,7 +176,7 @@ const registerUser = async (req, res) => {
                 console.error(`Field ${field} error:`, error.errors[field].message);
             });
         }
-        res.status(500).json({ message: 'Server error during registration' });
+        return res.status(500).json({ message: 'Server error during registration. Please try again later.' });
     }
 };
 
@@ -97,12 +188,20 @@ const checkAdmin = async (req, res) => {
             return res.status(400).json({ message: 'Email is required' });
         }
 
+        // First check if the email is an admin
+        const admin = await Admin.findOne({ username: email.toLowerCase() });
+        if (admin) {
+            return res.status(200).json({ isAdmin: true });
+        }
+
+        // If not an admin, check if it's a regular user
         const user = await User.findOne({ email });
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        res.status(200).json({ isAdmin: user.isAdmin });
+        // Regular users are never admins now
+        res.status(200).json({ isAdmin: false });
     } catch (error) {
         console.error('Admin check error:', error);
         res.status(500).json({ message: 'Server error' });
@@ -116,6 +215,17 @@ const getAllUsers = async (req, res) => {
         res.status(200).json(users);
     } catch (error) {
         console.error('Get users error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// Get all admins (admin only)
+const getAllAdmins = async (req, res) => {
+    try {
+        const admins = await Admin.find().select('-password').sort({ createdAt: -1 });
+        res.status(200).json(admins);
+    } catch (error) {
+        console.error('Get admins error:', error);
         res.status(500).json({ message: 'Server error' });
     }
 };
@@ -168,6 +278,17 @@ const getUserByEmail = async (req, res) => {
             return res.status(400).json({ message: 'Email is required' });
         }
 
+        // First check if this is an admin
+        const admin = await Admin.findOne({ username: email.toLowerCase() }).select('-password');
+        if (admin) {
+            return res.status(200).json({
+                fullname: admin.fullname,
+                email: admin.username,
+                isAdmin: true
+            });
+        }
+
+        // If not an admin, look for a regular user
         const user = await User.findOne({ email }).select('-password');
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
@@ -184,7 +305,8 @@ module.exports = {
     loginUser, 
     registerUser, 
     checkAdmin, 
-    getAllUsers, 
+    getAllUsers,
+    getAllAdmins,
     toggleAdmin, 
     deleteUser,
     getUserByEmail

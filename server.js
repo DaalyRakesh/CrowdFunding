@@ -12,12 +12,20 @@ const donationRoutes = require('./routes/donationRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const requirementRoutes = require('./routes/requirementRoutes');
 const feedbackRoutes = require('./routes/feedbackRoutes');
+const Admin = require('./models/Admin');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Connect to MongoDB
-connectDB();
+connectDB().then(async () => {
+    // Initialize the default admin account after successful DB connection
+    try {
+        await Admin.createDefaultAdmin();
+    } catch (error) {
+        console.error('Failed to create default admin:', error);
+    }
+});
 
 // Middleware to parse request bodies
 app.use(bodyParser.json());

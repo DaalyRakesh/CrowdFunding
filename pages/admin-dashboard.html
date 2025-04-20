@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Feeding Humanity</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #f5a623;
+            --secondary-color: #4a90e2;
+            --success-color: #50b848;
+            --danger-color: #ff6b6b;
+            --warning-color: #f5a623;
+            --info-color: #66d9e8;
+            --dark-color: #2c3e50;
+            --light-color: #f8f9fa;
+            --gray-color: #6c757d;
+        }
+        
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Admin Header */
+        .admin-header {
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .admin-logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .admin-logo h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: #333;
+        }
+        
+        .admin-logo span {
+            color: var(--primary-color);
+        }
+        
+        .admin-logo .badge {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            margin-left: 1rem;
+        }
+        
+        .admin-user {
+            display: flex;
+            align-items: center;
+        }
+        
+        .admin-user img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 1rem;
+            background-color: #ddd;
+        }
+        
+        .admin-user .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .admin-user .user-name {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .admin-user .user-role {
+            font-size: 0.8rem;
+            color: var(--gray-color);
+        }
+        
+        .admin-user .logout-btn {
+            margin-left: 1rem;
+            padding: 0.25rem 0.75rem;
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        
+        .admin-user .logout-btn:hover {
+            background-color: #e25f5f;
+        }
+        
+        /* Admin Container */
+        .admin-container {
+            display: flex;
+            min-height: calc(100vh - 70px);
+        }
+        
+        /* Sidebar */
+        .admin-sidebar {
+            width: 250px;
+            background-color: #2c3e50;
+            color: white;
+            padding: 1rem 0;
+        }
+        
+        .nav-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .nav-section-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: #adb5bd;
+            padding: 0.5rem 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            color: #f8f9fa;
+            text-decoration: none;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+        
+        .nav-item:hover, .nav-item.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-left-color: var(--primary-color);
+        }
+        
+        .nav-item i {
+            margin-right: 0.75rem;
+            width: 20px;
+            text-align: center;
+        }
+        
+        /* Main Content */
+        .admin-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+        
+        .page-title {
+            margin-top: 0;
+            color: #333;
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .page-title i {
+            margin-right: 0.75rem;
+            color: var(--primary-color);
+        }
+        
+        /* Dashboard Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-size: 1.5rem;
+            color: white;
+        }
+        
+        .stat-icon.donations {
+            background-color: var(--primary-color);
+        }
+        
+        .stat-icon.payments {
+            background-color: var(--success-color);
+        }
+        
+        .stat-icon.requirements {
+            background-color: var(--secondary-color);
+        }
+        
+        .stat-icon.feedback {
+            background-color: var(--info-color);
+        }
+        
+        .stat-info {
+            flex: 1;
+        }
+        
+        .stat-title {
+            font-size: 0.9rem;
+            color: var(--gray-color);
+            margin: 0 0 0.5rem 0;
+        }
+        
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+        
+        /* Data Tabs */
+        .data-tabs {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+        
+        .tab-buttons {
+            display: flex;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .tab-btn {
+            padding: 1rem 1.5rem;
+            border: none;
+            background: none;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--gray-color);
+            cursor: pointer;
+            transition: all 0.2s;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab-btn:hover {
+            color: #333;
+        }
+        
+        .tab-btn.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 1.5rem;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Data Table */
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .admin-table th, 
+        .admin-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .admin-table th {
+            font-weight: 600;
+            color: #495057;
+            background-color: #f8f9fa;
+        }
+        
+        .admin-table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .status-badge.pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-badge.completed {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+        
+        .status-badge.cancelled {
+            background-color: #f8d7da;
+            color: #842029;
+        }
+        
+        .action-btn {
+            padding: 0.25rem 0.5rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            margin-right: 0.25rem;
+            transition: all 0.2s;
+        }
+        
+        .view-btn {
+            background-color: var(--info-color);
+            color: white;
+        }
+        
+        .view-btn:hover {
+            background-color: #5bc0de;
+        }
+        
+        .edit-btn {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        
+        .edit-btn:hover {
+            background-color: #357abd;
+        }
+        
+        .delete-btn {
+            background-color: var(--danger-color);
+            color: white;
+        }
+        
+        .delete-btn:hover {
+            background-color: #e25f5f;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .admin-container {
+                flex-direction: column;
+            }
+            
+            .admin-sidebar {
+                width: 100%;
+                order: 2;
+            }
+            
+            .admin-content {
+                order: 1;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="admin-header">
+        <div class="admin-logo">
+            <h1>Feeding <span>Humanity</span></h1>
+            <div class="badge">Admin Panel</div>
+        </div>
+        <div class="admin-user">
+            <div class="user-avatar">
+                <i class="fas fa-user-circle fa-2x" style="color: #ccc;"></i>
+            </div>
+            <div class="user-info">
+                <div class="user-name" id="adminName">Admin User</div>
+                <div class="user-role">Administrator</div>
+            </div>
+            <button class="logout-btn" id="logoutBtn">Logout</button>
+        </div>
+    </header>
+    
+    <div class="admin-container">
+        <aside class="admin-sidebar">
+            <div class="nav-section">
+                <div class="nav-section-title">Main</div>
+                <a href="#" class="nav-item active" data-tab="dashboard">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Data</div>
+                <a href="#" class="nav-item" data-tab="donations">
+                    <i class="fas fa-gift"></i> Donations
+                </a>
+                <a href="#" class="nav-item" data-tab="payments">
+                    <i class="fas fa-credit-card"></i> Payments
+                </a>
+                <a href="#" class="nav-item" data-tab="requirements">
+                    <i class="fas fa-hand-holding-heart"></i> Requirements
+                </a>
+                <a href="#" class="nav-item" data-tab="feedback">
+                    <i class="fas fa-comment-alt"></i> Feedback
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Management</div>
+                <a href="#" class="nav-item" data-tab="users">
+                    <i class="fas fa-users"></i> Users
+                </a>
+                <a href="#" class="nav-item" data-tab="settings">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+            </div>
+        </aside>
+        
+        <main class="admin-content" id="adminContent">
+            <!-- Content will be loaded dynamically -->
+        </main>
+    </div>
+    
+    <script>
+        // Initial page setup
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in as admin
+            if (!isLoggedInAsAdmin()) {
+                window.location.href = 'login.html?admin=true';
+                return;
+            }
+            
+            // Set admin name
+            const adminName = localStorage.getItem('userName') || 'Admin User';
+            document.getElementById('adminName').textContent = adminName;
+            
+            // Load dashboard tab by default
+            loadTab('dashboard');
+            
+            // Add event listeners to navigation items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const tabName = this.getAttribute('data-tab');
+                    
+                    // Update active tab
+                    document.querySelectorAll('.nav-item').forEach(navItem => {
+                        navItem.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    
+                    // Load tab content
+                    loadTab(tabName);
+                });
+            });
+            
+            // Add logout event listener
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                logout();
+            });
+        });
+        
+        // Check if user is logged in as admin
+        function isLoggedInAsAdmin() {
+            const isAdmin = localStorage.getItem('isAdmin') === 'true';
+            
+            if (!isAdmin) {
+                console.error('Unauthorized access attempt to admin panel');
+                return false;
+            }
+            
+            // Additional check - verify with the server that this user is actually an admin
+            const userEmail = localStorage.getItem('userEmail');
+            if (!userEmail) {
+                console.error('No user email found in localStorage');
+                return false;
+            }
+            
+            // This is an additional security check, but we'll still return true
+            // to avoid blocking the UI while the check is in progress
+            fetch(`/api/auth/check-admin?email=${encodeURIComponent(userEmail)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.isAdmin) {
+                        console.error('User is not an admin according to server');
+                        logout(); // Force logout if server says user is not an admin
+                    }
+                })
+                .catch(error => {
+                    console.error('Error verifying admin status:', error);
+                });
+            
+            return isAdmin;
+        }
+        
+        // Logout function
+        function logout() {
+            // Clear localStorage
+            localStorage.removeItem('userId');
+            localStorage.removeItem('userEmail');
+            localStorage.removeItem('userName');
+            localStorage.removeItem('isAdmin');
+            
+            // Redirect to login page
+            window.location.href = 'login.html';
+        }
+        
+        // Load tab content
+        function loadTab(tabName) {
+            const contentArea = document.getElementById('adminContent');
+            
+            // Clear current content
+            contentArea.innerHTML = '';
+            
+            // Load the appropriate content based on the tab
+            switch(tabName) {
+                case 'dashboard':
+                    loadDashboardContent();
+                    break;
+                case 'donations':
+                    loadDonationsContent();
+                    break;
+                case 'payments':
+                    loadPaymentsContent();
+                    break;
+                case 'requirements':
+                    loadRequirementsContent();
+                    break;
+                case 'feedback':
+                    loadFeedbackContent();
+                    break;
+                case 'users':
+                    loadUsersContent();
+                    break;
+                case 'settings':
+                    loadSettingsContent();
+                    break;
+                default:
+                    contentArea.innerHTML = '<h2>Page not found</h2>';
+            }
+        }
+        
+        // Dashboard content
+        function loadDashboardContent() {
+            const contentArea = document.getElementById('adminContent');
+            
+            // Create dashboard content
+            const dashboardHTML = `
+                <h2 class="page-title"><i class="fas fa-tachometer-alt"></i> Dashboard Overview</h2>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon donations">
+                            <i class="fas fa-gift"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-title">Total Donations</div>
+                            <div class="stat-value" id="totalDonations">0</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon payments">
+                            <i class="fas fa-credit-card"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-title">Total Payments</div>
+                            <div class="stat-value" id="totalPayments">₹0</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon requirements">
+                            <i class="fas fa-hand-holding-heart"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-title">Requirements</div>
+                            <div class="stat-value" id="totalRequirements">0</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon feedback">
+                            <i class="fas fa-comment-alt"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-title">Feedbacks</div>
+                            <div class="stat-value" id="totalFeedback">0</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="data-tabs">
+                    <div class="tab-buttons">
+                        <button class="tab-btn active" data-tab="recent-donations">Recent Donations</button>
+                        <button class="tab-btn" data-tab="recent-payments">Recent Payments</button>
+                        <button class="tab-btn" data-tab="recent-requirements">Recent Requirements</button>
+                        <button class="tab-btn" data-tab="recent-feedback">Recent Feedback</button>
+                    </div>
+                    
+                    <div id="recent-donations" class="tab-content active">
+                        <table class="admin-table" id="recentDonationsTable">
+                            <thead>
+                                <tr>
+                                    <th>Donation ID</th>
+                                    <th>Name</th>
+                                    <th>Category</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Donation data will be loaded here -->
+                                <tr>
+                                    <td colspan="6" style="text-align: center;">Loading donations...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div id="recent-payments" class="tab-content">
+                        <table class="admin-table" id="recentPaymentsTable">
+                            <thead>
+                                <tr>
+                                    <th>Payment ID</th>
+                                    <th>Donation ID</th>
+                                    <th>Amount</th>
+                                    <th>Method</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Payment data will be loaded here -->
+                                <tr>
+                                    <td colspan="7" style="text-align: center;">Loading payments...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div id="recent-requirements" class="tab-content">
+                        <table class="admin-table" id="recentRequirementsTable">
+                            <thead>
+                                <tr>
+                                    <th>Req. ID</th>
+                                    <th>Organization</th>
+                                    <th>Type</th>
+                                    <th>Amount</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Requirements data will be loaded here -->
+                                <tr>
+                                    <td colspan="7" style="text-align: center;">Loading requirements...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div id="recent-feedback" class="tab-content">
+                        <table class="admin-table" id="recentFeedbackTable">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Rating</th>
+                                    <th>Feedback</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Feedback data will be loaded here -->
+                                <tr>
+                                    <td colspan="6" style="text-align: center;">Loading feedback...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            
+            // Set content
+            contentArea.innerHTML = dashboardHTML;
+            
+            // Add event listeners to tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Update active tab button
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Show the corresponding tab content
+                    const tabId = this.getAttribute('data-tab');
+                    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+            
+            // Load data for dashboard
+            fetchDashboardData();
+        }
+        
+        // Fetch data for dashboard
+        function fetchDashboardData() {
+            // Fetch donation count
+            fetch('/api/donations/count')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('totalDonations').textContent = data.count || 0;
+                })
+                .catch(error => {
+                    console.error('Error fetching donation count:', error);
+                    document.getElementById('totalDonations').textContent = '0';
+                });
+            
+            // Fetch payment total
+            fetch('/api/payments/total')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('totalPayments').textContent = '₹' + (data.total || 0);
+                })
+                .catch(error => {
+                    console.error('Error fetching payment total:', error);
+                    document.getElementById('totalPayments').textContent = '₹0';
+                });
+            
+            // Fetch requirements count
+            fetch('/api/requirements/count')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('totalRequirements').textContent = data.count || 0;
+                })
+                .catch(error => {
+                    console.error('Error fetching requirements count:', error);
+                    document.getElementById('totalRequirements').textContent = '0';
+                });
+            
+            // Fetch feedback count
+            fetch('/api/feedback/count')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('totalFeedback').textContent = data.count || 0;
+                })
+                .catch(error => {
+                    console.error('Error fetching feedback count:', error);
+                    document.getElementById('totalFeedback').textContent = '0';
+                });
+            
+            // Load recent donations
+            loadRecentDonations();
+            
+            // Load recent payments
+            loadRecentPayments();
+            
+            // Load recent requirements
+            loadRecentRequirements();
+            
+            // Load recent feedback
+            loadRecentFeedback();
+        }
+        
+        // Load recent donations
+        function loadRecentDonations() {
+            const tableBody = document.querySelector('#recentDonationsTable tbody');
+            
+            // Fetch recent donations from API
+            fetch('/api/donations/recent')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('API request failed');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.length > 0) {
+                        updateDonationsTable(tableBody, data);
+                    } else {
+                        // If no data, use mock data
+                        updateDonationsTable(tableBody, getMockDonations().slice(0, 3));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching recent donations:', error);
+                    // Use mock data on error
+                    updateDonationsTable(tableBody, getMockDonations().slice(0, 3));
+                });
+        }
+        
+        // Helper to update donations table
+        function updateDonationsTable(tableBody, donations) {
+            // Clear loading message
+            tableBody.innerHTML = '';
+            
+            if (donations.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No donations found</td></tr>';
+                return;
+            }
+            
+            // Add each donation to the table
+            donations.forEach(donation => {
+                const row = document.createElement('tr');
+                
+                // Format the date
+                const date = new Date(donation.createdAt);
+                const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+                
+                // Create status badge class
+                const statusClass = donation.status.toLowerCase();
+                
+                row.innerHTML = `
+                    <td>${donation.donationId}</td>
+                    <td>${donation.name}</td>
+                    <td>${donation.category}</td>
+                    <td>${formattedDate}</td>
+                    <td><span class="status-badge ${statusClass}">${donation.status}</span></td>
+                    <td>
+                        <button class="action-btn view-btn" data-id="${donation._id}">View</button>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+            
+            // Add event listeners for view buttons
+            document.querySelectorAll('#recentDonationsTable .view-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const donationId = this.getAttribute('data-id');
+                    viewDonationDetails(donationId);
+                });
+            });
+        }
+        
+        // Load recent payments
+        function loadRecentPayments() {
+            const tableBody = document.querySelector('#recentPaymentsTable tbody');
+            
+            // Fetch recent payments from API
+            fetch('/api/payments/recent')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length > 0) {
+                        // Clear loading message
+                        tableBody.innerHTML = '';
+                        
+                        // Add each payment to the table
+                        data.forEach(payment => {
+                            const row = document.createElement('tr');
+                            
+                            // Format the date
+                            const date = new Date(payment.createdAt);
+                            const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+                            
+                            // Create status badge class
+                            const statusClass = payment.status.toLowerCase();
+                            
+                            row.innerHTML = `
+                                <td>${payment._id.substring(0, 8)}</td>
+                                <td>${payment.donationId}</td>
+                                <td>₹${payment.amount}</td>
+                                <td>${payment.category}</td>
+                                <td>${formattedDate}</td>
+                                <td><span class="status-badge ${statusClass}">${payment.status}</span></td>
+                                <td>
+                                    <button class="action-btn view-btn" data-id="${payment._id}">View</button>
+                                </td>
+                            `;
+                            
+                            tableBody.appendChild(row);
+                        });
+                        
+                        // Add event listeners for view buttons
+                        document.querySelectorAll('#recentPaymentsTable .view-btn').forEach(btn => {
+                            btn.addEventListener('click', function() {
+                                const paymentId = this.getAttribute('data-id');
+                                viewPaymentDetails(paymentId);
+                            });
+                        });
+                    } else {
+                        tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No payments found</td></tr>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching recent payments:', error);
+                    tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Error loading payments</td></tr>';
+                });
+        }
+        
+        // Load recent requirements
+        function loadRecentRequirements() {
+            const tableBody = document.querySelector('#recentRequirementsTable tbody');
+            
+            // Fetch recent requirements from API
+            fetch('/api/requirements/recent')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length > 0) {
+                        // Clear loading message
+                        tableBody.innerHTML = '';
+                        
+                        // Add each requirement to the table
+                        data.forEach(req => {
+                            const row = document.createElement('tr');
+                            
+                            // Format the date
+                            const date = new Date(req.createdAt);
+                            const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+                            
+                            // Create status badge class
+                            const statusClass = req.status ? req.status.toLowerCase() : 'pending';
+                            const status = req.status || 'Pending';
+                            
+                            row.innerHTML = `
+                                <td>${req.donationId}</td>
+                                <td>${req.orgName}</td>
+                                <td>${req.requirementType}</td>
+                                <td>₹${req.amount}</td>
+                                <td>${formattedDate}</td>
+                                <td><span class="status-badge ${statusClass}">${status}</span></td>
+                                <td>
+                                    <button class="action-btn view-btn" data-id="${req._id}">View</button>
+                                </td>
+                            `;
+                            
+                            tableBody.appendChild(row);
+                        });
+                        
+                        // Add event listeners for view buttons
+                        document.querySelectorAll('#recentRequirementsTable .view-btn').forEach(btn => {
+                            btn.addEventListener('click', function() {
+                                const reqId = this.getAttribute('data-id');
+                                viewRequirementDetails(reqId);
+                            });
+                        });
+                    } else {
+                        tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No requirements found</td></tr>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching recent requirements:', error);
+                    tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Error loading requirements</td></tr>';
+                });
+        }
+        
+        // Load recent feedback
+        function loadRecentFeedback() {
+            const tableBody = document.querySelector('#recentFeedbackTable tbody');
+            
+            // Fetch recent feedback from API
+            fetch('/api/feedback/recent')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length > 0) {
+                        // Clear loading message
+                        tableBody.innerHTML = '';
+                        
+                        // Add each feedback to the table
+                        data.forEach(feedback => {
+                            const row = document.createElement('tr');
+                            
+                            // Format the date
+                            const date = new Date(feedback.createdAt);
+                            const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+                            
+                            // Truncate feedback text if it's too long
+                            const truncatedFeedback = feedback.feedbackText.length > 50 
+                                ? feedback.feedbackText.substring(0, 50) + '...' 
+                                : feedback.feedbackText;
+                            
+                            // Generate stars for rating
+                            const rating = parseInt(feedback.ratingValue) || 0;
+                            let stars = '';
+                            for (let i = 0; i < 5; i++) {
+                                if (i < rating) {
+                                    stars += '<i class="fas fa-star" style="color: gold;"></i>';
+                                } else {
+                                    stars += '<i class="far fa-star" style="color: #ccc;"></i>';
+                                }
+                            }
+                            
+                            row.innerHTML = `
+                                <td>${feedback.fullName}</td>
+                                <td>${feedback.feedbackEmail}</td>
+                                <td>${stars}</td>
+                                <td>${truncatedFeedback}</td>
+                                <td>${formattedDate}</td>
+                                <td>
+                                    <button class="action-btn view-btn" data-id="${feedback._id}">View</button>
+                                </td>
+                            `;
+                            
+                            tableBody.appendChild(row);
+                        });
+                        
+                        // Add event listeners for view buttons
+                        document.querySelectorAll('#recentFeedbackTable .view-btn').forEach(btn => {
+                            btn.addEventListener('click', function() {
+                                const feedbackId = this.getAttribute('data-id');
+                                viewFeedbackDetails(feedbackId);
+                            });
+                        });
+                    } else {
+                        tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No feedback found</td></tr>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching recent feedback:', error);
+                    tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Error loading feedback</td></tr>';
+                });
+        }
+        
+        // Functions for individual tab content
+        function loadDonationsContent() {
+            const contentArea = document.getElementById('adminContent');
+            
+            contentArea.innerHTML = `
+                <h2 class="page-title"><i class="fas fa-gift"></i> Donations</h2>
+                
+                <div class="data-tabs">
+                    <div class="tab-buttons">
+                        <button class="tab-btn active" data-tab="all-donations">All Donations</button>
+                        <button class="tab-btn" data-tab="pending-donations">Pending</button>
+                        <button class="tab-btn" data-tab="completed-donations">Completed</button>
+                    </div>
+                    
+                    <div id="all-donations" class="tab-content active">
+                        <table class="admin-table" id="allDonationsTable">
+                            <thead>
+                                <tr>
+                                    <th>Donation ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Category</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="7" style="text-align: center;">Loading donations...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div id="pending-donations" class="tab-content">
+                        <table class="admin-table" id="pendingDonationsTable">
+                            <!-- Similar structure as above -->
+                            <thead>
+                                <tr>
+                                    <th>Donation ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Category</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="6" style="text-align: center;">Loading pending donations...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div id="completed-donations" class="tab-content">
+                        <table class="admin-table" id="completedDonationsTable">
+                            <!-- Similar structure as above -->
+                            <thead>
+                                <tr>
+                                    <th>Donation ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Category</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="6" style="text-align: center;">Loading completed donations...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            
+            // Add event listeners to tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Update active tab button
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Show the corresponding tab content
+                    const tabId = this.getAttribute('data-tab');
+                    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+            
+            // Load donations data
+            loadAllDonations();
+        }
+        
+        function loadPaymentsContent() {
+            const contentArea = document.getElementById('adminContent');
+            
+            contentArea.innerHTML = `
+                <h2 class="page-title"><i class="fas fa-credit-card"></i> Payments</h2>
+                
+                <div class="data-tabs">
+                    <div class="tab-buttons">
+                        <button class="tab-btn active" data-tab="all-payments">All Payments</button>
+                        <button class="tab-btn" data-tab="pending-payments">Pending</button>
+                        <button class="tab-btn" data-tab="completed-payments">Completed</button>
+                    </div>
+                    
+                    <div id="all-payments" class="tab-content active">
+                        <table class="admin-table" id="allPaymentsTable">
+                            <thead>
+                                <tr>
+                                    <th>Payment ID</th>
+                                    <th>Donation ID</th>
+                                    <th>Amount</th>
+                                    <th>Method</th>
+                                    <th>Email</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="8" style="text-align: center;">Loading payments...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Similar structure for other tabs -->
+                    <div id="pending-payments" class="tab-content">
+                        <!-- Pending payments table -->
+                    </div>
+                    
+                    <div id="completed-payments" class="tab-content">
+                        <!-- Completed payments table -->
+                    </div>
+                </div>
+            `;
+            
+            // Add tab switching functionality
+            // Add data loading functions
+        }
+        
+        function loadRequirementsContent() {
+            const contentArea = document.getElementById('adminContent');
+            
+            contentArea.innerHTML = `
+                <h2 class="page-title"><i class="fas fa-hand-holding-heart"></i> Requirements</h2>
+                
+                <div class="data-tabs">
+                    <div class="tab-buttons">
+                        <button class="tab-btn active" data-tab="all-requirements">All Requirements</button>
+                        <button class="tab-btn" data-tab="pending-requirements">Pending</button>
+                        <button class="tab-btn" data-tab="fulfilled-requirements">Fulfilled</button>
+                    </div>
+                    
+                    <div id="all-requirements" class="tab-content active">
+                        <table class="admin-table" id="allRequirementsTable">
+                            <thead>
+                                <tr>
+                                    <th>Req. ID</th>
+                                    <th>Organization</th>
+                                    <th>Contact Person</th>
+                                    <th>Type</th>
+                                    <th>Amount</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="8" style="text-align: center;">Loading requirements...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Similar structure for other tabs -->
+                </div>
+            `;
+            
+            // Add tab switching functionality
+            // Add data loading functions
+        }
+        
+        function loadFeedbackContent() {
+            const contentArea = document.getElementById('adminContent');
+            
+            contentArea.innerHTML = `
+                <h2 class="page-title"><i class="fas fa-comment-alt"></i> Feedback</h2>
+                
+                <div class="data-tabs">
+                    <div class="tab-buttons">
+                        <button class="tab-btn active" data-tab="all-feedback">All Feedback</button>
+                        <button class="tab-btn" data-tab="positive-feedback">Positive</button>
+                        <button class="tab-btn" data-tab="negative-feedback">Negative</button>
+                    </div>
+                    
+                    <div id="all-feedback" class="tab-content active">
+                        <table class="admin-table" id="allFeedbackTable">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Rating</th>
+                                    <th>Feedback</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="7" style="text-align: center;">Loading feedback...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Similar structure for other tabs -->
+                </div>
+            `;
+            
+            // Add tab switching functionality
+            // Add data loading functions
+        }
+        
+        // Placeholder for other content loading functions
+        function loadUsersContent() {
+            const contentArea = document.getElementById('adminContent');
+            contentArea.innerHTML = `<h2 class="page-title"><i class="fas fa-users"></i> Users Management</h2>`;
+            // Add user management functionality
+        }
+        
+        function loadSettingsContent() {
+            const contentArea = document.getElementById('adminContent');
+            contentArea.innerHTML = `<h2 class="page-title"><i class="fas fa-cog"></i> Settings</h2>`;
+            // Add settings functionality
+        }
+        
+        // Detail view functions (placeholders)
+        function viewDonationDetails(id) {
+            alert(`View donation details for ID: ${id}`);
+            // Implement donation details view
+        }
+        
+        function viewPaymentDetails(id) {
+            alert(`View payment details for ID: ${id}`);
+            // Implement payment details view
+        }
+        
+        function viewRequirementDetails(id) {
+            alert(`View requirement details for ID: ${id}`);
+            // Implement requirement details view
+        }
+        
+        function viewFeedbackDetails(id) {
+            alert(`View feedback details for ID: ${id}`);
+            // Implement feedback details view
+        }
+        
+        // Load all donations data
+        function loadAllDonations() {
+            // Implementation for loading all donations
+            // Similar to loadRecentDonations but with more data
+        }
+        
+        // Mock data functions for testing
+        function getMockDonations() {
+            return [
+                {
+                    _id: 'don1',
+                    donationId: 'D-0001',
+                    name: 'John Doe',
+                    email: 'john@example.com',
+                    category: 'Food',
+                    status: 'Pending',
+                    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000) // 2 days ago
+                },
+                {
+                    _id: 'don2',
+                    donationId: 'D-0002',
+                    name: 'Jane Smith',
+                    email: 'jane@example.com',
+                    category: 'Clothes',
+                    status: 'Completed',
+                    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000) // 5 days ago
+                },
+                {
+                    _id: 'don3',
+                    donationId: 'D-0003',
+                    name: 'Robert Johnson',
+                    email: 'robert@example.com',
+                    category: 'Education',
+                    status: 'Pending',
+                    createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000) // 1 day ago
+                },
+                {
+                    _id: 'don4',
+                    donationId: 'D-0004',
+                    name: 'Sarah Williams',
+                    email: 'sarah@example.com',
+                    category: 'Medical',
+                    status: 'Completed',
+                    createdAt: new Date()
+                }
+            ];
+        }
+        
+        function getMockPayments() {
+            return [
+                {
+                    _id: 'pay1',
+                    donationId: 'D-0001',
+                    amount: 500,
+                    category: 'Card',
+                    emailId: 'john@example.com',
+                    status: 'Completed',
+                    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
+                },
+                {
+                    _id: 'pay2',
+                    donationId: 'D-0002',
+                    amount: 1000,
+                    category: 'UPI',
+                    emailId: 'jane@example.com',
+                    status: 'Pending',
+                    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000)
+                },
+                {
+                    _id: 'pay3',
+                    donationId: 'D-0003',
+                    amount: 750,
+                    category: 'Cash',
+                    emailId: 'robert@example.com',
+                    status: 'Completed',
+                    createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000)
+                }
+            ];
+        }
+        
+        function getMockRequirements() {
+            return [
+                {
+                    _id: 'req1',
+                    donationId: 'P-0001',
+                    orgName: 'Orphanage Center',
+                    contactPerson: 'Michael Brown',
+                    requirementType: 'Food',
+                    amount: 2000,
+                    status: 'Pending',
+                    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000)
+                },
+                {
+                    _id: 'req2',
+                    donationId: 'P-0002',
+                    orgName: 'Local School',
+                    contactPerson: 'Amanda Johnson',
+                    requirementType: 'Education',
+                    amount: 5000,
+                    status: 'Fulfilled',
+                    createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+                },
+                {
+                    _id: 'req3',
+                    donationId: 'P-0003',
+                    orgName: 'Community Center',
+                    contactPerson: 'David Wilson',
+                    requirementType: 'Clothes',
+                    amount: 1500,
+                    status: 'Pending',
+                    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
+                }
+            ];
+        }
+        
+        function getMockFeedback() {
+            return [
+                {
+                    _id: 'feed1',
+                    fullName: 'Alice Cooper',
+                    feedbackEmail: 'alice@example.com',
+                    phoneNo: '9876543210',
+                    ratingValue: '5',
+                    feedbackText: 'Great service and very responsive team. Highly recommend!',
+                    createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000)
+                },
+                {
+                    _id: 'feed2',
+                    fullName: 'Bob Martinez',
+                    feedbackEmail: 'bob@example.com',
+                    phoneNo: '8765432109',
+                    ratingValue: '4',
+                    feedbackText: 'Good experience overall, but could improve on communication.',
+                    createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000)
+                },
+                {
+                    _id: 'feed3',
+                    fullName: 'Carol Davis',
+                    feedbackEmail: 'carol@example.com',
+                    phoneNo: '7654321098',
+                    ratingValue: '3',
+                    feedbackText: 'Average experience. Some things could be better organized.',
+                    createdAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000)
+                }
+            ];
+        }
+    </script>
+</body>
+</html> 
