@@ -168,6 +168,8 @@
     background: #ffd700;
     color: #1a1a1a;
     flex: 2;
+    display: block !important;
+    opacity: 1 !important;
 }
 
 .btn-reset {

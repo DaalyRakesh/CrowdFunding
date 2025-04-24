@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+require('dotenv').config();
 
 // MongoDB connection URI - using MongoDB Atlas
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://rakeshmr1309:Rakesh123$@cluster0.mksrqza.mongodb.net/feeding-humanity?retryWrites=true&w=majority';
@@ -13,6 +14,7 @@ const connectDB = async () => {
         }
         
         console.log('Connecting to MongoDB Atlas...');
+        console.log('Using MongoDB URI:', MONGODB_URI); // Log the URI being used (remove for production)
         
         // Connection options
         const options = {
