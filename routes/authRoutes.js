@@ -11,4 +11,12 @@ router.get('/user', authController.getUserByEmail);
 router.put('/toggle-admin/:userId', authController.toggleAdmin);
 router.delete('/user/:userId', authController.deleteUser);
 
+// Password reset routes
+router.post('/forgot-password', authController.forgotPassword);
+router.get('/reset-password/:token', authController.validateResetToken);
+router.post('/reset-password/:token', authController.resetPassword);
+
+// Temporary direct reset link route (for development only)
+router.get('/direct-reset-link', authController.getDirectResetLink);
+
 module.exports = router;

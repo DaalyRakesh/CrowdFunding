@@ -770,7 +770,8 @@
                         <th>ID</th>
                         <th>Name</th>
                         <th>Email</th>
-                        <th>Website</th>
+                        <th>Phone</th>
+                        <th>Address</th>
                         <th>Date</th>
                         <th>Status</th>
                         <th>Actions</th>
@@ -779,7 +780,7 @@
                 <tbody id="recent-contacts">
                     <!-- Contact rows will be inserted here -->
                     <tr>
-                        <td colspan="7" class="loading-data">Loading contact submissions...</td>
+                        <td colspan="8" style="text-align: center;">Loading contact submissions...</td>
                     </tr>
                 </tbody>
             </table>
@@ -1182,47 +1183,24 @@
         
         // Fetch data for dashboard
         function fetchDashboardData() {
-            // Fetch donation count
-            fetch('/api/donations/count')
+            // Fetch all dashboard stats in one API call
+            fetch('/api/admin/dashboard/stats')
                 .then(response => response.json())
                 .then(data => {
-                    document.getElementById('totalDonations').textContent = data.count || 0;
+                    // Update the dashboard statistics with real data
+                    document.getElementById('totalDonations').textContent = data.donations.count || 0;
+                    document.getElementById('totalPayments').textContent = '₹' + (data.payments.total || 0).toLocaleString('en-IN');
+                    document.getElementById('totalRequirements').textContent = data.requirements.count || 0;
+                    document.getElementById('totalFeedback').textContent = data.feedback.count || 0;
+                    
+                    console.log('Dashboard statistics loaded:', data);
                 })
                 .catch(error => {
-                    console.error('Error fetching donation count:', error);
+                    console.error('Error fetching dashboard statistics:', error);
+                    // Set placeholder values in case of error
                     document.getElementById('totalDonations').textContent = '0';
-                });
-            
-            // Fetch payment total
-            fetch('/api/payments/total')
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('totalPayments').textContent = '₹' + (data.total || 0);
-                })
-                .catch(error => {
-                    console.error('Error fetching payment total:', error);
                     document.getElementById('totalPayments').textContent = '₹0';
-                });
-            
-            // Fetch requirements count
-            fetch('/api/requirements/count')
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('totalRequirements').textContent = data.count || 0;
-                })
-                .catch(error => {
-                    console.error('Error fetching requirements count:', error);
                     document.getElementById('totalRequirements').textContent = '0';
-                });
-            
-            // Fetch feedback count
-            fetch('/api/feedback/count')
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('totalFeedback').textContent = data.count || 0;
-                })
-                .catch(error => {
-                    console.error('Error fetching feedback count:', error);
                     document.getElementById('totalFeedback').textContent = '0';
                 });
             
@@ -1239,6 +1217,8 @@
             loadRecentFeedback();
         }
         
+        // Helper function to refresh all dashboard statistics
+        function refreshDashboardStats() {
         // Load recent donations
         function loadRecentDonations() {
             const tableBody = document.querySelector('#recentDonationsTable tbody');
@@ -1311,10 +1291,13 @@
                     .then(data => {
                         if (data.length > 0) {
                             // Update dashboard stats
-                            fetch('/api/donations/count')
+                            fetch('/api/admin/dashboard/stats')
                                 .then(response => response.json())
-                                .then(countData => {
-                                    document.getElementById('totalDonations').textContent = countData.count || '0';
+                                .then(statsData => {
+                                    document.getElementById('totalDonations').textContent = statsData.donations.count || 0;
+                                    document.getElementById('totalPayments').textContent = '₹' + (statsData.payments.total || 0).toLocaleString('en-IN');
+                                    document.getElementById('totalRequirements').textContent = statsData.requirements.count || 0;
+                                    document.getElementById('totalFeedback').textContent = statsData.feedback.count || 0;
                                 });
                                 
                             // Update the donations table if new data is available
@@ -3332,7 +3315,8 @@
                                     <th>ID</th>
                                     <th>Name</th>
                                     <th>Email</th>
-                                    <th>Website</th>
+                                    <th>Phone</th>
+                                    <th>Address</th>
                                     <th>Date</th>
                                     <th>Status</th>
                                     <th>Actions</th>
@@ -3340,7 +3324,7 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td colspan="7" style="text-align: center;">Loading contact submissions...</td>
+                                    <td colspan="8" style="text-align: center;">Loading contact submissions...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -3353,14 +3337,15 @@
                                     <th>ID</th>
                                     <th>Name</th>
                                     <th>Email</th>
-                                    <th>Website</th>
+                                    <th>Phone</th>
+                                    <th>Address</th>
                                     <th>Date</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td colspan="6" style="text-align: center;">Loading new contact submissions...</td>
+                                    <td colspan="7" style="text-align: center;">Loading new contact submissions...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -3373,14 +3358,15 @@
                                     <th>ID</th>
                                     <th>Name</th>
                                     <th>Email</th>
-                                    <th>Website</th>
+                                    <th>Phone</th>
+                                    <th>Address</th>
                                     <th>Date</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td colspan="6" style="text-align: center;">Loading responded contact submissions...</td>
+                                    <td colspan="7" style="text-align: center;">Loading responded contact submissions...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -3429,46 +3415,53 @@
             `;
             
             // Add event listeners to tab buttons
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    // Update active tab button
-                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    // Remove active class from all buttons and content
+                    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                    
+                    // Add active class to current button
                     this.classList.add('active');
                     
-                    // Show the corresponding tab content
+                    // Show the corresponding content
                     const tabId = this.getAttribute('data-tab');
-                    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
                     document.getElementById(tabId).classList.add('active');
                 });
             });
             
-            // Load contacts data
+            // Load contact data
             loadAllContacts();
         }
         
-        // Load all contacts data
         function loadAllContacts() {
-            const tableBody = document.querySelector('#allContactsTable tbody');
+            const tableBody = document.getElementById('allContactsTable').querySelector('tbody');
             
-            // Show loading state
-            tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Loading contact submissions...</td></tr>';
+            // Show loading message
+            tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Loading contact submissions...</td></tr>';
             
-            // Fetch all contacts from API
+            // Fetch all contacts
             fetch('/api/contact/all')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.length > 0) {
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch contacts');
+                    }
+                    return response.json();
+                })
+                .then(contacts => {
+                    if (contacts && contacts.length > 0) {
                         // Clear loading message
                         tableBody.innerHTML = '';
                         
                         // Add each contact to the table
-                        data.forEach(contact => {
+                        contacts.forEach(contact => {
                             const row = document.createElement('tr');
                             
                             // Format the date
                             const date = new Date(contact.createdAt);
-                            const formattedDate = `${date.toLocaleDateString()}`;
+                            const formattedDate = date.toLocaleDateString();
                             
+                            // Determine status class
                             let statusClass = '';
                             switch (contact.status) {
                                 case 'new':
@@ -3488,7 +3481,8 @@
                                 <td>${contact._id.substring(0, 8)}</td>
                                 <td>${contact.name}</td>
                                 <td>${contact.email}</td>
-                                <td>${contact.website || '-'}</td>
+                                <td>${contact.phone || '-'}</td>
+                                <td>${contact.address ? contact.address.substring(0, 20) + '...' : '-'}</td>
                                 <td>${formattedDate}</td>
                                 <td><span class="status-badge ${statusClass}">${contact.status}</span></td>
                                 <td>
@@ -3515,12 +3509,12 @@
                             });
                         });
                     } else {
-                        tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No contact submissions found</td></tr>';
+                        tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No contact submissions found</td></tr>';
                     }
                 })
                 .catch(error => {
                     console.error('Error fetching contacts:', error);
-                    tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Error loading contact submissions</td></tr>';
+                    tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Error loading contact submissions</td></tr>';
                 });
         }
         
@@ -3558,7 +3552,8 @@
                                 <p><strong>ID:</strong> ${contact._id}</p>
                                 <p><strong>Name:</strong> ${contact.name}</p>
                                 <p><strong>Email:</strong> ${contact.email}</p>
-                                <p><strong>Website:</strong> ${contact.website || 'Not provided'}</p>
+                                <p><strong>Phone:</strong> ${contact.phone || '-'}</p>
+                                <p><strong>Address:</strong> ${contact.address || '-'}</p>
                                 <p><strong>Date:</strong> ${date}</p>
                                 <p><strong>Status:</strong> <span class="status status-${contact.status}">${contact.status}</span></p>
                             </div>
@@ -3690,6 +3685,11 @@
                             <h3>Original Message:</h3>
                             <p class="message-meta">
                                 <strong>${contact.name}</strong> - ${date}
+                            </p>
+                            <p class="message-details">
+                                <strong>Email:</strong> ${contact.email}<br>
+                                <strong>Phone:</strong> ${contact.phone || '-'}<br>
+                                <strong>Address:</strong> ${contact.address || '-'}
                             </p>
                             <p class="message-content">${contact.message}</p>
                         </div>

@@ -47,22 +47,23 @@ const logContactSubmission = (data) => {
  */
 router.post('/submit', async (req, res) => {
     try {
-        const { name, email, website, message, adminEmail } = req.body;
+        const { name, email, phone, address, message, adminEmail } = req.body;
         
         // Log the form submission
         console.log('Contact form submission received:');
-        console.log({ name, email, website, message });
+        console.log({ name, email, phone, address, message });
         
         // Validate required fields
-        if (!name || !email || !message) {
-            return res.status(400).json({ success: false, message: 'Please provide name, email and message' });
+        if (!name || !email || !phone || !address || !message) {
+            return res.status(400).json({ success: false, message: 'Please provide name, email, phone, address and message' });
         }
         
         // Store the submission data for logging
         const submissionData = {
             name,
             email,
-            website: website || 'Not provided',
+            phone,
+            address,
             message,
             timestamp: new Date().toISOString()
         };
@@ -75,7 +76,8 @@ router.post('/submit', async (req, res) => {
             const newContact = new Contact({
                 name,
                 email,
-                website: website || '',
+                phone,
+                address,
                 message
             });
             
@@ -97,7 +99,8 @@ router.post('/submit', async (req, res) => {
                     <h3>New Contact Form Submission</h3>
                     <p><strong>Name:</strong> ${name}</p>
                     <p><strong>Email:</strong> ${email}</p>
-                    <p><strong>Website:</strong> ${website || 'Not provided'}</p>
+                    <p><strong>Phone:</strong> ${phone}</p>
+                    <p><strong>Address:</strong> ${address}</p>
                     <p><strong>Message:</strong></p>
                     <p>${message}</p>
                 `

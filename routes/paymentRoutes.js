@@ -94,4 +94,33 @@ router.put('/status/:id', async (req, res) => {
     }
 });
 
+// Get total payment amount for admin dashboard
+router.get('/total', async (req, res) => {
+    try {
+        const result = await Payment.aggregate([
+            { $match: { status: 'completed' } },
+            { $group: { _id: null, total: { $sum: "$amount" } } }
+        ]);
+        
+        const total = result.length > 0 ? result[0].total : 0;
+        res.json({ total });
+    } catch (error) {
+        console.error('Error fetching payment total:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Get recent payments for admin dashboard
+router.get('/recent', async (req, res) => {
+    try {
+        const payments = await Payment.find()
+            .sort({ createdAt: -1 })
+            .limit(10);
+        res.json(payments);
+    } catch (error) {
+        console.error('Error fetching recent payments:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 module.exports = router; 

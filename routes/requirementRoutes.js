@@ -104,4 +104,28 @@ router.put('/status/:id', async (req, res) => {
     }
 });
 
+// Get total requirement count for admin dashboard
+router.get('/count', async (req, res) => {
+    try {
+        const count = await Requirement.countDocuments();
+        res.json({ count });
+    } catch (error) {
+        console.error('Error fetching requirement count:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Get recent requirements for admin dashboard
+router.get('/recent', async (req, res) => {
+    try {
+        const requirements = await Requirement.find()
+            .sort({ createdAt: -1 })
+            .limit(10);
+        res.json(requirements);
+    } catch (error) {
+        console.error('Error fetching recent requirements:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 module.exports = router; 

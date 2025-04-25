@@ -13,8 +13,14 @@ const contactSchema = new mongoose.Schema({
         trim: true,
         lowercase: true
     },
-    website: {
+    phone: {
         type: String,
+        required: true,
+        trim: true
+    },
+    address: {
+        type: String,
+        required: true,
         trim: true
     },
     message: {
@@ -30,6 +36,9 @@ const contactSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     }
+}, { 
+    // Ensure any fields not defined in the schema won't be saved to the database
+    strict: true 
 });
 
 // Create the Contact model

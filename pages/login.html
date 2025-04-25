@@ -40,6 +40,25 @@
         .btn-primary.admin-login:hover {
             background-color: #e09010;
         }
+        
+        /* Password toggle styles */
+        .input-group {
+            position: relative;
+        }
+        
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #666;
+            z-index: 10;
+        }
+        
+        .toggle-password:hover {
+            color: #333;
+        }
     </style>
 </head>
 <body>
@@ -50,19 +69,22 @@
                 <h2 id="loginTitle">Welcome Back</h2>
                 <p id="loginSubtitle">Login to your account</p>
             </div>
-            <form class="auth-form" id="loginForm">
+            <form class="auth-form" id="loginForm" autocomplete="off">
                 <div class="form-group">
                     <label for="email">Email</label>
                     <div class="input-group">
                         <i class="fas fa-envelope"></i>
-                        <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                        <input type="email" id="email" name="email" placeholder="Enter your email" pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" title="Please enter a valid email address" required autocomplete="new-email">
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="password">Password</label>
                     <div class="input-group">
                         <i class="fas fa-lock"></i>
-                        <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                        <input type="password" id="password" name="password" placeholder="Enter your password" required autocomplete="new-password">
+                        <span class="toggle-password" onclick="togglePasswordVisibility('password')">
+                            <i class="fas fa-eye"></i>
+                        </span>
                     </div>
                 </div>
                 <div id="loginError" class="error-message"></div>
@@ -71,7 +93,7 @@
                         <input type="checkbox" id="remember">
                         <span>Remember me</span>
                     </label>
-                    <a href="#" class="forgot-password">Forgot Password?</a>
+                    <a href="forgot-password.html" class="forgot-password">Forgot Password?</a>
                 </div>
                 <button type="submit" class="btn btn-primary btn-block" id="loginButton">Login</button>
                 <div class="auth-footer">
@@ -94,7 +116,37 @@
             document.getElementById('loginButton').classList.add('admin-login');
             document.getElementById('authBox').classList.add('admin-mode');
             document.getElementById('signupLinkContainer').style.display = 'none'; // Hide signup link for admin login
+            
+            // Add honeypot fields to confuse autofill
+            const form = document.getElementById('loginForm');
+            const honeyPotDiv = document.createElement('div');
+            honeyPotDiv.style.opacity = '0';
+            honeyPotDiv.style.position = 'absolute';
+            honeyPotDiv.style.height = '0';
+            honeyPotDiv.style.overflow = 'hidden';
+            honeyPotDiv.innerHTML = `
+                <input type="text" name="fake_username" tabindex="-1">
+                <input type="password" name="fake_password" tabindex="-1">
+            `;
+            form.prepend(honeyPotDiv);
+            
+            // Clear any pre-filled values for admin login
+            setTimeout(() => {
+                document.getElementById('email').value = '';
+                document.getElementById('password').value = '';
+            }, 100);
         }
+        
+        // Add special handling to prevent autofill
+        window.addEventListener('load', function() {
+            if (isAdminLogin) {
+                // Force clear the form fields again after page load
+                setTimeout(() => {
+                    document.getElementById('email').value = '';
+                    document.getElementById('password').value = '';
+                }, 500);
+            }
+        });
         
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -203,6 +255,23 @@
                 loginButton.textContent = originalButtonText;
             });
         });
+
+        function togglePasswordVisibility(inputId) {
+            const passwordInput = document.getElementById(inputId);
+            const toggleIcon = document.querySelector('.toggle-password i');
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            
+            passwordInput.setAttribute('type', type);
+            
+            // Toggle the eye icon
+            if (type === 'password') {
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            } else {
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            }
+        }
     </script>
 </body>
 </html>

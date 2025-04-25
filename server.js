@@ -17,6 +17,11 @@ const requirementRoutes = require('./routes/requirementRoutes');
 const feedbackRoutes = require('./routes/feedbackRoutes');
 const contactRoutes = require('./routes/contactRoutes');
 const Admin = require('./models/Admin');
+const Donation = require('./models/Donation');
+const Payment = require('./models/Payment');
+const Requirement = require('./models/Requirement');
+const Feedback = require('./models/Feedback');
+const User = require('./models/User');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -45,6 +50,52 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/requirements', requirementRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/contact', contactRoutes);
+
+// Admin dashboard statistics endpoint
+app.get('/api/admin/dashboard/stats', async (req, res) => {
+    try {
+        // Get donation count
+        const donationCount = await Donation.countDocuments();
+        
+        // Get payment total
+        const paymentResult = await Payment.aggregate([
+            { $match: { status: 'completed' } },
+            { $group: { _id: null, total: { $sum: "$amount" } } }
+        ]);
+        const paymentTotal = paymentResult.length > 0 ? paymentResult[0].total : 0;
+        
+        // Get requirement count
+        const requirementCount = await Requirement.countDocuments();
+        
+        // Get feedback count
+        const feedbackCount = await Feedback.countDocuments();
+        
+        // Get user count
+        const userCount = await User.countDocuments({ isAdmin: false });
+        
+        // Return all stats
+        res.json({
+            donations: {
+                count: donationCount
+            },
+            payments: {
+                total: paymentTotal
+            },
+            requirements: {
+                count: requirementCount
+            },
+            feedback: {
+                count: feedbackCount
+            },
+            users: {
+                count: userCount
+            }
+        });
+    } catch (error) {
+        console.error('Error fetching dashboard stats:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
 
 // Serve index.html for the root route
 app.get('/', (req, res) => {

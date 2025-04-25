@@ -42,6 +42,50 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+        
+        .field-error {
+            color: #ff6b6b;
+            font-size: 0.8rem;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        /* Password toggle styles */
+        .input-group {
+            position: relative;
+        }
+        
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #666;
+            z-index: 10;
+        }
+        
+        .toggle-password:hover {
+            color: #333;
+        }
+        
+        /* Style for name fields container */
+        .name-fields {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .name-fields .form-group {
+            flex: 1;
+        }
+        
+        /* Responsive adjustment */
+        @media (max-width: 480px) {
+            .name-fields {
+                flex-direction: column;
+                gap: 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -52,33 +96,53 @@
                 <p>Join our community today</p>
             </div>
             <form class="auth-form" id="signupForm">
-                <div class="form-group">
-                    <label for="fullname">Full Name</label>
-                    <div class="input-group">
-                        <i class="fas fa-user"></i>
-                        <input type="text" id="fullname" name="fullname" placeholder="Enter your full name" required>
+                <div class="name-fields">
+                    <div class="form-group">
+                        <label for="firstName">First Name</label>
+                        <div class="input-group">
+                            <i class="fas fa-user"></i>
+                            <input type="text" id="firstName" name="firstName" placeholder="Enter your first name" pattern="[A-Za-z]+" title="Only letters allowed" required>
+                        </div>
+                        <div id="firstName-error" class="field-error"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Last Name</label>
+                        <div class="input-group">
+                            <i class="fas fa-user"></i>
+                            <input type="text" id="lastName" name="lastName" placeholder="Enter your last name" pattern="[A-Za-z]+" title="Only letters allowed" required>
+                        </div>
+                        <div id="lastName-error" class="field-error"></div>
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="email">Email</label>
                     <div class="input-group">
                         <i class="fas fa-envelope"></i>
-                        <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                        <input type="email" id="email" name="email" placeholder="Enter your email" pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" title="Please enter a valid email address" required>
                     </div>
+                    <div id="email-error" class="field-error"></div>
                 </div>
                 <div class="form-group">
                     <label for="password">Password</label>
                     <div class="input-group">
                         <i class="fas fa-lock"></i>
-                        <input type="password" id="password" name="password" placeholder="Create a password" required>
+                        <input type="password" id="password" name="password" placeholder="Create a password (min. 6 characters)" minlength="6" required>
+                        <span class="toggle-password" onclick="togglePassword(this, 'password')">
+                            <i class="fas fa-eye"></i>
+                        </span>
                     </div>
+                    <div id="password-error" class="field-error"></div>
                 </div>
                 <div class="form-group">
                     <label for="confirm-password">Confirm Password</label>
                     <div class="input-group">
                         <i class="fas fa-lock"></i>
                         <input type="password" id="confirm-password" name="confirm-password" placeholder="Confirm your password" required>
+                        <span class="toggle-password" onclick="togglePassword(this, 'confirm-password')">
+                            <i class="fas fa-eye"></i>
+                        </span>
                     </div>
+                    <div id="confirm-password-error" class="field-error"></div>
                 </div>
                 <div id="signupError" class="error-message"></div>
                 <div class="form-options">
@@ -96,6 +160,122 @@
     </div>
 
     <script>
+        // Live validation for First Name
+        document.getElementById('firstName').addEventListener('input', function() {
+            validateName(this, 'firstName-error', 'First name');
+        });
+        
+        // Live validation for Last Name
+        document.getElementById('lastName').addEventListener('input', function() {
+            validateName(this, 'lastName-error', 'Last name');
+        });
+        
+        // Live validation for Email
+        document.getElementById('email').addEventListener('input', function() {
+            validateEmail(this);
+        });
+        
+        // Live validation for Password
+        document.getElementById('password').addEventListener('input', function() {
+            validatePassword(this);
+            // Also validate confirm password field if it has a value
+            if (document.getElementById('confirm-password').value) {
+                validatePasswordMatch();
+            }
+        });
+        
+        // Live validation for Confirm Password
+        document.getElementById('confirm-password').addEventListener('input', function() {
+            validatePasswordMatch();
+        });
+        
+        // Name validation helper function
+        function validateName(input, errorId, fieldName) {
+            const value = input.value.trim();
+            const errorElement = document.getElementById(errorId);
+            
+            if (!value) {
+                showFieldError(errorElement, `${fieldName} is required`);
+                return false;
+            } else if (!/^[A-Za-z]+$/.test(value)) {
+                showFieldError(errorElement, `${fieldName} should only contain letters`);
+                return false;
+            } else if (!/^[A-Z]/.test(value)) {
+                showFieldError(errorElement, `${fieldName} should start with a capital letter`);
+                return false;
+            } else {
+                hideFieldError(errorElement);
+                return true;
+            }
+        }
+        
+        // Email validation helper function
+        function validateEmail(input) {
+            const email = input.value.trim();
+            const errorElement = document.getElementById('email-error');
+            const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            
+            if (!email) {
+                showFieldError(errorElement, 'Email address is required');
+                return false;
+            } else if (!emailRegex.test(email)) {
+                showFieldError(errorElement, 'Please enter a valid email address');
+                return false;
+            } else {
+                hideFieldError(errorElement);
+                return true;
+            }
+        }
+        
+        // Password validation helper function
+        function validatePassword(input) {
+            const password = input.value;
+            const errorElement = document.getElementById('password-error');
+            
+            if (!password) {
+                showFieldError(errorElement, 'Password is required');
+                return false;
+            } else if (password.length < 6) {
+                showFieldError(errorElement, 'Password must be at least 6 characters');
+                return false;
+            } else {
+                hideFieldError(errorElement);
+                return true;
+            }
+        }
+        
+        // Password match validation helper function
+        function validatePasswordMatch() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            const errorElement = document.getElementById('confirm-password-error');
+            
+            if (!confirmPassword) {
+                showFieldError(errorElement, 'Please confirm your password');
+                return false;
+            } else if (password !== confirmPassword) {
+                showFieldError(errorElement, 'Passwords do not match');
+                return false;
+            } else {
+                hideFieldError(errorElement);
+                return true;
+            }
+        }
+        
+        // Helper function to show field error
+        function showFieldError(element, message) {
+            element.textContent = message;
+            element.style.display = 'block';
+            element.parentNode.classList.add('error');
+        }
+        
+        // Helper function to hide field error
+        function hideFieldError(element) {
+            element.textContent = '';
+            element.style.display = 'none';
+            element.parentNode.classList.remove('error');
+        }
+        
         // Utility function to show error messages
         function showError(message, errors = []) {
             const errorElement = document.getElementById('signupError');
@@ -134,6 +314,10 @@
             document.querySelectorAll('.form-group.error').forEach(el => {
                 el.classList.remove('error');
             });
+            document.querySelectorAll('.field-error').forEach(el => {
+                el.textContent = '';
+                el.style.display = 'none';
+            });
         }
         
         // Set loading state
@@ -157,50 +341,47 @@
             resetFormErrors();
             
             // Get form values
-            const fullname = document.getElementById('fullname').value.trim();
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirm-password').value;
             const termsAccepted = document.getElementById('terms').checked;
             
-            // Client-side validation
-            let errors = [];
+            // Run all validations
+            const isFirstNameValid = validateName(document.getElementById('firstName'), 'firstName-error', 'First name');
+            const isLastNameValid = validateName(document.getElementById('lastName'), 'lastName-error', 'Last name');
+            const isEmailValid = validateEmail(document.getElementById('email'));
+            const isPasswordValid = validatePassword(document.getElementById('password'));
+            const isPasswordMatchValid = validatePasswordMatch();
             
-            if (!fullname) errors.push('Full name is required');
-            if (!email) errors.push('Email address is required');
-            if (!password) errors.push('Password is required');
-            if (!confirmPassword) errors.push('Please confirm your password');
-            if (!termsAccepted) errors.push('You must accept the Terms of Service and Privacy Policy');
-            
-            if (password !== confirmPassword) {
-                errors.push('Passwords do not match');
-                document.querySelector('.form-group:nth-child(4)').classList.add('error');
+            // Terms validation
+            if (!termsAccepted) {
+                showError('You must accept the Terms of Service and Privacy Policy');
+                return;
             }
             
-            if (password && password.length < 6) {
-                errors.push('Password must be at least 6 characters');
-                document.querySelector('.form-group:nth-child(3)').classList.add('error');
-            }
-            
-            // If there are validation errors, show them and stop
-            if (errors.length > 0) {
-                showError('Please fix the following errors:', errors);
+            // If any validation fails, stop the submission
+            if (!isFirstNameValid || !isLastNameValid || !isEmailValid || !isPasswordValid || !isPasswordMatchValid) {
                 return;
             }
             
             // Show loading state
             setLoading(true);
             
-            console.log('Attempting to register with data:', { fullname, email });
+            console.log('Attempting to register with data:', { firstName, lastName, email });
             
             try {
+                // Generate a full name from first and last name
+                const fullname = firstName + ' ' + lastName;
+                
                 // Call the API to register
                 const response = await fetch('/api/auth/register', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ fullname, email, password })
+                    body: JSON.stringify({ fullname, firstName, lastName, email, password })
                 });
                 
                 console.log('Registration response status:', response.status);
@@ -251,6 +432,14 @@
                 setLoading(false);
             }
         });
+        
+        // Password toggle functionality
+        function togglePassword(element, inputId) {
+            const input = document.getElementById(inputId);
+            const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+            input.setAttribute('type', type);
+            element.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+        }
     </script>
 </body>
 </html> 

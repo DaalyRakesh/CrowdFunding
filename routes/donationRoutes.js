@@ -74,4 +74,28 @@ router.put('/status/:id', async (req, res) => {
     }
 });
 
+// Get total donation count for admin dashboard
+router.get('/count', async (req, res) => {
+    try {
+        const count = await Donation.countDocuments();
+        res.json({ count });
+    } catch (error) {
+        console.error('Error fetching donation count:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Get recent donations for admin dashboard
+router.get('/recent', async (req, res) => {
+    try {
+        const donations = await Donation.find()
+            .sort({ createdAt: -1 })
+            .limit(10);
+        res.json(donations);
+    } catch (error) {
+        console.error('Error fetching recent donations:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 module.exports = router; 
