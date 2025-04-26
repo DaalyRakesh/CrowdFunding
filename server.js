@@ -49,6 +49,7 @@ app.use('/api/donations', donationRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/requirements', requirementRoutes);
 app.use('/api/feedback', feedbackRoutes);
+app.use('/api/admin/feedback', feedbackRoutes);
 app.use('/api/contact', contactRoutes);
 
 // Admin dashboard statistics endpoint
@@ -93,6 +94,22 @@ app.get('/api/admin/dashboard/stats', async (req, res) => {
         });
     } catch (error) {
         console.error('Error fetching dashboard stats:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// API endpoint to get users for admin dashboard
+app.get('/api/admin/users', async (req, res) => {
+    try {
+        // Get all users who are not admins
+        const users = await User.find({ isAdmin: false })
+            .select('fullname email firstName lastName createdAt')
+            .sort({ createdAt: -1 })
+            .limit(10);
+        
+        res.json(users);
+    } catch (error) {
+        console.error('Error fetching users:', error);
         res.status(500).json({ message: 'Server error' });
     }
 });

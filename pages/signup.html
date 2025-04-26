@@ -105,10 +105,10 @@
                         </div>
                         <div id="firstName-error" class="field-error"></div>
                     </div>
-                    <div class="form-group">
+                <div class="form-group">
                         <label for="lastName">Last Name</label>
-                        <div class="input-group">
-                            <i class="fas fa-user"></i>
+                    <div class="input-group">
+                        <i class="fas fa-user"></i>
                             <input type="text" id="lastName" name="lastName" placeholder="Enter your last name" pattern="[A-Za-z]+" title="Only letters allowed" required>
                         </div>
                         <div id="lastName-error" class="field-error"></div>
@@ -302,7 +302,7 @@
             }
             
             // Display the error element
-            errorElement.style.display = 'block';
+                errorElement.style.display = 'block';
             
             // Scroll to error message
             errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -374,13 +374,13 @@
             try {
                 // Generate a full name from first and last name
                 const fullname = firstName + ' ' + lastName;
-                
-                // Call the API to register
+            
+            // Call the API to register
                 const response = await fetch('/api/auth/register', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
                     body: JSON.stringify({ fullname, firstName, lastName, email, password })
                 });
                 

@@ -26,23 +26,15 @@
             padding: 0;
         }
         
-        /* Management Interface Specific Styles */
-        .admin-actions {
-            margin-bottom: 20px;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        
+        /* Management Interface Styles */
         .filter-controls {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 15px;
-            background-color: #f5f5f5;
+            margin-bottom: 20px;
             padding: 15px;
+            background-color: #f8f9fa;
             border-radius: 5px;
-            flex-wrap: wrap;
-            gap: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
         
         .search-box {
@@ -69,7 +61,6 @@
         .filter-options {
             display: flex;
             gap: 10px;
-            flex-wrap: wrap;
         }
         
         .filter-options select {
@@ -79,13 +70,10 @@
             background-color: white;
         }
         
-        .pagination-controls {
+        .admin-actions {
             display: flex;
             justify-content: space-between;
-            align-items: center;
             margin-top: 20px;
-            flex-wrap: wrap;
-            gap: 10px;
         }
         
         .bulk-actions {
@@ -101,14 +89,60 @@
             background-color: white;
         }
         
-        .info-btn {
-            background-color: var(--info-color);
-            color: white;
+        .status-select {
+            padding: 5px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+            width: 100%;
+            max-width: 120px;
         }
         
-        .small-btn {
-            padding: 5px 10px;
-            font-size: 0.85rem;
+        /* Status colors */
+        .status-select option[value="Pending"] {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-select option[value="Approved"] {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+        
+        .status-select option[value="Completed"] {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+        
+        .status-select option[value="Rejected"] {
+            background-color: #f8d7da;
+            color: #842029;
+        }
+        
+        /* Modal donation details */
+        .donation-details {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .status-update {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        
+        .status-update h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+        
+        .status-update select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-right: 10px;
         }
         
         /* Admin Header */
@@ -479,19 +513,6 @@
             .admin-container {
                 flex-direction: column;
             }
-            
-            .admin-sidebar {
-                width: 100%;
-                order: 2;
-            }
-            
-            .admin-content {
-                order: 1;
-            }
-            
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
         }
         
         /* Modal styles */
@@ -763,17 +784,14 @@
             
             <div class="nav-section">
                 <div class="nav-section-title">Management</div>
-                <a href="#" class="nav-item" data-tab="donations-manage">
+                <a href="#" class="nav-item" data-tab="manage-donations">
                     <i class="fas fa-tasks"></i> Manage Donations
                 </a>
-                <a href="#" class="nav-item" data-tab="payments-manage">
+                <a href="#" class="nav-item" data-tab="manage-payments">
                     <i class="fas fa-money-check-alt"></i> Manage Payments
                 </a>
-                <a href="#" class="nav-item" data-tab="requirements-manage">
+                <a href="#" class="nav-item" data-tab="manage-requirements">
                     <i class="fas fa-clipboard-list"></i> Manage Requirements
-                </a>
-                <a href="#" class="nav-item" data-tab="feedback-manage">
-                    <i class="fas fa-reply-all"></i> Manage Feedback
                 </a>
                 <a href="#" class="nav-item" data-tab="contacts">
                     <i class="fas fa-address-book"></i> Contact Submissions
@@ -858,7 +876,8 @@
                         <th>ID</th>
                         <th>Name</th>
                         <th>Email</th>
-                        <th>Website</th>
+                        <th>Phone</th>
+                        <th>Address</th>
                         <th>Date</th>
                         <th>Status</th>
                         <th>Actions</th>
@@ -867,7 +886,7 @@
                 <tbody id="recent-contacts">
                     <!-- Contact rows will be inserted here -->
                     <tr>
-                        <td colspan="7" class="loading-data">Loading contact submissions...</td>
+                        <td colspan="8" style="text-align: center;">Loading contact submissions...</td>
                     </tr>
                 </tbody>
             </table>
@@ -999,17 +1018,14 @@
                 case 'feedback':
                     loadFeedbackContent();
                     break;
-                case 'donations-manage':
-                    loadDonationsManageContent();
+                case 'manage-donations':
+                    loadManageDonationsContent();
                     break;
-                case 'payments-manage':
-                    loadPaymentsManageContent();
+                case 'manage-payments':
+                    loadManagePaymentsContent();
                     break;
-                case 'requirements-manage':
-                    loadRequirementsManageContent();
-                    break;
-                case 'feedback-manage':
-                    loadFeedbackManageContent();
+                case 'manage-requirements':
+                    loadManageRequirementsContent();
                     break;
                 case 'contacts':
                     loadContactContent();
@@ -1282,47 +1298,24 @@
         
         // Fetch data for dashboard
         function fetchDashboardData() {
-            // Fetch donation count
-            fetch('/api/donations/count')
+            // Fetch all dashboard stats in one API call
+            fetch('/api/admin/dashboard/stats')
                 .then(response => response.json())
                 .then(data => {
-                    document.getElementById('totalDonations').textContent = data.count || 0;
+                    // Update the dashboard statistics with real data
+                    document.getElementById('totalDonations').textContent = data.donations.count || 0;
+                    document.getElementById('totalPayments').textContent = '₹' + (data.payments.total || 0).toLocaleString('en-IN');
+                    document.getElementById('totalRequirements').textContent = data.requirements.count || 0;
+                    document.getElementById('totalFeedback').textContent = data.feedback.count || 0;
+                    
+                    console.log('Dashboard statistics loaded:', data);
                 })
                 .catch(error => {
-                    console.error('Error fetching donation count:', error);
+                    console.error('Error fetching dashboard statistics:', error);
+                    // Set placeholder values in case of error
                     document.getElementById('totalDonations').textContent = '0';
-                });
-            
-            // Fetch payment total
-            fetch('/api/payments/total')
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('totalPayments').textContent = '₹' + (data.total || 0);
-                })
-                .catch(error => {
-                    console.error('Error fetching payment total:', error);
                     document.getElementById('totalPayments').textContent = '₹0';
-                });
-            
-            // Fetch requirements count
-            fetch('/api/requirements/count')
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('totalRequirements').textContent = data.count || 0;
-                })
-                .catch(error => {
-                    console.error('Error fetching requirements count:', error);
                     document.getElementById('totalRequirements').textContent = '0';
-                });
-            
-            // Fetch feedback count
-            fetch('/api/feedback/count')
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('totalFeedback').textContent = data.count || 0;
-                })
-                .catch(error => {
-                    console.error('Error fetching feedback count:', error);
                     document.getElementById('totalFeedback').textContent = '0';
                 });
             
@@ -1339,6 +1332,8 @@
             loadRecentFeedback();
         }
         
+        // Helper function to refresh all dashboard statistics
+        function refreshDashboardStats() {
         // Load recent donations
         function loadRecentDonations() {
             const tableBody = document.querySelector('#recentDonationsTable tbody');
@@ -1411,10 +1406,13 @@
                     .then(data => {
                         if (data.length > 0) {
                             // Update dashboard stats
-                            fetch('/api/donations/count')
+                            fetch('/api/admin/dashboard/stats')
                                 .then(response => response.json())
-                                .then(countData => {
-                                    document.getElementById('totalDonations').textContent = countData.count || '0';
+                                .then(statsData => {
+                                    document.getElementById('totalDonations').textContent = statsData.donations.count || 0;
+                                    document.getElementById('totalPayments').textContent = '₹' + (statsData.payments.total || 0).toLocaleString('en-IN');
+                                    document.getElementById('totalRequirements').textContent = statsData.requirements.count || 0;
+                                    document.getElementById('totalFeedback').textContent = statsData.feedback.count || 0;
                                 });
                                 
                             // Update the donations table if new data is available
@@ -1764,18 +1762,32 @@
                         const row = document.createElement('tr');
                         
                         // Format the date
-                        const date = new Date(feedback.createdAt).toLocaleDateString();
-                        const statusClass = 'status-new'; // Default to new status
+                        const date = new Date(feedback.timestamp || feedback.createdAt).toLocaleDateString();
+                        let statusClass = '';
+                        
+                        switch (feedback.status) {
+                            case 'new':
+                                statusClass = 'status-new';
+                                break;
+                            case 'in_progress':
+                                statusClass = 'status-pending';
+                                break;
+                            case 'resolved':
+                                statusClass = 'status-completed';
+                                break;
+                            default:
+                                statusClass = '';
+                        }
                         
                         row.innerHTML = `
-                            <td>${feedback._id.substring(0, 8)}</td>
-                            <td>${feedback.fullName || 'Anonymous'}</td>
-                            <td>General</td>
+                            <td>${feedback._id ? feedback._id.substring(0, 8) : feedback.id}</td>
+                            <td>${feedback.userName || feedback.name || 'Anonymous'}</td>
+                            <td>${feedback.type || feedback.feedbackType || 'General'}</td>
                             <td>${date}</td>
-                            <td><span class="status-badge ${statusClass}">New</span></td>
+                            <td><span class="status-badge ${statusClass}">${feedback.status.replace('_', ' ')}</span></td>
                             <td>
-                                <button class="action-btn view-btn" data-id="${feedback._id}">View</button>
-                                <button class="action-btn respond-btn" data-id="${feedback._id}">Respond</button>
+                                <button class="action-btn view-btn" data-id="${feedback._id || feedback.id}">View</button>
+                                <button class="action-btn respond-btn" data-id="${feedback._id || feedback.id}">Respond</button>
                             </td>
                         `;
                         
@@ -1829,24 +1841,22 @@
                 })
                 .then(feedback => {
                     // Format the date
-                    const date = new Date(feedback.timestamp || feedback.createdAt).toLocaleString();
+                    const date = new Date(feedback.timestamp).toLocaleString();
                     
                     // Create the HTML for the feedback details
                     let detailsHTML = `
                         <div class="feedback-detail-header">
                             <div class="feedback-meta">
-                                <p><strong>ID:</strong> ${feedback.id || feedback._id}</p>
-                                <p><strong>User:</strong> ${feedback.userName || feedback.name || feedback.fullName || 'Anonymous'}</p>
-                                <p><strong>Email:</strong> ${feedback.email || feedback.feedbackEmail || 'N/A'}</p>
-                                <p><strong>Phone:</strong> ${feedback.phoneNo || 'N/A'}</p>
+                                <p><strong>ID:</strong> ${feedback.id}</p>
+                                <p><strong>User:</strong> ${feedback.userName || feedback.name || 'Anonymous'}</p>
                                 <p><strong>Type:</strong> ${feedback.type || feedback.feedbackType || 'General'}</p>
                                 <p><strong>Date:</strong> ${date}</p>
-                                <p><strong>Status:</strong> <span class="status status-new">New</span></p>
+                                <p><strong>Status:</strong> <span class="status status-${feedback.status}">${feedback.status.replace('_', ' ')}</span></p>
                             </div>
                         </div>
                         <div class="feedback-message">
                             <h3>Feedback Message:</h3>
-                            <p>${feedback.message || feedback.feedbackText || 'No message provided'}</p>
+                            <p>${feedback.message}</p>
                         </div>
                     `;
                     
@@ -1873,7 +1883,7 @@
                     detailsHTML += `
                         <div class="feedback-actions">
                             <button class="btn secondary-btn close-modal">Close</button>
-                            <button class="btn primary-btn" onclick="respondToFeedback('${feedback.id || feedback._id}')">Respond</button>
+                            <button class="btn primary-btn" onclick="respondToFeedback(${feedback.id})">Respond</button>
                         </div>
                     `;
                     
@@ -1945,35 +1955,41 @@
                 })
                 .then(feedback => {
                     // Format the date
-                    const date = new Date(feedback.timestamp || feedback.createdAt).toLocaleString();
+                    const date = new Date(feedback.timestamp).toLocaleString();
                     
-                    // Create the HTML for the feedback message
+                    // Show the original feedback message
                     messageContainer.innerHTML = `
-                        <div class="feedback-meta">
-                            <p><strong>From:</strong> ${feedback.userName || feedback.name || feedback.fullName || 'Anonymous'}</p>
-                            <p><strong>Date:</strong> ${date}</p>
-                            <p><strong>Type:</strong> ${feedback.type || feedback.feedbackType || 'General'}</p>
-                        </div>
-                        <div class="feedback-text">
-                            <p>${feedback.message || feedback.feedbackText || 'No message provided'}</p>
+                        <div class="original-message">
+                            <h3>Original Feedback:</h3>
+                            <p class="message-meta">
+                                <strong>${feedback.userName || feedback.name || 'Anonymous'}</strong> - ${date}
+                            </p>
+                            <p class="message-content">${feedback.message}</p>
                         </div>
                     `;
                     
-                    // Update the form action to include the feedback ID
+                    // Set up the form submission
                     const form = document.getElementById('feedback-response-form');
-                    form.setAttribute('data-id', feedback.id || feedback._id);
                     
-                    // Add event listener to the form submit
-                    form.addEventListener('submit', function(e) {
-                        e.preventDefault();
+                    // Remove any existing event listeners
+                    const newForm = form.cloneNode(true);
+                    form.parentNode.replaceChild(newForm, form);
+                    
+                    // Add new event listener
+                    newForm.addEventListener('submit', function(event) {
+                        event.preventDefault();
                         
-                        // Get the response message
-                        const responseMessage = document.getElementById('feedback-response-message').value;
+                        const responseMessage = document.getElementById('response-message').value;
                         
-                        // Show loading state
-                        const submitBtn = document.getElementById('submit-response');
-                        submitBtn.disabled = true;
-                        submitBtn.textContent = 'Sending...';
+                        if (!responseMessage.trim()) {
+                            alert('Please enter a response message');
+                            return;
+                        }
+                        
+                        // Disable the submit button to prevent double submission
+                        const submitButton = this.querySelector('button[type="submit"]');
+                        submitButton.disabled = true;
+                        submitButton.textContent = 'Sending...';
                         
                         // Send the response
                         fetch(`/api/admin/feedback/${feedbackId}/respond`, {
@@ -1983,7 +1999,7 @@
                             },
                             body: JSON.stringify({
                                 message: responseMessage,
-                                adminName: 'Admin'
+                                status: 'in_progress'  // Update status when responding
                             })
                         })
                         .then(response => {
@@ -1996,29 +2012,24 @@
                             // Close the modal
                             modal.style.display = 'none';
                             
-                            // Reset the form
-                            form.reset();
-                            
                             // Show success notification
                             showNotification('Response sent successfully', 'success');
                             
-                            // Reload feedback data
+                            // Reload the feedback list to reflect the status change
                             loadRecentFeedback();
                         })
                         .catch(error => {
                             console.error('Error sending response:', error);
+                            alert('Failed to send response. Please try again.');
                             
-                            // Enable the submit button
-                            submitBtn.disabled = false;
-                            submitBtn.textContent = 'Send Response';
-                            
-                            // Show error notification
-                            showNotification('Failed to send response. Please try again.', 'error');
+                            // Re-enable the submit button
+                            submitButton.disabled = false;
+                            submitButton.textContent = 'Send Response';
                         });
                     });
                 })
                 .catch(error => {
-                    console.error('Error fetching feedback details:', error);
+                    console.error('Error fetching feedback for response:', error);
                     messageContainer.innerHTML = `
                         <div class="error-message">
                             <p>Failed to load feedback details. Please try again.</p>
@@ -2029,36 +2040,51 @@
             // Get the close button in the modal header
             const closeButton = modal.querySelector('.close');
             
-            // When the user clicks on the close button, close the modal and reset form
+            // When the user clicks on the close button, close the modal
             closeButton.onclick = function() {
                 modal.style.display = 'none';
-                document.getElementById('feedback-response-form').reset();
             };
             
-            // When the user clicks anywhere outside of the modal content, close it and reset form
+            // Add event listener to cancel button
+            document.querySelectorAll('#feedback-response-modal .close-modal').forEach(button => {
+                button.addEventListener('click', function() {
+                    modal.style.display = 'none';
+                });
+            });
+            
+            // When the user clicks anywhere outside of the modal content, close it
             window.onclick = function(event) {
                 if (event.target === modal) {
                     modal.style.display = 'none';
-                    document.getElementById('feedback-response-form').reset();
                 }
             };
         }
         
-        // Function to show notification
+        /**
+         * Displays a notification message to the user
+         * @param {string} message - The message to display
+         * @param {string} type - The type of notification (info, success, warning, error)
+         */
         function showNotification(message, type = 'info') {
-            const notification = document.createElement('div');
-            notification.classList.add('notification', `notification-${type}`);
+            // Create notification element if it doesn't exist
+            let notification = document.getElementById('notification');
+            
+            if (!notification) {
+                notification = document.createElement('div');
+                notification.id = 'notification';
+                document.body.appendChild(notification);
+            }
+            
+            // Set the message and type
             notification.textContent = message;
+            notification.className = `notification ${type}`;
             
-            // Add notification to the body
-            document.body.appendChild(notification);
+            // Show the notification
+            notification.style.display = 'block';
             
-            // Remove after 3 seconds
+            // Hide the notification after 3 seconds
             setTimeout(() => {
-                notification.classList.add('fade-out');
-                setTimeout(() => {
-                    notification.remove();
-                }, 500);
+                notification.style.display = 'none';
             }, 3000);
         }
         
@@ -2726,6 +2752,47 @@
                 .catch(error => {
                     console.error('Error fetching feedback:', error);
                     tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Error loading feedback</td></tr>';
+                    
+                    // For development/testing, use mock data if API fails
+                    const mockData = getMockFeedback();
+                    if (mockData.length > 0) {
+                        tableBody.innerHTML = '';
+                        mockData.forEach(feedback => {
+                            const row = document.createElement('tr');
+                            const date = new Date(feedback.createdAt);
+                            const formattedDate = date.toLocaleDateString();
+                            
+                            row.innerHTML = `
+                                <td>${feedback._id.substring(0, 8)}</td>
+                                <td>${feedback.fullName}</td>
+                                <td>${feedback.feedbackEmail}</td>
+                                <td>General</td>
+                                <td>${formattedDate}</td>
+                                <td><span class="status-badge status-new">New</span></td>
+                                <td>
+                                    <button class="action-btn view-btn" data-id="${feedback._id}">View</button>
+                                    <button class="action-btn respond-btn" data-id="${feedback._id}">Respond</button>
+                                </td>
+                            `;
+                            
+                            tableBody.appendChild(row);
+                        });
+                        
+                        // Add event listeners for mock data
+                        document.querySelectorAll('#allFeedbackTable .view-btn').forEach(btn => {
+                            btn.addEventListener('click', function() {
+                                const feedbackId = this.getAttribute('data-id');
+                                viewFeedbackDetails(feedbackId);
+                            });
+                        });
+                        
+                        document.querySelectorAll('#allFeedbackTable .respond-btn').forEach(btn => {
+                            btn.addEventListener('click', function() {
+                                const feedbackId = this.getAttribute('data-id');
+                                respondToFeedback(feedbackId);
+                            });
+                        });
+                    }
                 });
         }
         
@@ -3132,6 +3199,38 @@
             ];
         }
         
+        function getMockFeedback() {
+            return [
+                {
+                    _id: 'feed1',
+                    fullName: 'Alice Cooper',
+                    feedbackEmail: 'alice@example.com',
+                    phoneNo: '9876543210',
+                    ratingValue: '5',
+                    feedbackText: 'Great service and very responsive team. Highly recommend!',
+                    createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000)
+                },
+                {
+                    _id: 'feed2',
+                    fullName: 'Bob Martinez',
+                    feedbackEmail: 'bob@example.com',
+                    phoneNo: '8765432109',
+                    ratingValue: '4',
+                    feedbackText: 'Good experience overall, but could improve on communication.',
+                    createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000)
+                },
+                {
+                    _id: 'feed3',
+                    fullName: 'Carol Davis',
+                    feedbackEmail: 'carol@example.com',
+                    phoneNo: '7654321098',
+                    ratingValue: '3',
+                    feedbackText: 'Average experience. Some things could be better organized.',
+                    createdAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000)
+                }
+            ];
+        }
+        
         // View user details
         function viewUserDetails(userId) {
             // Get user data
@@ -3331,7 +3430,8 @@
                                     <th>ID</th>
                                     <th>Name</th>
                                     <th>Email</th>
-                                    <th>Website</th>
+                                    <th>Phone</th>
+                                    <th>Address</th>
                                     <th>Date</th>
                                     <th>Status</th>
                                     <th>Actions</th>
@@ -3339,7 +3439,7 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td colspan="7" style="text-align: center;">Loading contact submissions...</td>
+                                    <td colspan="8" style="text-align: center;">Loading contact submissions...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -3352,14 +3452,15 @@
                                     <th>ID</th>
                                     <th>Name</th>
                                     <th>Email</th>
-                                    <th>Website</th>
+                                    <th>Phone</th>
+                                    <th>Address</th>
                                     <th>Date</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td colspan="6" style="text-align: center;">Loading new contact submissions...</td>
+                                    <td colspan="7" style="text-align: center;">Loading new contact submissions...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -3372,14 +3473,15 @@
                                     <th>ID</th>
                                     <th>Name</th>
                                     <th>Email</th>
-                                    <th>Website</th>
+                                    <th>Phone</th>
+                                    <th>Address</th>
                                     <th>Date</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td colspan="6" style="text-align: center;">Loading responded contact submissions...</td>
+                                    <td colspan="7" style="text-align: center;">Loading responded contact submissions...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -3428,46 +3530,53 @@
             `;
             
             // Add event listeners to tab buttons
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    // Update active tab button
-                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    // Remove active class from all buttons and content
+                    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                    
+                    // Add active class to current button
                     this.classList.add('active');
                     
-                    // Show the corresponding tab content
+                    // Show the corresponding content
                     const tabId = this.getAttribute('data-tab');
-                    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
                     document.getElementById(tabId).classList.add('active');
                 });
             });
             
-            // Load contacts data
+            // Load contact data
             loadAllContacts();
         }
         
-        // Load all contacts data
         function loadAllContacts() {
-            const tableBody = document.querySelector('#allContactsTable tbody');
+            const tableBody = document.getElementById('allContactsTable').querySelector('tbody');
             
-            // Show loading state
-            tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Loading contact submissions...</td></tr>';
+            // Show loading message
+            tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Loading contact submissions...</td></tr>';
             
-            // Fetch all contacts from API
+            // Fetch all contacts
             fetch('/api/contact/all')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.length > 0) {
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch contacts');
+                    }
+                    return response.json();
+                })
+                .then(contacts => {
+                    if (contacts && contacts.length > 0) {
                         // Clear loading message
                         tableBody.innerHTML = '';
                         
                         // Add each contact to the table
-                        data.forEach(contact => {
+                        contacts.forEach(contact => {
                             const row = document.createElement('tr');
                             
                             // Format the date
                             const date = new Date(contact.createdAt);
-                            const formattedDate = `${date.toLocaleDateString()}`;
+                            const formattedDate = date.toLocaleDateString();
                             
+                            // Determine status class
                             let statusClass = '';
                             switch (contact.status) {
                                 case 'new':
@@ -3487,7 +3596,8 @@
                                 <td>${contact._id.substring(0, 8)}</td>
                                 <td>${contact.name}</td>
                                 <td>${contact.email}</td>
-                                <td>${contact.website || '-'}</td>
+                                <td>${contact.phone || '-'}</td>
+                                <td>${contact.address ? contact.address.substring(0, 20) + '...' : '-'}</td>
                                 <td>${formattedDate}</td>
                                 <td><span class="status-badge ${statusClass}">${contact.status}</span></td>
                                 <td>
@@ -3514,12 +3624,12 @@
                             });
                         });
                     } else {
-                        tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No contact submissions found</td></tr>';
+                        tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No contact submissions found</td></tr>';
                     }
                 })
                 .catch(error => {
                     console.error('Error fetching contacts:', error);
-                    tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Error loading contact submissions</td></tr>';
+                    tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Error loading contact submissions</td></tr>';
                 });
         }
         
@@ -3557,7 +3667,8 @@
                                 <p><strong>ID:</strong> ${contact._id}</p>
                                 <p><strong>Name:</strong> ${contact.name}</p>
                                 <p><strong>Email:</strong> ${contact.email}</p>
-                                <p><strong>Website:</strong> ${contact.website || 'Not provided'}</p>
+                                <p><strong>Phone:</strong> ${contact.phone || '-'}</p>
+                                <p><strong>Address:</strong> ${contact.address || '-'}</p>
                                 <p><strong>Date:</strong> ${date}</p>
                                 <p><strong>Status:</strong> <span class="status status-${contact.status}">${contact.status}</span></p>
                             </div>
@@ -3690,6 +3801,11 @@
                             <p class="message-meta">
                                 <strong>${contact.name}</strong> - ${date}
                             </p>
+                            <p class="message-details">
+                                <strong>Email:</strong> ${contact.email}<br>
+                                <strong>Phone:</strong> ${contact.phone || '-'}<br>
+                                <strong>Address:</strong> ${contact.address || '-'}
+                            </p>
                             <p class="message-content">${contact.message}</p>
                         </div>
                     `;
@@ -3803,17 +3919,41 @@
             };
         }
         
-        // Management content loading functions
-        function loadDonationsManageContent() {
+        // Load management content functions
+        function loadManageDonationsContent() {
             const contentArea = document.getElementById('adminContent');
             
             contentArea.innerHTML = `
                 <h2 class="page-title"><i class="fas fa-tasks"></i> Manage Donations</h2>
                 
+                <div class="filter-controls">
+                    <div class="search-box">
+                        <input type="text" id="donationSearchInput" placeholder="Search donations...">
+                        <button id="donationSearchBtn"><i class="fas fa-search"></i></button>
+                    </div>
+                    <div class="filter-options">
+                        <select id="donationStatusFilter">
+                            <option value="">All Statuses</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Approved">Approved</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Rejected">Rejected</option>
+                        </select>
+                        <select id="donationCategoryFilter">
+                            <option value="">All Categories</option>
+                            <option value="Food">Food</option>
+                            <option value="Clothes">Clothes</option>
+                            <option value="Money">Money</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                
                 <div class="table-container">
                     <table class="admin-table" id="manageDonationsTable">
                         <thead>
                             <tr>
+                                <th><input type="checkbox" id="selectAllDonations"></th>
                                 <th>ID</th>
                                 <th>Name</th>
                                 <th>Email</th>
@@ -3825,229 +3965,342 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td colspan="7" style="text-align: center;">Loading donations...</td>
+                                <td colspan="8" style="text-align: center;">Loading donations...</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
+                
+                <div class="admin-actions">
+                    <div class="bulk-actions">
+                        <select id="donationBulkAction">
+                            <option value="">Bulk Actions</option>
+                            <option value="approve">Approve Selected</option>
+                            <option value="complete">Mark as Completed</option>
+                            <option value="reject">Reject Selected</option>
+                            <option value="delete">Delete Selected</option>
+                        </select>
+                        <button class="btn primary-btn" id="applyDonationBulkAction">Apply</button>
+                    </div>
+                    <button class="btn secondary-btn" id="refreshDonationsBtn"><i class="fas fa-sync"></i> Refresh</button>
+                </div>
             `;
             
-            // Load donations data from database API
-            const tableBody = document.querySelector('#manageDonationsTable tbody');
+            // Load donation data
+            loadDonationsData();
             
-            // Fetch donations from API
-            fetch('/api/admin/donations/all')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Failed to fetch donations data');
-                    }
-                    return response.json();
-                })
-                .then(donations => {
-                    if (donations && donations.length > 0) {
-                        tableBody.innerHTML = '';
-                        
-                        donations.forEach(donation => {
-                            const row = document.createElement('tr');
-                            
-                            // Format date
-                            const date = new Date(donation.createdAt || donation.timestamp);
-                            const formattedDate = date.toLocaleDateString();
-                            
-                            // Create status dropdown
-                            const statusDropdown = `
-                                <select class="status-dropdown" data-id="${donation._id || donation.id}">
-                                    <option value="Pending" ${(donation.status === 'Pending') ? 'selected' : ''}>Pending</option>
-                                    <option value="Approved" ${(donation.status === 'Approved') ? 'selected' : ''}>Approved</option>
-                                    <option value="Completed" ${(donation.status === 'Completed') ? 'selected' : ''}>Completed</option>
-                                    <option value="Rejected" ${(donation.status === 'Rejected') ? 'selected' : ''}>Rejected</option>
-                                </select>
-                            `;
-                            
-                            row.innerHTML = `
-                                <td>${(donation._id || donation.id).substring(0, 8)}</td>
-                                <td>${donation.donorName || donation.name || 'N/A'}</td>
-                                <td>${donation.donorEmail || donation.email || 'N/A'}</td>
-                                <td>${donation.donationType || donation.category || 'N/A'}</td>
-                                <td>${formattedDate}</td>
-                                <td>${statusDropdown}</td>
-                                <td>
-                                    <button class="action-btn view-btn" data-id="${donation._id || donation.id}">View</button>
-                                    <button class="action-btn delete-btn" data-id="${donation._id || donation.id}">Delete</button>
-                                </td>
-                            `;
-                            
-                            tableBody.appendChild(row);
-                        });
-                        
-                        // Add event listeners for status changes
-                        document.querySelectorAll('.status-dropdown').forEach(dropdown => {
-                            dropdown.addEventListener('change', function() {
-                                const donationId = this.getAttribute('data-id');
-                                const newStatus = this.value;
-                                updateDonationStatus(donationId, newStatus);
-                            });
-                        });
-                        
-                        // Add event listeners for view buttons
-                        document.querySelectorAll('#manageDonationsTable .view-btn').forEach(btn => {
-                            btn.addEventListener('click', function() {
-                                const donationId = this.getAttribute('data-id');
-                                viewDonationDetails(donationId);
-                            });
-                        });
-                        
-                        // Add event listeners for delete buttons
-                        document.querySelectorAll('#manageDonationsTable .delete-btn').forEach(btn => {
-                            btn.addEventListener('click', function() {
-                                const donationId = this.getAttribute('data-id');
-                                deleteDonation(donationId);
-                            });
-                        });
-                    } else {
-                        tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No donations found</td></tr>';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading donations:', error);
-                    tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Error loading donations. Please try again.</td></tr>';
-                    
-                    // Fallback to mock data for development/demo purposes
-                    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-                        setTimeout(() => {
-                            showNotification('Using mock data for development', 'info');
-                            loadMockDonations();
-                        }, 1000);
-                    }
+            // Setup event listeners
+            document.getElementById('donationSearchBtn').addEventListener('click', function() {
+                const searchTerm = document.getElementById('donationSearchInput').value.trim();
+                if (searchTerm) {
+                    searchDonations(searchTerm);
+                } else {
+                    loadDonationsData(); // Reload all data if search is empty
+                }
+            });
+            
+            document.getElementById('donationStatusFilter').addEventListener('change', function() {
+                filterDonationsByStatus(this.value);
+            });
+            
+            document.getElementById('donationCategoryFilter').addEventListener('change', function() {
+                filterDonationsByCategory(this.value);
+            });
+            
+            document.getElementById('refreshDonationsBtn').addEventListener('click', function() {
+                loadDonationsData();
+                showNotification('Donations data refreshed', 'success');
+            });
+            
+            document.getElementById('applyDonationBulkAction').addEventListener('click', applyDonationBulkAction);
+            
+            document.getElementById('selectAllDonations').addEventListener('change', function() {
+                const checkboxes = document.querySelectorAll('#manageDonationsTable .donation-checkbox');
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = this.checked;
                 });
+            });
         }
         
-        // Function to load mock donations (for development only)
-        function loadMockDonations() {
+        function loadManagePaymentsContent() {
+            const contentArea = document.getElementById('adminContent');
+            contentArea.innerHTML = `
+                <h2 class="page-title"><i class="fas fa-money-check-alt"></i> Manage Payments</h2>
+                <p>Payment management interface is under development.</p>
+            `;
+        }
+        
+        function loadManageRequirementsContent() {
+            const contentArea = document.getElementById('adminContent');
+            contentArea.innerHTML = `
+                <h2 class="page-title"><i class="fas fa-clipboard-list"></i> Manage Requirements</h2>
+                <p>Requirements management interface is under development.</p>
+            `;
+        }
+        
+        // Helper functions for donation management
+        function loadDonationsData() {
             const tableBody = document.querySelector('#manageDonationsTable tbody');
-            const donations = getMockDonations();
+            tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Loading donations...</td></tr>';
             
-            if (donations.length > 0) {
+            // In a real app, this would be an API call
+            // We'll use mock data for now
+            const mockDonations = [
+                { id: 'DON-001', name: 'John Smith', email: 'john@example.com', category: 'Food', date: '2023-05-15', status: 'Pending' },
+                { id: 'DON-002', name: 'Jane Doe', email: 'jane@example.com', category: 'Clothes', date: '2023-05-18', status: 'Approved' },
+                { id: 'DON-003', name: 'Bob Johnson', email: 'bob@example.com', category: 'Money', date: '2023-05-20', status: 'Completed' },
+                { id: 'DON-004', name: 'Alice Williams', email: 'alice@example.com', category: 'Books', date: '2023-05-22', status: 'Rejected' },
+                { id: 'DON-005', name: 'Michael Brown', email: 'michael@example.com', category: 'Food', date: '2023-05-25', status: 'Pending' }
+            ];
+            
+            setTimeout(() => {
                 tableBody.innerHTML = '';
                 
-                donations.forEach(donation => {
+                mockDonations.forEach(donation => {
                     const row = document.createElement('tr');
                     
-                    // Format date
-                    const date = new Date(donation.createdAt);
-                    const formattedDate = date.toLocaleDateString();
-                    
-                    // Create status dropdown
-                    const statusDropdown = `
-                        <select class="status-dropdown" data-id="${donation._id}">
-                            <option value="Pending" ${donation.status === 'Pending' ? 'selected' : ''}>Pending</option>
-                            <option value="Approved" ${donation.status === 'Approved' ? 'selected' : ''}>Approved</option>
-                            <option value="Completed" ${donation.status === 'Completed' ? 'selected' : ''}>Completed</option>
-                            <option value="Rejected" ${donation.status === 'Rejected' ? 'selected' : ''}>Rejected</option>
-                        </select>
-                    `;
-                    
                     row.innerHTML = `
-                        <td>${donation._id.substring(0, 8)}</td>
+                        <td><input type="checkbox" class="donation-checkbox" data-id="${donation.id}"></td>
+                        <td>${donation.id}</td>
                         <td>${donation.name}</td>
                         <td>${donation.email}</td>
                         <td>${donation.category}</td>
-                        <td>${formattedDate}</td>
-                        <td>${statusDropdown}</td>
+                        <td>${donation.date}</td>
                         <td>
-                            <button class="action-btn view-btn" data-id="${donation._id}">View</button>
-                            <button class="action-btn delete-btn" data-id="${donation._id}">Delete</button>
+                            <select class="status-select" data-id="${donation.id}">
+                                <option value="Pending" ${donation.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                                <option value="Approved" ${donation.status === 'Approved' ? 'selected' : ''}>Approved</option>
+                                <option value="Completed" ${donation.status === 'Completed' ? 'selected' : ''}>Completed</option>
+                                <option value="Rejected" ${donation.status === 'Rejected' ? 'selected' : ''}>Rejected</option>
+                            </select>
+                        </td>
+                        <td>
+                            <button class="action-btn view-btn" data-id="${donation.id}">View</button>
+                            <button class="action-btn delete-btn" data-id="${donation.id}">Delete</button>
                         </td>
                     `;
                     
                     tableBody.appendChild(row);
                 });
                 
-                // Add event listeners
-                attachDonationEventListeners();
-            }
+                // Add event listeners for status change
+                document.querySelectorAll('.status-select').forEach(select => {
+                    select.addEventListener('change', function() {
+                        const donationId = this.getAttribute('data-id');
+                        const newStatus = this.value;
+                        updateDonationStatus(donationId, newStatus);
+                    });
+                });
+                
+                // Add event listeners for view and delete buttons
+                document.querySelectorAll('#manageDonationsTable .view-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const donationId = this.getAttribute('data-id');
+                        viewDonationDetails(donationId);
+                    });
+                });
+                
+                document.querySelectorAll('#manageDonationsTable .delete-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const donationId = this.getAttribute('data-id');
+                        deleteDonation(donationId);
+                    });
+                });
+                
+            }, 500); // Simulate API delay
         }
         
-        // Helper function to attach event listeners to donation table elements
-        function attachDonationEventListeners() {
-            // Status change listeners
-            document.querySelectorAll('.status-dropdown').forEach(dropdown => {
-                dropdown.addEventListener('change', function() {
-                    const donationId = this.getAttribute('data-id');
-                    const newStatus = this.value;
-                    updateDonationStatus(donationId, newStatus);
-                });
-            });
-            
-            // View button listeners
-            document.querySelectorAll('#manageDonationsTable .view-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const donationId = this.getAttribute('data-id');
-                    viewDonationDetails(donationId);
-                });
-            });
-            
-            // Delete button listeners
-            document.querySelectorAll('#manageDonationsTable .delete-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const donationId = this.getAttribute('data-id');
-                    deleteDonation(donationId);
-                });
-            });
-        }
-        
-        // Function to update donation status in the database
         function updateDonationStatus(donationId, newStatus) {
-            // Send update to API
-            fetch(`/api/admin/donations/${donationId}/status`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ status: newStatus })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to update donation status');
+            // In a real app, this would be an API call to update the status
+            
+            // For demo, we'll just show a notification
+            showNotification(`Donation ${donationId} status updated to ${newStatus}`, 'success');
+            
+            // This would update the database in a real application
+            console.log(`API call would be made to update donation ${donationId} status to ${newStatus}`);
+        }
+        
+        function viewDonationDetails(donationId) {
+            // In a real app, this would fetch the donation details
+            // For demo, we'll use mock data
+            const donation = {
+                id: donationId,
+                name: 'John Smith',
+                email: 'john@example.com',
+                phone: '123-456-7890',
+                category: 'Food',
+                description: 'Donation of 10kg rice and 5kg wheat',
+                date: '2023-05-15',
+                status: 'Pending'
+            };
+            
+            // Create modal HTML
+            const modalHTML = `
+                <div id="donation-details-modal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2>Donation Details</h2>
+                            <span class="close">&times;</span>
+                        </div>
+                        <div class="modal-body">
+                            <div class="donation-details">
+                                <p><strong>ID:</strong> ${donation.id}</p>
+                                <p><strong>Name:</strong> ${donation.name}</p>
+                                <p><strong>Email:</strong> ${donation.email}</p>
+                                <p><strong>Phone:</strong> ${donation.phone}</p>
+                                <p><strong>Category:</strong> ${donation.category}</p>
+                                <p><strong>Description:</strong> ${donation.description}</p>
+                                <p><strong>Date:</strong> ${donation.date}</p>
+                                <p><strong>Status:</strong> ${donation.status}</p>
+                            </div>
+                            
+                            <div class="status-update">
+                                <h3>Update Status</h3>
+                                <select id="status-update-select">
+                                    <option value="Pending" ${donation.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                                    <option value="Approved" ${donation.status === 'Approved' ? 'selected' : ''}>Approved</option>
+                                    <option value="Completed" ${donation.status === 'Completed' ? 'selected' : ''}>Completed</option>
+                                    <option value="Rejected" ${donation.status === 'Rejected' ? 'selected' : ''}>Rejected</option>
+                                </select>
+                                <button id="update-status-btn" class="btn primary-btn">Update Status</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Add modal to body
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            
+            // Get modal elements
+            const modal = document.getElementById('donation-details-modal');
+            const closeBtn = modal.querySelector('.close');
+            const updateBtn = document.getElementById('update-status-btn');
+            
+            // Show modal
+            modal.style.display = 'block';
+            
+            // Close modal when clicking X
+            closeBtn.addEventListener('click', function() {
+                modal.remove();
+            });
+            
+            // Close modal when clicking outside
+            window.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    modal.remove();
                 }
-                return response.json();
-            })
-            .then(data => {
-                console.log(`Updated donation ${donationId} status to ${newStatus}`);
-                showNotification(`Status updated to ${newStatus}`, 'success');
-            })
-            .catch(error => {
-                console.error('Error updating donation status:', error);
-                showNotification('Failed to update status. Please try again.', 'error');
+            });
+            
+            // Update status when clicking update button
+            updateBtn.addEventListener('click', function() {
+                const newStatus = document.getElementById('status-update-select').value;
+                updateDonationStatus(donationId, newStatus);
+                
+                // Close modal
+                modal.remove();
+                
+                // Refresh donations data to reflect change
+                loadDonationsData();
             });
         }
         
-        // Function to handle donation deletion
         function deleteDonation(donationId) {
-            if (confirm(`Are you sure you want to delete donation #${donationId.substring(0, 8)}?`)) {
-                // Send delete request to API
-                fetch(`/api/admin/donations/${donationId}`, {
-                    method: 'DELETE'
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Failed to delete donation');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    // Remove the row from the table
-                    const row = document.querySelector(`#manageDonationsTable tr td button.delete-btn[data-id="${donationId}"]`).closest('tr');
-                    if (row) {
-                        row.remove();
-                        showNotification(`Donation #${donationId.substring(0, 8)} has been deleted`, 'success');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error deleting donation:', error);
-                    showNotification('Failed to delete donation. Please try again.', 'error');
-                });
+            if (confirm(`Are you sure you want to delete donation ${donationId}? This action cannot be undone.`)) {
+                // In a real app, this would be an API call to delete the donation
+                
+                // For demo, we'll just show a notification
+                showNotification(`Donation ${donationId} deleted successfully`, 'success');
+                
+                // Refresh donations data to reflect deletion
+                loadDonationsData();
+                
+                // This would delete from the database in a real application
+                console.log(`API call would be made to delete donation ${donationId}`);
             }
+        }
+        
+        function searchDonations(term) {
+            // In a real app, this would search the database
+            // For demo, we'll just show a notification
+            showNotification(`Searching for donations matching "${term}"`, 'info');
+            
+            // This would call the API with search parameters in a real application
+            console.log(`API call would be made to search for donations matching "${term}"`);
+        }
+        
+        function filterDonationsByStatus(status) {
+            // In a real app, this would filter donations by status
+            // For demo, we'll just show a notification
+            if (status) {
+                showNotification(`Filtering donations by status: ${status}`, 'info');
+            } else {
+                loadDonationsData(); // Reload all data if filter is cleared
+            }
+            
+            // This would call the API with filter parameters in a real application
+            console.log(`API call would be made to filter donations by status: ${status}`);
+        }
+        
+        function filterDonationsByCategory(category) {
+            // In a real app, this would filter donations by category
+            // For demo, we'll just show a notification
+            if (category) {
+                showNotification(`Filtering donations by category: ${category}`, 'info');
+            } else {
+                loadDonationsData(); // Reload all data if filter is cleared
+            }
+            
+            // This would call the API with filter parameters in a real application
+            console.log(`API call would be made to filter donations by category: ${category}`);
+        }
+        
+        function applyDonationBulkAction() {
+            const action = document.getElementById('donationBulkAction').value;
+            const selectedCheckboxes = document.querySelectorAll('#manageDonationsTable .donation-checkbox:checked');
+            
+            if (!action) {
+                showNotification('Please select an action', 'warning');
+                return;
+            }
+            
+            if (selectedCheckboxes.length === 0) {
+                showNotification('Please select at least one donation', 'warning');
+                return;
+            }
+            
+            const selectedIds = Array.from(selectedCheckboxes).map(checkbox => checkbox.getAttribute('data-id'));
+            
+            // In a real app, this would apply the action to the selected donations
+            switch (action) {
+                case 'approve':
+                    if (confirm(`Are you sure you want to approve ${selectedIds.length} donations?`)) {
+                        showNotification(`${selectedIds.length} donations approved`, 'success');
+                        loadDonationsData(); // Refresh data
+                    }
+                    break;
+                case 'complete':
+                    if (confirm(`Are you sure you want to mark ${selectedIds.length} donations as completed?`)) {
+                        showNotification(`${selectedIds.length} donations marked as completed`, 'success');
+                        loadDonationsData(); // Refresh data
+                    }
+                    break;
+                case 'reject':
+                    if (confirm(`Are you sure you want to reject ${selectedIds.length} donations?`)) {
+                        showNotification(`${selectedIds.length} donations rejected`, 'success');
+                        loadDonationsData(); // Refresh data
+                    }
+                    break;
+                case 'delete':
+                    if (confirm(`Are you sure you want to delete ${selectedIds.length} donations? This action cannot be undone.`)) {
+                        showNotification(`${selectedIds.length} donations deleted`, 'success');
+                        loadDonationsData(); // Refresh data
+                    }
+                    break;
+            }
+            
+            // This would call the API with bulk action parameters in a real application
+            console.log(`API call would be made to ${action} donations: ${selectedIds.join(', ')}`);
         }
     </script>
 </body>

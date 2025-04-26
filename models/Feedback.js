@@ -23,6 +23,25 @@ const FeedbackSchema = new mongoose.Schema({
         min: 0,
         max: 5
     },
+    status: {
+        type: String,
+        enum: ['new', 'in_progress', 'resolved'],
+        default: 'new'
+    },
+    responses: [{
+        message: {
+            type: String,
+            required: true
+        },
+        adminName: {
+            type: String,
+            required: true
+        },
+        timestamp: {
+            type: Date,
+            default: Date.now
+        }
+    }],
     createdAt: {
         type: Date,
         default: Date.now

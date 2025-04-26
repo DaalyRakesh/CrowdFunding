@@ -165,13 +165,13 @@ const registerUser = async (req, res) => {
         
         // Save the user to the database
         try {
-            const savedUser = await newUser.save();
-            console.log('User saved successfully:', savedUser._id);
-            
+        const savedUser = await newUser.save();
+        console.log('User saved successfully:', savedUser._id);
+
             // Return success response with user ID and admin status
             return res.status(201).json({ 
-                message: 'User registered successfully', 
-                userId: savedUser._id,
+            message: 'User registered successfully', 
+            userId: savedUser._id,
                 isAdmin: false
             });
         } catch (saveError) {
@@ -627,7 +627,7 @@ module.exports = {
     loginUser, 
     registerUser, 
     checkAdmin, 
-    getAllUsers,
+    getAllUsers, 
     getAllAdmins,
     toggleAdmin, 
     deleteUser,
