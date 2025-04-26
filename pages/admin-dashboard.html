@@ -1172,19 +1172,17 @@
                         <table class="admin-table" id="recentDonationsTable">
                             <thead>
                                 <tr>
-                                    <th>Donation ID</th>
+                                    <th>ID</th>
                                     <th>Name</th>
                                     <th>Email</th>
-                                    <th>Category</th>
+                                    <th>Type</th>
                                     <th>Date</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <!-- Donation data will be loaded here -->
                                 <tr>
-                                    <td colspan="7" style="text-align: center;">Loading donations...</td>
+                                    <td colspan="5" style="text-align: center;">Loading donations...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -1194,20 +1192,18 @@
                         <table class="admin-table" id="recentPaymentsTable">
                             <thead>
                                 <tr>
-                                    <th>Payment ID</th>
+                                    <th>ID</th>
                                     <th>Donation ID</th>
                                     <th>Amount</th>
                                     <th>Method</th>
                                     <th>Email</th>
                                     <th>Date</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <!-- Payment data will be loaded here -->
                                 <tr>
-                                    <td colspan="8" style="text-align: center;">Loading payments...</td>
+                                    <td colspan="6" style="text-align: center;">Loading payments...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -1223,14 +1219,12 @@
                                     <th>Type</th>
                                     <th>Amount</th>
                                     <th>Date</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <!-- Requirements data will be loaded here -->
                                 <tr>
-                                    <td colspan="8" style="text-align: center;">Loading requirements...</td>
+                                    <td colspan="6" style="text-align: center;">Loading requirements...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -1244,14 +1238,12 @@
                                     <th>User</th>
                                     <th>Type</th>
                                     <th>Date</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <!-- Feedback data will be loaded here -->
                                 <tr>
-                                    <td colspan="6" style="text-align: center;">Loading feedback...</td>
+                                    <td colspan="4" style="text-align: center;">Loading feedback...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -1365,37 +1357,17 @@
                                 <td style="color: #000 !important;">${donation.donorEmail || donation.email || 'N/A'}</td>
                                 <td style="color: #000 !important;">${donation.donationType || donation.category || 'N/A'}</td>
                                 <td>${formattedDate}</td>
-                                <td><span class="status-badge ${donation.status.toLowerCase()}">${donation.status}</span></td>
-                                <td>
-                                    <button class="action-btn view-btn" data-id="${donation._id}">View</button>
-                                    <button class="action-btn edit-btn" data-id="${donation._id}">Edit</button>
-                                </td>
                             `;
                             
                             tableBody.appendChild(row);
                         });
-                        
-                        // Add event listeners for view and edit buttons
-                        document.querySelectorAll('#recentDonationsTable .view-btn').forEach(btn => {
-                            btn.addEventListener('click', function() {
-                                const donationId = this.getAttribute('data-id');
-                                viewDonationDetails(donationId);
-                            });
-                        });
-                        
-                        document.querySelectorAll('#recentDonationsTable .edit-btn').forEach(btn => {
-                            btn.addEventListener('click', function() {
-                                const donationId = this.getAttribute('data-id');
-                                editDonation(donationId);
-                            });
-                        });
                     } else {
-                        tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No donations found</td></tr>';
+                        tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No donations found</td></tr>';
                     }
                 })
                 .catch(error => {
                     console.error('Error fetching recent donations:', error);
-                    tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Error loading donations</td></tr>';
+                    tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Error loading donations</td></tr>';
                 });
             
             // Set up real-time updates for donations
@@ -1435,29 +1407,9 @@
                                     <td style="color: #000 !important;">${donation.donorEmail || donation.email || 'N/A'}</td>
                                     <td style="color: #000 !important;">${donation.donationType || donation.category || 'N/A'}</td>
                                     <td>${formattedDate}</td>
-                                    <td><span class="status-badge ${donation.status.toLowerCase()}">${donation.status}</span></td>
-                                    <td>
-                                        <button class="action-btn view-btn" data-id="${donation._id}">View</button>
-                                        <button class="action-btn edit-btn" data-id="${donation._id}">Edit</button>
-                                    </td>
                                 `;
                                 
                                 tableBody.appendChild(row);
-                            });
-                            
-                            // Add event listeners for view and edit buttons
-                            document.querySelectorAll('#recentDonationsTable .view-btn').forEach(btn => {
-                                btn.addEventListener('click', function() {
-                                    const donationId = this.getAttribute('data-id');
-                                    viewDonationDetails(donationId);
-                                });
-                            });
-                            
-                            document.querySelectorAll('#recentDonationsTable .edit-btn').forEach(btn => {
-                                btn.addEventListener('click', function() {
-                                    const donationId = this.getAttribute('data-id');
-                                    editDonation(donationId);
-                                });
                             });
                             
                             // Show notification
@@ -1502,29 +1454,17 @@
                                 <td style="color: #000 !important;">${payment.paymentMethod}</td>
                                 <td style="color: #000 !important;">${payment.userEmail || 'Anonymous'}</td>
                                 <td style="color: #000 !important;">${formattedDate}</td>
-                                <td><span class="status-badge ${payment.status.toLowerCase()}">${payment.status}</span></td>
-                                <td>
-                                    <button class="action-btn view-btn" data-id="${payment._id}">View</button>
-                                </td>
                             `;
                             
                             tableBody.appendChild(row);
                         });
-                        
-                        // Add event listeners for view buttons
-                        document.querySelectorAll('#recentPaymentsTable .view-btn').forEach(btn => {
-                            btn.addEventListener('click', function() {
-                                const paymentId = this.getAttribute('data-id');
-                                viewPaymentDetails(paymentId);
-                            });
-                        });
                     } else {
-                        tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No payments found</td></tr>';
+                        tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No payments found</td></tr>';
                     }
                 })
                 .catch(error => {
                     console.error('Error fetching recent payments:', error);
-                    tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Error loading payments</td></tr>';
+                    tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Error loading payments</td></tr>';
                 });
             
             // Set up real-time updates for payments
@@ -1568,21 +1508,9 @@
                                     <td style="color: #000 !important;">${payment.paymentMethod}</td>
                                     <td style="color: #000 !important;">${payment.userEmail || 'Anonymous'}</td>
                                     <td style="color: #000 !important;">${formattedDate}</td>
-                                    <td><span class="status-badge ${payment.status.toLowerCase()}">${payment.status}</span></td>
-                                    <td>
-                                        <button class="action-btn view-btn" data-id="${payment._id}">View</button>
-                                    </td>
                                 `;
                                 
                                 tableBody.appendChild(row);
-                            });
-                            
-                            // Add event listeners for view buttons
-                            document.querySelectorAll('#recentPaymentsTable .view-btn').forEach(btn => {
-                                btn.addEventListener('click', function() {
-                                    const paymentId = this.getAttribute('data-id');
-                                    viewPaymentDetails(paymentId);
-                                });
                             });
                             
                             // Show notification
@@ -1627,37 +1555,17 @@
                                 <td>${requirement.requirementType}</td>
                                 <td>${amount}</td>
                                 <td>${formattedDate}</td>
-                                <td><span class="status-badge ${requirement.status.toLowerCase()}">${requirement.status}</span></td>
-                                <td>
-                                    <button class="action-btn view-btn" data-id="${requirement._id}">View</button>
-                                    <button class="action-btn edit-btn" data-id="${requirement._id}">Edit</button>
-                                </td>
                             `;
                             
                             tableBody.appendChild(row);
                         });
-                        
-                        // Add event listeners for view and edit buttons
-                        document.querySelectorAll('#recentRequirementsTable .view-btn').forEach(btn => {
-                            btn.addEventListener('click', function() {
-                                const requirementId = this.getAttribute('data-id');
-                                viewRequirementDetails(requirementId);
-                            });
-                        });
-                        
-                        document.querySelectorAll('#recentRequirementsTable .edit-btn').forEach(btn => {
-                            btn.addEventListener('click', function() {
-                                const requirementId = this.getAttribute('data-id');
-                                editRequirement(requirementId);
-                            });
-                        });
                     } else {
-                        tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No requirements found</td></tr>';
+                        tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No requirements found</td></tr>';
                     }
                 })
                 .catch(error => {
                     console.error('Error fetching recent requirements:', error);
-                    tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Error loading requirements</td></tr>';
+                    tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Error loading requirements</td></tr>';
                 });
             
             // Set up real-time updates for requirements
@@ -1701,29 +1609,9 @@
                                     <td>${requirement.requirementType}</td>
                                     <td>${amount}</td>
                                     <td>${formattedDate}</td>
-                                    <td><span class="status-badge ${requirement.status.toLowerCase()}">${requirement.status}</span></td>
-                                    <td>
-                                        <button class="action-btn view-btn" data-id="${requirement._id}">View</button>
-                                        <button class="action-btn edit-btn" data-id="${requirement._id}">Edit</button>
-                                    </td>
                                 `;
                                 
                                 tableBody.appendChild(row);
-                            });
-                            
-                            // Add event listeners for view and edit buttons
-                            document.querySelectorAll('#recentRequirementsTable .view-btn').forEach(btn => {
-                                btn.addEventListener('click', function() {
-                                    const requirementId = this.getAttribute('data-id');
-                                    viewRequirementDetails(requirementId);
-                                });
-                            });
-                            
-                            document.querySelectorAll('#recentRequirementsTable .edit-btn').forEach(btn => {
-                                btn.addEventListener('click', function() {
-                                    const requirementId = this.getAttribute('data-id');
-                                    editRequirement(requirementId);
-                                });
                             });
                             
                             // Show notification
@@ -1752,7 +1640,7 @@
                 })
                 .then(data => {
                     if (data.length === 0) {
-                        tableBody.innerHTML = '<tr><td colspan="6" class="no-data">No feedback available</td></tr>';
+                        tableBody.innerHTML = '<tr><td colspan="4" class="no-data">No feedback available</td></tr>';
                         return;
                     }
                     
@@ -1765,42 +1653,21 @@
                         
                         // Format the date
                         const date = new Date(feedback.createdAt).toLocaleDateString();
-                        const statusClass = 'status-new'; // Default to new status
                         
                         row.innerHTML = `
                             <td>${feedback._id.substring(0, 8)}</td>
                             <td>${feedback.fullName || 'Anonymous'}</td>
                             <td>General</td>
                             <td>${date}</td>
-                            <td><span class="status-badge ${statusClass}">New</span></td>
-                            <td>
-                                <button class="action-btn view-btn" data-id="${feedback._id}">View</button>
-                                <button class="action-btn respond-btn" data-id="${feedback._id}">Respond</button>
-                            </td>
                         `;
                         
                         tableBody.appendChild(row);
-                    });
-                    
-                    // Add event listeners for buttons
-                    document.querySelectorAll('#recentFeedbackTable .view-btn').forEach(btn => {
-                        btn.addEventListener('click', function() {
-                            const feedbackId = this.getAttribute('data-id');
-                            viewFeedbackDetails(feedbackId);
-                        });
-                    });
-                    
-                    document.querySelectorAll('#recentFeedbackTable .respond-btn').forEach(btn => {
-                        btn.addEventListener('click', function() {
-                            const feedbackId = this.getAttribute('data-id');
-                            respondToFeedback(feedbackId);
-                        });
                     });
                 })
                 .catch(error => {
                     console.error('Error loading recent feedback:', error);
                     tableBody.innerHTML = 
-                        '<tr><td colspan="6" class="error-data">Error loading feedback data. Please try again later.</td></tr>';
+                        '<tr><td colspan="4" class="error-data">Error loading feedback data. Please try again later.</td></tr>';
                 });
         }
         
@@ -3819,13 +3686,11 @@
                                 <th>Email</th>
                                 <th>Category</th>
                                 <th>Date</th>
-                                <th>Status</th>
-                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td colspan="7" style="text-align: center;">Loading donations...</td>
+                                <td colspan="5" style="text-align: center;">Loading donations...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -3854,63 +3719,23 @@
                             const date = new Date(donation.createdAt || donation.timestamp);
                             const formattedDate = date.toLocaleDateString();
                             
-                            // Create status dropdown
-                            const statusDropdown = `
-                                <select class="status-dropdown" data-id="${donation._id || donation.id}">
-                                    <option value="Pending" ${(donation.status === 'Pending') ? 'selected' : ''}>Pending</option>
-                                    <option value="Approved" ${(donation.status === 'Approved') ? 'selected' : ''}>Approved</option>
-                                    <option value="Completed" ${(donation.status === 'Completed') ? 'selected' : ''}>Completed</option>
-                                    <option value="Rejected" ${(donation.status === 'Rejected') ? 'selected' : ''}>Rejected</option>
-                                </select>
-                            `;
-                            
                             row.innerHTML = `
                                 <td>${(donation._id || donation.id).substring(0, 8)}</td>
                                 <td>${donation.donorName || donation.name || 'N/A'}</td>
                                 <td>${donation.donorEmail || donation.email || 'N/A'}</td>
                                 <td>${donation.donationType || donation.category || 'N/A'}</td>
                                 <td>${formattedDate}</td>
-                                <td>${statusDropdown}</td>
-                                <td>
-                                    <button class="action-btn view-btn" data-id="${donation._id || donation.id}">View</button>
-                                    <button class="action-btn delete-btn" data-id="${donation._id || donation.id}">Delete</button>
-                                </td>
                             `;
                             
                             tableBody.appendChild(row);
                         });
-                        
-                        // Add event listeners for status changes
-                        document.querySelectorAll('.status-dropdown').forEach(dropdown => {
-                            dropdown.addEventListener('change', function() {
-                                const donationId = this.getAttribute('data-id');
-                                const newStatus = this.value;
-                                updateDonationStatus(donationId, newStatus);
-                            });
-                        });
-                        
-                        // Add event listeners for view buttons
-                        document.querySelectorAll('#manageDonationsTable .view-btn').forEach(btn => {
-                            btn.addEventListener('click', function() {
-                                const donationId = this.getAttribute('data-id');
-                                viewDonationDetails(donationId);
-                            });
-                        });
-                        
-                        // Add event listeners for delete buttons
-                        document.querySelectorAll('#manageDonationsTable .delete-btn').forEach(btn => {
-                            btn.addEventListener('click', function() {
-                                const donationId = this.getAttribute('data-id');
-                                deleteDonation(donationId);
-                            });
-                        });
                     } else {
-                        tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No donations found</td></tr>';
+                        tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No donations found</td></tr>';
                     }
                 })
                 .catch(error => {
                     console.error('Error loading donations:', error);
-                    tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Error loading donations. Please try again.</td></tr>';
+                    tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Error loading donations. Please try again.</td></tr>';
                     
                     // Fallback to mock data for development/demo purposes
                     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
@@ -3937,34 +3762,16 @@
                     const date = new Date(donation.createdAt);
                     const formattedDate = date.toLocaleDateString();
                     
-                    // Create status dropdown
-                    const statusDropdown = `
-                        <select class="status-dropdown" data-id="${donation._id}">
-                            <option value="Pending" ${donation.status === 'Pending' ? 'selected' : ''}>Pending</option>
-                            <option value="Approved" ${donation.status === 'Approved' ? 'selected' : ''}>Approved</option>
-                            <option value="Completed" ${donation.status === 'Completed' ? 'selected' : ''}>Completed</option>
-                            <option value="Rejected" ${donation.status === 'Rejected' ? 'selected' : ''}>Rejected</option>
-                        </select>
-                    `;
-                    
                     row.innerHTML = `
                         <td>${donation._id.substring(0, 8)}</td>
                         <td>${donation.name}</td>
                         <td>${donation.email}</td>
                         <td>${donation.category}</td>
                         <td>${formattedDate}</td>
-                        <td>${statusDropdown}</td>
-                        <td>
-                            <button class="action-btn view-btn" data-id="${donation._id}">View</button>
-                            <button class="action-btn delete-btn" data-id="${donation._id}">Delete</button>
-                        </td>
                     `;
                     
                     tableBody.appendChild(row);
                 });
-                
-                // Add event listeners
-                attachDonationEventListeners();
             }
         }
         
