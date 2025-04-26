@@ -26,6 +26,91 @@
             padding: 0;
         }
         
+        /* Management Interface Specific Styles */
+        .admin-actions {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .search-box {
+            display: flex;
+            align-items: center;
+        }
+        
+        .search-box input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px 0 0 4px;
+            width: 250px;
+        }
+        
+        .search-box button {
+            padding: 8px 12px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+        }
+        
+        .filter-options {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-options select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
+        }
+        
+        .pagination-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .bulk-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .bulk-actions select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
+        }
+        
+        .info-btn {
+            background-color: var(--info-color);
+            color: white;
+        }
+        
+        .small-btn {
+            padding: 5px 10px;
+            font-size: 0.85rem;
+        }
+        
         /* Admin Header */
         .admin-header {
             background-color: #fff;
@@ -678,20 +763,23 @@
             
             <div class="nav-section">
                 <div class="nav-section-title">Management</div>
-                <a href="#" class="nav-item" data-tab="donations">
-                    <i class="fas fa-gift"></i> Donations
+                <a href="#" class="nav-item" data-tab="donations-manage">
+                    <i class="fas fa-tasks"></i> Manage Donations
                 </a>
-                <a href="#" class="nav-item" data-tab="payments">
-                    <i class="fas fa-credit-card"></i> Payments
+                <a href="#" class="nav-item" data-tab="payments-manage">
+                    <i class="fas fa-money-check-alt"></i> Manage Payments
                 </a>
-                <a href="#" class="nav-item" data-tab="requirements">
-                    <i class="fas fa-hand-holding-heart"></i> Requirements
+                <a href="#" class="nav-item" data-tab="requirements-manage">
+                    <i class="fas fa-clipboard-list"></i> Manage Requirements
                 </a>
-                <a href="#" class="nav-item" data-tab="feedback">
-                    <i class="fas fa-comment-alt"></i> Feedback
+                <a href="#" class="nav-item" data-tab="feedback-manage">
+                    <i class="fas fa-reply-all"></i> Manage Feedback
                 </a>
                 <a href="#" class="nav-item" data-tab="contacts">
                     <i class="fas fa-address-book"></i> Contact Submissions
+                </a>
+                <a href="#" class="nav-item" data-tab="users">
+                    <i class="fas fa-users"></i> User Management
                 </a>
             </div>
         </aside>
@@ -770,8 +858,7 @@
                         <th>ID</th>
                         <th>Name</th>
                         <th>Email</th>
-                        <th>Phone</th>
-                        <th>Address</th>
+                        <th>Website</th>
                         <th>Date</th>
                         <th>Status</th>
                         <th>Actions</th>
@@ -780,7 +867,7 @@
                 <tbody id="recent-contacts">
                     <!-- Contact rows will be inserted here -->
                     <tr>
-                        <td colspan="8" style="text-align: center;">Loading contact submissions...</td>
+                        <td colspan="7" class="loading-data">Loading contact submissions...</td>
                     </tr>
                 </tbody>
             </table>
@@ -911,6 +998,18 @@
                     break;
                 case 'feedback':
                     loadFeedbackContent();
+                    break;
+                case 'donations-manage':
+                    loadDonationsManageContent();
+                    break;
+                case 'payments-manage':
+                    loadPaymentsManageContent();
+                    break;
+                case 'requirements-manage':
+                    loadRequirementsManageContent();
+                    break;
+                case 'feedback-manage':
+                    loadFeedbackManageContent();
                     break;
                 case 'contacts':
                     loadContactContent();
@@ -1183,24 +1282,47 @@
         
         // Fetch data for dashboard
         function fetchDashboardData() {
-            // Fetch all dashboard stats in one API call
-            fetch('/api/admin/dashboard/stats')
+            // Fetch donation count
+            fetch('/api/donations/count')
                 .then(response => response.json())
                 .then(data => {
-                    // Update the dashboard statistics with real data
-                    document.getElementById('totalDonations').textContent = data.donations.count || 0;
-                    document.getElementById('totalPayments').textContent = '₹' + (data.payments.total || 0).toLocaleString('en-IN');
-                    document.getElementById('totalRequirements').textContent = data.requirements.count || 0;
-                    document.getElementById('totalFeedback').textContent = data.feedback.count || 0;
-                    
-                    console.log('Dashboard statistics loaded:', data);
+                    document.getElementById('totalDonations').textContent = data.count || 0;
                 })
                 .catch(error => {
-                    console.error('Error fetching dashboard statistics:', error);
-                    // Set placeholder values in case of error
+                    console.error('Error fetching donation count:', error);
                     document.getElementById('totalDonations').textContent = '0';
+                });
+            
+            // Fetch payment total
+            fetch('/api/payments/total')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('totalPayments').textContent = '₹' + (data.total || 0);
+                })
+                .catch(error => {
+                    console.error('Error fetching payment total:', error);
                     document.getElementById('totalPayments').textContent = '₹0';
+                });
+            
+            // Fetch requirements count
+            fetch('/api/requirements/count')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('totalRequirements').textContent = data.count || 0;
+                })
+                .catch(error => {
+                    console.error('Error fetching requirements count:', error);
                     document.getElementById('totalRequirements').textContent = '0';
+                });
+            
+            // Fetch feedback count
+            fetch('/api/feedback/count')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('totalFeedback').textContent = data.count || 0;
+                })
+                .catch(error => {
+                    console.error('Error fetching feedback count:', error);
                     document.getElementById('totalFeedback').textContent = '0';
                 });
             
@@ -1217,8 +1339,6 @@
             loadRecentFeedback();
         }
         
-        // Helper function to refresh all dashboard statistics
-        function refreshDashboardStats() {
         // Load recent donations
         function loadRecentDonations() {
             const tableBody = document.querySelector('#recentDonationsTable tbody');
@@ -1291,13 +1411,10 @@
                     .then(data => {
                         if (data.length > 0) {
                             // Update dashboard stats
-                            fetch('/api/admin/dashboard/stats')
+                            fetch('/api/donations/count')
                                 .then(response => response.json())
-                                .then(statsData => {
-                                    document.getElementById('totalDonations').textContent = statsData.donations.count || 0;
-                                    document.getElementById('totalPayments').textContent = '₹' + (statsData.payments.total || 0).toLocaleString('en-IN');
-                                    document.getElementById('totalRequirements').textContent = statsData.requirements.count || 0;
-                                    document.getElementById('totalFeedback').textContent = statsData.feedback.count || 0;
+                                .then(countData => {
+                                    document.getElementById('totalDonations').textContent = countData.count || '0';
                                 });
                                 
                             // Update the donations table if new data is available
@@ -3315,8 +3432,7 @@
                                     <th>ID</th>
                                     <th>Name</th>
                                     <th>Email</th>
-                                    <th>Phone</th>
-                                    <th>Address</th>
+                                    <th>Website</th>
                                     <th>Date</th>
                                     <th>Status</th>
                                     <th>Actions</th>
@@ -3324,7 +3440,7 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td colspan="8" style="text-align: center;">Loading contact submissions...</td>
+                                    <td colspan="7" style="text-align: center;">Loading contact submissions...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -3337,15 +3453,14 @@
                                     <th>ID</th>
                                     <th>Name</th>
                                     <th>Email</th>
-                                    <th>Phone</th>
-                                    <th>Address</th>
+                                    <th>Website</th>
                                     <th>Date</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td colspan="7" style="text-align: center;">Loading new contact submissions...</td>
+                                    <td colspan="6" style="text-align: center;">Loading new contact submissions...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -3358,15 +3473,14 @@
                                     <th>ID</th>
                                     <th>Name</th>
                                     <th>Email</th>
-                                    <th>Phone</th>
-                                    <th>Address</th>
+                                    <th>Website</th>
                                     <th>Date</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td colspan="7" style="text-align: center;">Loading responded contact submissions...</td>
+                                    <td colspan="6" style="text-align: center;">Loading responded contact submissions...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -3415,53 +3529,46 @@
             `;
             
             // Add event listeners to tab buttons
-            document.querySelectorAll('.tab-btn').forEach(button => {
-                button.addEventListener('click', function() {
-                    // Remove active class from all buttons and content
-                    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-                    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-                    
-                    // Add active class to current button
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Update active tab button
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
                     this.classList.add('active');
                     
-                    // Show the corresponding content
+                    // Show the corresponding tab content
                     const tabId = this.getAttribute('data-tab');
+                    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
                     document.getElementById(tabId).classList.add('active');
                 });
             });
             
-            // Load contact data
+            // Load contacts data
             loadAllContacts();
         }
         
+        // Load all contacts data
         function loadAllContacts() {
-            const tableBody = document.getElementById('allContactsTable').querySelector('tbody');
+            const tableBody = document.querySelector('#allContactsTable tbody');
             
-            // Show loading message
-            tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Loading contact submissions...</td></tr>';
+            // Show loading state
+            tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Loading contact submissions...</td></tr>';
             
-            // Fetch all contacts
+            // Fetch all contacts from API
             fetch('/api/contact/all')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Failed to fetch contacts');
-                    }
-                    return response.json();
-                })
-                .then(contacts => {
-                    if (contacts && contacts.length > 0) {
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length > 0) {
                         // Clear loading message
                         tableBody.innerHTML = '';
                         
                         // Add each contact to the table
-                        contacts.forEach(contact => {
+                        data.forEach(contact => {
                             const row = document.createElement('tr');
                             
                             // Format the date
                             const date = new Date(contact.createdAt);
-                            const formattedDate = date.toLocaleDateString();
+                            const formattedDate = `${date.toLocaleDateString()}`;
                             
-                            // Determine status class
                             let statusClass = '';
                             switch (contact.status) {
                                 case 'new':
@@ -3481,8 +3588,7 @@
                                 <td>${contact._id.substring(0, 8)}</td>
                                 <td>${contact.name}</td>
                                 <td>${contact.email}</td>
-                                <td>${contact.phone || '-'}</td>
-                                <td>${contact.address ? contact.address.substring(0, 20) + '...' : '-'}</td>
+                                <td>${contact.website || '-'}</td>
                                 <td>${formattedDate}</td>
                                 <td><span class="status-badge ${statusClass}">${contact.status}</span></td>
                                 <td>
@@ -3509,12 +3615,12 @@
                             });
                         });
                     } else {
-                        tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No contact submissions found</td></tr>';
+                        tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No contact submissions found</td></tr>';
                     }
                 })
                 .catch(error => {
                     console.error('Error fetching contacts:', error);
-                    tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Error loading contact submissions</td></tr>';
+                    tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Error loading contact submissions</td></tr>';
                 });
         }
         
@@ -3552,8 +3658,7 @@
                                 <p><strong>ID:</strong> ${contact._id}</p>
                                 <p><strong>Name:</strong> ${contact.name}</p>
                                 <p><strong>Email:</strong> ${contact.email}</p>
-                                <p><strong>Phone:</strong> ${contact.phone || '-'}</p>
-                                <p><strong>Address:</strong> ${contact.address || '-'}</p>
+                                <p><strong>Website:</strong> ${contact.website || 'Not provided'}</p>
                                 <p><strong>Date:</strong> ${date}</p>
                                 <p><strong>Status:</strong> <span class="status status-${contact.status}">${contact.status}</span></p>
                             </div>
@@ -3686,11 +3791,6 @@
                             <p class="message-meta">
                                 <strong>${contact.name}</strong> - ${date}
                             </p>
-                            <p class="message-details">
-                                <strong>Email:</strong> ${contact.email}<br>
-                                <strong>Phone:</strong> ${contact.phone || '-'}<br>
-                                <strong>Address:</strong> ${contact.address || '-'}
-                            </p>
                             <p class="message-content">${contact.message}</p>
                         </div>
                     `;
@@ -3802,6 +3902,253 @@
                     modal.style.display = 'none';
                 }
             };
+        }
+        
+        // Management content loading functions
+        function loadDonationsManageContent() {
+            const contentArea = document.getElementById('adminContent');
+            
+            contentArea.innerHTML = `
+                <h2 class="page-title"><i class="fas fa-tasks"></i> Manage Donations</h2>
+                
+                <div class="table-container">
+                    <table class="admin-table" id="manageDonationsTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Category</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="7" style="text-align: center;">Loading donations...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            // Load donations data from database API
+            const tableBody = document.querySelector('#manageDonationsTable tbody');
+            
+            // Fetch donations from API
+            fetch('/api/admin/donations/all')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch donations data');
+                    }
+                    return response.json();
+                })
+                .then(donations => {
+                    if (donations && donations.length > 0) {
+                        tableBody.innerHTML = '';
+                        
+                        donations.forEach(donation => {
+                            const row = document.createElement('tr');
+                            
+                            // Format date
+                            const date = new Date(donation.createdAt || donation.timestamp);
+                            const formattedDate = date.toLocaleDateString();
+                            
+                            // Create status dropdown
+                            const statusDropdown = `
+                                <select class="status-dropdown" data-id="${donation._id || donation.id}">
+                                    <option value="Pending" ${(donation.status === 'Pending') ? 'selected' : ''}>Pending</option>
+                                    <option value="Approved" ${(donation.status === 'Approved') ? 'selected' : ''}>Approved</option>
+                                    <option value="Completed" ${(donation.status === 'Completed') ? 'selected' : ''}>Completed</option>
+                                    <option value="Rejected" ${(donation.status === 'Rejected') ? 'selected' : ''}>Rejected</option>
+                                </select>
+                            `;
+                            
+                            row.innerHTML = `
+                                <td>${(donation._id || donation.id).substring(0, 8)}</td>
+                                <td>${donation.donorName || donation.name || 'N/A'}</td>
+                                <td>${donation.donorEmail || donation.email || 'N/A'}</td>
+                                <td>${donation.donationType || donation.category || 'N/A'}</td>
+                                <td>${formattedDate}</td>
+                                <td>${statusDropdown}</td>
+                                <td>
+                                    <button class="action-btn view-btn" data-id="${donation._id || donation.id}">View</button>
+                                    <button class="action-btn delete-btn" data-id="${donation._id || donation.id}">Delete</button>
+                                </td>
+                            `;
+                            
+                            tableBody.appendChild(row);
+                        });
+                        
+                        // Add event listeners for status changes
+                        document.querySelectorAll('.status-dropdown').forEach(dropdown => {
+                            dropdown.addEventListener('change', function() {
+                                const donationId = this.getAttribute('data-id');
+                                const newStatus = this.value;
+                                updateDonationStatus(donationId, newStatus);
+                            });
+                        });
+                        
+                        // Add event listeners for view buttons
+                        document.querySelectorAll('#manageDonationsTable .view-btn').forEach(btn => {
+                            btn.addEventListener('click', function() {
+                                const donationId = this.getAttribute('data-id');
+                                viewDonationDetails(donationId);
+                            });
+                        });
+                        
+                        // Add event listeners for delete buttons
+                        document.querySelectorAll('#manageDonationsTable .delete-btn').forEach(btn => {
+                            btn.addEventListener('click', function() {
+                                const donationId = this.getAttribute('data-id');
+                                deleteDonation(donationId);
+                            });
+                        });
+                    } else {
+                        tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No donations found</td></tr>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading donations:', error);
+                    tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Error loading donations. Please try again.</td></tr>';
+                    
+                    // Fallback to mock data for development/demo purposes
+                    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                        setTimeout(() => {
+                            showNotification('Using mock data for development', 'info');
+                            loadMockDonations();
+                        }, 1000);
+                    }
+                });
+        }
+        
+        // Function to load mock donations (for development only)
+        function loadMockDonations() {
+            const tableBody = document.querySelector('#manageDonationsTable tbody');
+            const donations = getMockDonations();
+            
+            if (donations.length > 0) {
+                tableBody.innerHTML = '';
+                
+                donations.forEach(donation => {
+                    const row = document.createElement('tr');
+                    
+                    // Format date
+                    const date = new Date(donation.createdAt);
+                    const formattedDate = date.toLocaleDateString();
+                    
+                    // Create status dropdown
+                    const statusDropdown = `
+                        <select class="status-dropdown" data-id="${donation._id}">
+                            <option value="Pending" ${donation.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                            <option value="Approved" ${donation.status === 'Approved' ? 'selected' : ''}>Approved</option>
+                            <option value="Completed" ${donation.status === 'Completed' ? 'selected' : ''}>Completed</option>
+                            <option value="Rejected" ${donation.status === 'Rejected' ? 'selected' : ''}>Rejected</option>
+                        </select>
+                    `;
+                    
+                    row.innerHTML = `
+                        <td>${donation._id.substring(0, 8)}</td>
+                        <td>${donation.name}</td>
+                        <td>${donation.email}</td>
+                        <td>${donation.category}</td>
+                        <td>${formattedDate}</td>
+                        <td>${statusDropdown}</td>
+                        <td>
+                            <button class="action-btn view-btn" data-id="${donation._id}">View</button>
+                            <button class="action-btn delete-btn" data-id="${donation._id}">Delete</button>
+                        </td>
+                    `;
+                    
+                    tableBody.appendChild(row);
+                });
+                
+                // Add event listeners
+                attachDonationEventListeners();
+            }
+        }
+        
+        // Helper function to attach event listeners to donation table elements
+        function attachDonationEventListeners() {
+            // Status change listeners
+            document.querySelectorAll('.status-dropdown').forEach(dropdown => {
+                dropdown.addEventListener('change', function() {
+                    const donationId = this.getAttribute('data-id');
+                    const newStatus = this.value;
+                    updateDonationStatus(donationId, newStatus);
+                });
+            });
+            
+            // View button listeners
+            document.querySelectorAll('#manageDonationsTable .view-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const donationId = this.getAttribute('data-id');
+                    viewDonationDetails(donationId);
+                });
+            });
+            
+            // Delete button listeners
+            document.querySelectorAll('#manageDonationsTable .delete-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const donationId = this.getAttribute('data-id');
+                    deleteDonation(donationId);
+                });
+            });
+        }
+        
+        // Function to update donation status in the database
+        function updateDonationStatus(donationId, newStatus) {
+            // Send update to API
+            fetch(`/api/admin/donations/${donationId}/status`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ status: newStatus })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to update donation status');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(`Updated donation ${donationId} status to ${newStatus}`);
+                showNotification(`Status updated to ${newStatus}`, 'success');
+            })
+            .catch(error => {
+                console.error('Error updating donation status:', error);
+                showNotification('Failed to update status. Please try again.', 'error');
+            });
+        }
+        
+        // Function to handle donation deletion
+        function deleteDonation(donationId) {
+            if (confirm(`Are you sure you want to delete donation #${donationId.substring(0, 8)}?`)) {
+                // Send delete request to API
+                fetch(`/api/admin/donations/${donationId}`, {
+                    method: 'DELETE'
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to delete donation');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Remove the row from the table
+                    const row = document.querySelector(`#manageDonationsTable tr td button.delete-btn[data-id="${donationId}"]`).closest('tr');
+                    if (row) {
+                        row.remove();
+                        showNotification(`Donation #${donationId.substring(0, 8)} has been deleted`, 'success');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error deleting donation:', error);
+                    showNotification('Failed to delete donation. Please try again.', 'error');
+                });
+            }
         }
     </script>
 </body>
