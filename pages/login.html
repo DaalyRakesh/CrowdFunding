@@ -59,9 +59,42 @@
         .toggle-password:hover {
             color: #333;
         }
+        
+        /* Home button styles */
+        .home-button-container {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
+        
+        .home-button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #4a90e2;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .home-button:hover {
+            background-color: #357abd;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
     </style>
 </head>
 <body>
+    <div class="home-button-container">
+        <a href="../index.html" class="home-button">
+            <i class="fas fa-home"></i>
+            Home
+        </a>
+    </div>
+
     <div class="auth-container">
         <div class="auth-box" id="authBox">
             <div class="auth-header">
