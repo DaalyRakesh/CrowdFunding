@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
+const emailService = require('./emailService');
 require('dotenv').config();
 
 // Configure email transporter
@@ -376,70 +377,23 @@ const forgotPassword = async (req, res) => {
         const resetUrl = `${req.protocol}://${req.get('host')}/pages/reset-password.html?token=${resetToken}`;
         console.log(`Reset URL generated: ${resetUrl}`);
         
-        // Email message content with improved template
-        const mailOptions = {
-            from: `"Feeding Humanity" <${process.env.EMAIL_USER}>`,
-            to: user.email,
-            subject: 'Password Reset - Feeding Humanity',
-            html: `
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
-                    <div style="text-align: center; margin-bottom: 20px;">
-                        <h2 style="color: #4a90e2;">Feeding Humanity</h2>
-                        <h3 style="color: #333;">Password Reset Request</h3>
-                    </div>
-                    <p>Hello,</p>
-                    <p>We received a request to reset your password for your Feeding Humanity account. If you didn't make this request, you can ignore this email.</p>
-                    <p>To reset your password, please click the button below:</p>
-                    <div style="text-align: center; margin: 25px 0;">
-                        <a href="${resetUrl}" style="background-color: #4a90e2; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Reset Password</a>
-                    </div>
-                    <p>Or copy and paste this link into your browser:</p>
-                    <p style="background-color: #f5f5f5; padding: 10px; border-radius: 4px; word-break: break-all;">${resetUrl}</p>
-                    <p><strong>This link will expire in 24 hours.</strong></p>
-                    <p>If you're having trouble, please contact our support team.</p>
-                    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center; color: #777; font-size: 12px;">
-                        <p>Feeding Humanity - Making a difference together</p>
-                        <p>This is an automated message, please do not reply to this email.</p>
-                    </div>
-                </div>
-            `
-        };
+        // Send the email using our email service
+        const emailResult = await emailService.sendPasswordResetEmail(user.email, resetUrl);
         
-        console.log('Attempting to send password reset email...');
-        
-        // Send the email
-        try {
-            const info = await transporter.sendMail(mailOptions);
+        if (emailResult.success) {
             console.log(`Password reset email successfully sent to: ${user.email}`);
-            console.log(`Message ID: ${info.messageId}`);
-            console.log(`Preview URL: ${nodemailer.getTestMessageUrl(info)}`);
+            console.log(`Message ID: ${emailResult.messageId}`);
             
             // Return success message
             return res.status(200).json({ 
                 message: 'If an account exists with that email, a password reset link has been sent.',
-                exists: true,
-                emailSent: true
+                exists: true
             });
-        } catch (emailError) {
-            console.error('Error sending password reset email:', emailError);
-            
-            // Gmail troubleshooting guide
-            console.log('Gmail troubleshooting:');
-            console.log('1. Make sure 2-Step Verification is enabled in your Google Account');
-            console.log('2. Generate an App Password at https://myaccount.google.com/apppasswords');
-            console.log('3. Use the App Password in your .env file as EMAIL_PASS');
-            console.log('4. Make sure the sending email account has "Less secure app access" turned off');
-            
-            // Generate a direct reset link that can be provided to the user
-            const directResetLink = `${req.protocol}://${req.get('host')}/pages/reset-password.html?token=${resetToken}`;
-            
-            // Return response with direct reset link for admins
-            return res.status(200).json({ 
-                message: 'If an account exists with that email, a password reset link has been sent.',
-                exists: true,
-                emailSent: false,
-                adminMessage: 'Email sending failed. Check server logs.',
-                directResetLink: directResetLink // Only visible to admins/developers
+        } else {
+            console.error('Error sending password reset email:', emailResult.error);
+            return res.status(500).json({ 
+                message: 'There was a problem sending the password reset email. Please try again later.',
+                error: 'EMAIL_SENDING_FAILED'
             });
         }
     } catch (error) {
@@ -546,24 +500,12 @@ const resetPassword = async (req, res) => {
         user.resetPasswordExpires = null;
         await user.save();
         
-        // Send confirmation email
-        const mailOptions = {
-            from: process.env.EMAIL_USER,
-            to: user.email,
-            subject: 'Your password has been changed - Feeding Humanity',
-            html: `
-                <h1>Password Change Confirmation</h1>
-                <p>This is a confirmation that the password for your account ${user.email} has just been changed.</p>
-                <p>If you did not make this change, please contact support immediately.</p>
-            `
-        };
+        // Send confirmation email using the email service
+        const emailResult = await emailService.sendPasswordChangeConfirmationEmail(user.email);
         
-        try {
-            await transporter.sendMail(mailOptions);
-            console.log(`Password change confirmation email sent to: ${user.email}`);
-        } catch (emailError) {
-            console.error('Error sending password change confirmation email:', emailError);
-            // Don't expose the error to the user
+        if (!emailResult.success) {
+            console.error('Error sending password change confirmation email:', emailResult.error);
+            // Continue anyway since the password was reset successfully
         }
         
         // Return success message

@@ -16,6 +16,7 @@ const paymentRoutes = require('./routes/paymentRoutes');
 const requirementRoutes = require('./routes/requirementRoutes');
 const feedbackRoutes = require('./routes/feedbackRoutes');
 const contactRoutes = require('./routes/contactRoutes');
+const passwordResetRoutes = require('./routes/passwordReset');
 const Admin = require('./models/Admin');
 const Donation = require('./models/Donation');
 const Payment = require('./models/Payment');
