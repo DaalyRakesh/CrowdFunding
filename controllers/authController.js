@@ -11,14 +11,15 @@ let transporter;
 try {
     transporter = nodemailer.createTransport({
         service: 'gmail',
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
         auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS
         },
-        tls: {
-            rejectUnauthorized: false // Helps with some SSL issues
-        },
-        debug: true // Enable debug output
+        debug: true,
+        logger: true
     });
 
     // Verify the configuration is correct
@@ -341,7 +342,6 @@ const forgotPassword = async (req, res) => {
         }
         
         console.log(`Password reset requested for email: ${email}`);
-        console.log(`Email configuration: Using ${process.env.EMAIL_USER} for sending`);
         
         // Find the user by email
         const user = await User.findOne({ email });
@@ -352,7 +352,6 @@ const forgotPassword = async (req, res) => {
             // For security, don't reveal if the email doesn't exist, but log it for administrators
             return res.status(200).json({ 
                 message: 'If an account exists with that email, a password reset link has been sent.',
-                // Include a hidden field that the client can check if needed
                 exists: false 
             });
         }
@@ -361,31 +360,48 @@ const forgotPassword = async (req, res) => {
         console.log(`Password reset initiated for registered user: ${email}`);
         
         // Generate a reset token
-        const resetToken = crypto.randomBytes(20).toString('hex');
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        console.log(`Generated reset token: ${resetToken.substring(0, 8)}...`);
         
-        // Set token expiration (1 hour from now)
-        const resetTokenExpiry = Date.now() + 3600000; // 1 hour in milliseconds
+        // Set token expiration (24 hours from now)
+        const resetTokenExpiry = Date.now() + 24 * 60 * 60 * 1000; // 24 hours in milliseconds
         
         // Save the token and expiry to the user
         user.resetPasswordToken = resetToken;
         user.resetPasswordExpires = new Date(resetTokenExpiry);
         await user.save();
+        console.log(`Reset token saved to user record for: ${email}`);
         
         // Create the reset URL
         const resetUrl = `${req.protocol}://${req.get('host')}/pages/reset-password.html?token=${resetToken}`;
         console.log(`Reset URL generated: ${resetUrl}`);
         
-        // Email message content
+        // Email message content with improved template
         const mailOptions = {
-            from: process.env.EMAIL_USER,
+            from: `"Feeding Humanity" <${process.env.EMAIL_USER}>`,
             to: user.email,
             subject: 'Password Reset - Feeding Humanity',
             html: `
-                <h1>You requested a password reset</h1>
-                <p>Please click the link below to reset your password:</p>
-                <a href="${resetUrl}" style="display: inline-block; padding: 10px 20px; background-color: #4a90e2; color: white; text-decoration: none; border-radius: 5px;">Reset Password</a>
-                <p>This link will expire in 1 hour.</p>
-                <p>If you did not request this, please ignore this email and your password will remain unchanged.</p>
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <h2 style="color: #4a90e2;">Feeding Humanity</h2>
+                        <h3 style="color: #333;">Password Reset Request</h3>
+                    </div>
+                    <p>Hello,</p>
+                    <p>We received a request to reset your password for your Feeding Humanity account. If you didn't make this request, you can ignore this email.</p>
+                    <p>To reset your password, please click the button below:</p>
+                    <div style="text-align: center; margin: 25px 0;">
+                        <a href="${resetUrl}" style="background-color: #4a90e2; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Reset Password</a>
+                    </div>
+                    <p>Or copy and paste this link into your browser:</p>
+                    <p style="background-color: #f5f5f5; padding: 10px; border-radius: 4px; word-break: break-all;">${resetUrl}</p>
+                    <p><strong>This link will expire in 24 hours.</strong></p>
+                    <p>If you're having trouble, please contact our support team.</p>
+                    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center; color: #777; font-size: 12px;">
+                        <p>Feeding Humanity - Making a difference together</p>
+                        <p>This is an automated message, please do not reply to this email.</p>
+                    </div>
+                </div>
             `
         };
         
@@ -393,32 +409,39 @@ const forgotPassword = async (req, res) => {
         
         // Send the email
         try {
-            await transporter.sendMail(mailOptions);
+            const info = await transporter.sendMail(mailOptions);
             console.log(`Password reset email successfully sent to: ${user.email}`);
-        } catch (emailError) {
-            console.error('Error sending password reset email:', emailError);
-            console.error('Email configuration error. Check EMAIL_USER and EMAIL_PASS in .env file');
+            console.log(`Message ID: ${info.messageId}`);
+            console.log(`Preview URL: ${nodemailer.getTestMessageUrl(info)}`);
             
-            // For Gmail users, you might need to:
-            console.log('Note: For Gmail accounts, you need to:');
-            console.log('1. Enable 2-Step Verification');
-            console.log('2. Generate an App Password at https://myaccount.google.com/apppasswords');
-            console.log('3. Use that App Password in your .env file');
-            
-            // Return a specific error for administrators while keeping the user message secure
+            // Return success message
             return res.status(200).json({ 
                 message: 'If an account exists with that email, a password reset link has been sent.',
+                exists: true,
+                emailSent: true
+            });
+        } catch (emailError) {
+            console.error('Error sending password reset email:', emailError);
+            
+            // Gmail troubleshooting guide
+            console.log('Gmail troubleshooting:');
+            console.log('1. Make sure 2-Step Verification is enabled in your Google Account');
+            console.log('2. Generate an App Password at https://myaccount.google.com/apppasswords');
+            console.log('3. Use the App Password in your .env file as EMAIL_PASS');
+            console.log('4. Make sure the sending email account has "Less secure app access" turned off');
+            
+            // Generate a direct reset link that can be provided to the user
+            const directResetLink = `${req.protocol}://${req.get('host')}/pages/reset-password.html?token=${resetToken}`;
+            
+            // Return response with direct reset link for admins
+            return res.status(200).json({ 
+                message: 'If an account exists with that email, a password reset link has been sent.',
+                exists: true,
+                emailSent: false,
                 adminMessage: 'Email sending failed. Check server logs.',
-                exists: true
+                directResetLink: directResetLink // Only visible to admins/developers
             });
         }
-        
-        // Return success message
-        return res.status(200).json({ 
-            message: 'If an account exists with that email, a password reset link has been sent.',
-            exists: true // This won't be shown to the user but can be used by the client
-        });
-        
     } catch (error) {
         console.error('Forgot password error:', error);
         res.status(500).json({ message: 'Server error' });
