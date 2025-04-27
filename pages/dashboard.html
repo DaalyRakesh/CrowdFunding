@@ -80,6 +80,11 @@
                         </div>
 
                         <div class="form-group">
+                            <label for="paymentId">Payment ID</label>
+                            <input type="text" id="paymentId" name="paymentId" readonly>
+                        </div>
+
+                        <div class="form-group">
                             <label for="paymentDonationId">Donation ID</label>
                             <select id="paymentDonationId" name="donationId" required>
                                 <option value="" disabled selected>Select donation</option>
@@ -570,9 +575,10 @@
                 }
             });
             
-            // If switching to payments section, reload current donation data
+            // If switching to payments section, load payment data
             if (sectionId === 'payments') {
                 loadUserDonations();
+                loadPaymentFormData();
             }
         }
 
@@ -627,17 +633,99 @@
 
         // When category changes in payment form, show/hide card fields
         document.getElementById('paymentCategory').addEventListener('change', function() {
-            const cardFields = document.querySelectorAll('#payments .card-fields');
+            const cardFields = document.querySelectorAll('#payment .card-fields');
             const showFields = this.value === 'Card';
             
             cardFields.forEach(field => {
                 field.style.display = showFields ? 'block' : 'none';
-                const inputs = field.querySelectorAll('input');
-                inputs.forEach(input => {
+                const input = field.querySelector('input');
+                if (input) {
                     input.required = showFields;
-                });
+                }
             });
         });
+
+        // Function to generate a payment ID with PA prefix
+        function generatePaymentId() {
+            const randomNum = Math.floor(10000 + Math.random() * 90000); // 5-digit random number
+            return `PA-${randomNum}`;
+        }
+
+        // Handle donation form reset
+        document.getElementById('donationForm').addEventListener('reset', function() {
+            // Generate a new donation ID after form reset
+            generateDonationId();
+        });
+
+        // Load payment form data when payment tab is selected
+        function loadPaymentFormData() {
+            // Get user email from localStorage
+            const userEmail = localStorage.getItem('userEmail');
+            
+            if (userEmail) {
+                // Set email field value
+                document.getElementById('paymentEmailId').value = userEmail;
+                
+                // Generate a payment ID
+                const paymentId = generatePaymentId();
+                document.getElementById('paymentId').value = paymentId;
+                
+                // Get current donation data from localStorage
+                const currentDonationId = localStorage.getItem('currentDonationId');
+                let donationDescription = localStorage.getItem('currentDonationDescription');
+                
+                // If donation description is empty, try to get from localStorage (helps after form reset)
+                if (!donationDescription || donationDescription === 'New Donation') {
+                    const storedDonationId = localStorage.getItem('currentDonationId');
+                    const storedDescription = localStorage.getItem('currentDonationDescription');
+                    
+                    if (storedDonationId && storedDescription) {
+                        currentDonationId = storedDonationId;
+                        donationDescription = storedDescription;
+                    }
+                }
+                
+                // Populate the donation select dropdown
+                const donationSelect = document.getElementById('paymentDonationId');
+                if (donationSelect) {
+                    donationSelect.innerHTML = '<option value="" disabled>Select donation</option>';
+                    
+                    // Add the current donation ID as the first option and select it
+                    if (currentDonationId) {
+                        const option = document.createElement('option');
+                        option.value = currentDonationId;
+                        option.textContent = `${currentDonationId} - ${donationDescription}`;
+                        option.dataset.description = donationDescription;
+                        option.selected = true;
+                        donationSelect.appendChild(option);
+                        
+                        // Also set the donation time
+                        const now = new Date();
+                        document.getElementById('paymentDonationTime').value = now.toLocaleString();
+                    }
+                    
+                    // Then fetch previous donations from API
+                    fetch(`/api/donations/user/${userEmail}`)
+                        .then(response => response.json())
+                        .then(donations => {
+                            // Add previous donations to the dropdown
+                            donations.forEach(donation => {
+                                // Skip if this is the current donation ID (already added)
+                                if (donation.donationId === currentDonationId) return;
+                                
+                                const option = document.createElement('option');
+                                option.value = donation.donationId;
+                                option.textContent = `${donation.donationId} - ${donation.donationDescription}`;
+                                option.dataset.description = donation.donationDescription;
+                                donationSelect.appendChild(option);
+                            });
+                        })
+                        .catch(error => {
+                            console.error('Error loading user donations:', error);
+                        });
+                }
+            }
+        }
 
         // Get user's donations for payment form
         function loadUserDonations() {
@@ -764,6 +852,13 @@
                 
                 // Reset donation form with a fresh ID for future donations
                 resetDonationForm();
+                
+                // Generate a new payment ID
+                document.getElementById('paymentId').value = generatePaymentId();
+                
+                // Set current date and time
+                const now = new Date();
+                document.getElementById('paymentDonationTime').value = now.toLocaleString();
             })
             .catch(error => {
                 console.error('Payment error:', error);
