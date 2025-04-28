@@ -3,37 +3,11 @@ const Admin = require('../models/Admin');
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const crypto = require('crypto');
-const nodemailer = require('nodemailer');
 const emailService = require('./emailService');
 require('dotenv').config();
 
-// Configure email transporter
-let transporter;
-try {
-    transporter = nodemailer.createTransport({
-        service: 'gmail',
-        host: 'smtp.gmail.com',
-        port: 465,
-        secure: true,
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS
-        },
-        debug: true,
-        logger: true
-    });
-
-    // Verify the configuration is correct
-    transporter.verify(function(error, success) {
-        if (error) {
-            console.error('Email transporter verification failed:', error);
-        } else {
-            console.log('Email server is ready to send messages');
-        }
-    });
-} catch (error) {
-    console.error('Failed to create email transporter:', error);
-}
+// Using real email service
+console.log('Using real email service for sending emails');
 
 const loginUser = async (req, res) => {
     const { email, password, isAdminLogin } = req.body;
@@ -339,7 +313,10 @@ const forgotPassword = async (req, res) => {
         const { email } = req.body;
         
         if (!email) {
-            return res.status(400).json({ message: 'Email is required' });
+            return res.status(400).json({ 
+                message: 'Email is required',
+                error: 'MISSING_EMAIL'
+            });
         }
         
         console.log(`Password reset requested for email: ${email}`);
@@ -350,7 +327,7 @@ const forgotPassword = async (req, res) => {
         // Check if user is registered
         if (!user) {
             console.log(`Password reset attempted for non-existent email: ${email}`);
-            // For security, don't reveal if the email doesn't exist, but log it for administrators
+            // For security, don't reveal if the email doesn't exist
             return res.status(200).json({ 
                 message: 'If an account exists with that email, a password reset link has been sent.',
                 exists: false 
@@ -377,28 +354,42 @@ const forgotPassword = async (req, res) => {
         const resetUrl = `${req.protocol}://${req.get('host')}/pages/reset-password.html?token=${resetToken}`;
         console.log(`Reset URL generated: ${resetUrl}`);
         
-        // Send the email using our email service
-        const emailResult = await emailService.sendPasswordResetEmail(user.email, resetUrl);
-        
-        if (emailResult.success) {
-            console.log(`Password reset email successfully sent to: ${user.email}`);
-            console.log(`Message ID: ${emailResult.messageId}`);
+        try {
+            // Send the email using our email service
+            const emailResult = await emailService.sendPasswordResetEmail(user.email, resetUrl);
             
-            // Return success message
-            return res.status(200).json({ 
-                message: 'If an account exists with that email, a password reset link has been sent.',
-                exists: true
-            });
-        } else {
-            console.error('Error sending password reset email:', emailResult.error);
+            if (emailResult.success) {
+                console.log(`Password reset email sent successfully`);
+                console.log(`Message ID: ${emailResult.messageId}`);
+                
+                // Return success message
+                return res.status(200).json({ 
+                    message: 'If an account exists with that email, a password reset link has been sent.',
+                    exists: true
+                });
+            } else {
+                console.error('Error sending password reset email:', emailResult.error);
+                return res.status(500).json({ 
+                    message: 'There was a problem sending the password reset email. Please try again later.',
+                    error: 'EMAIL_SENDING_FAILED',
+                    details: emailResult.error
+                });
+            }
+        } catch (emailError) {
+            console.error('Email service error:', emailError);
             return res.status(500).json({ 
-                message: 'There was a problem sending the password reset email. Please try again later.',
-                error: 'EMAIL_SENDING_FAILED'
+                message: 'The email service is currently unavailable. Please try again later or contact support.',
+                error: 'EMAIL_SERVICE_UNAVAILABLE',
+                details: emailError.message
             });
         }
     } catch (error) {
         console.error('Forgot password error:', error);
-        res.status(500).json({ message: 'Server error' });
+        return res.status(500).json({ 
+            message: 'An unexpected error occurred. Please try again later.',
+            error: 'SERVER_ERROR',
+            details: error.message
+        });
     }
 };
 
@@ -500,7 +491,7 @@ const resetPassword = async (req, res) => {
         user.resetPasswordExpires = null;
         await user.save();
         
-        // Send confirmation email using the email service
+        // Send confirmation email using the mock email service
         const emailResult = await emailService.sendPasswordChangeConfirmationEmail(user.email);
         
         if (!emailResult.success) {
@@ -519,72 +510,40 @@ const resetPassword = async (req, res) => {
     }
 };
 
-// Get direct password reset link (for testing only - DO NOT use in production)
+// Get direct reset link (for development/testing)
 const getDirectResetLink = async (req, res) => {
     try {
         const { email } = req.query;
         
-        console.log(`Direct reset link requested for email: ${email}`);
-        
         if (!email) {
-            console.log('Direct reset link request missing email parameter');
-            return res.status(400).json({ 
-                message: 'Email is required',
-                error: 'MISSING_EMAIL'
-            });
+            return res.status(400).json({ message: 'Email is required' });
         }
         
-        // Find the user by email
+        // Check if user exists
         const user = await User.findOne({ email });
-        
         if (!user) {
-            console.log(`Direct reset link requested for non-existent email: ${email}`);
-            return res.status(404).json({ 
-                message: 'No user found with this email address. Please make sure you have registered.',
-                error: 'USER_NOT_FOUND'
-            });
+            return res.status(404).json({ message: 'User not found' });
         }
         
-        console.log(`User found for direct reset link: ${user._id}`);
+        // Generate a token
+        const token = crypto.randomBytes(32).toString('hex');
         
-        // Generate a reset token
-        const resetToken = crypto.randomBytes(20).toString('hex');
-        console.log(`Reset token generated: ${resetToken.substring(0, 8)}...`);
+        // Store the token with the user's email and expiration
+        resetTokens[token] = {
+            email,
+            expires: Date.now() + 24 * 60 * 60 * 1000 // 24 hours
+        };
         
-        // Set token expiration (1 hour from now)
-        const resetTokenExpiry = Date.now() + 3600000; // 1 hour in milliseconds
+        // Generate the reset link
+        const resetLink = `${req.protocol}://${req.get('host')}/pages/reset-password.html?token=${token}`;
         
-        // Save the token and expiry to the user
-        user.resetPasswordToken = resetToken;
-        user.resetPasswordExpires = new Date(resetTokenExpiry);
-        
-        try {
-            await user.save();
-            console.log(`Reset token saved to user document: ${user._id}`);
-        } catch (saveError) {
-            console.error('Error saving reset token to user:', saveError);
-            return res.status(500).json({ 
-                message: 'Error saving reset token',
-                error: 'TOKEN_SAVE_ERROR'
-            });
-        }
-        
-        // Create the reset URL
-        const resetUrl = `${req.protocol}://${req.get('host')}/pages/reset-password.html?token=${resetToken}`;
-        console.log(`Reset URL generated: ${resetUrl}`);
-        
-        // Return the reset link directly
-        return res.status(200).json({ 
-            message: 'Password reset link generated successfully',
-            resetLink: resetUrl
+        res.status(200).json({ 
+            message: 'Reset link generated',
+            resetLink: resetLink
         });
-        
     } catch (error) {
-        console.error('Get direct reset link error:', error);
-        res.status(500).json({ 
-            message: 'Server error while generating reset link',
-            error: error.message || 'UNKNOWN_ERROR'
-        });
+        console.error('Error generating direct reset link:', error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 

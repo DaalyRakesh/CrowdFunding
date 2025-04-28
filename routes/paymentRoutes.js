@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Payment = require('../models/Payment');
+const emailService = require('../controllers/emailService');
 
 // Submit a new payment
 router.post('/submit', async (req, res) => {
@@ -38,6 +39,21 @@ router.post('/submit', async (req, res) => {
         
         // Save to database
         await payment.save();
+        
+        // Send payment details email
+        try {
+            await emailService.sendPaymentDetailsEmail({
+                emailId,
+                donationId,
+                donationTime,
+                amount,
+                category
+            });
+            console.log('Payment details email sent successfully');
+        } catch (emailError) {
+            console.error('Error sending payment details email:', emailError);
+            // Continue even if email fails
+        }
         
         res.status(201).json({ message: 'Payment submitted successfully', paymentId: payment._id });
     } catch (error) {

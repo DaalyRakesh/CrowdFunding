@@ -5,11 +5,11 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
 const dns = require('dns');
+const mongoose = require('./js/db');
 
 // Fix DNS resolution issues - this helps with MongoDB Atlas SRV connection
 dns.setDefaultResultOrder('ipv4first');
 
-const connectDB = require('./js/db');
 const authRoutes = require('./routes/authRoutes');
 const donationRoutes = require('./routes/donationRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
@@ -27,11 +27,11 @@ const User = require('./models/User');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Connect to MongoDB
-connectDB().then(async () => {
-    // Initialize the default admin account after successful DB connection
+// Initialize the default admin account after successful DB connection
+mongoose.connection.once('open', async () => {
     try {
         await Admin.createDefaultAdmin();
+        console.log('Default admin account initialized');
     } catch (error) {
         console.error('Failed to create default admin:', error);
     }
@@ -52,6 +52,7 @@ app.use('/api/requirements', requirementRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/admin/feedback', feedbackRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/password', passwordResetRoutes);
 
 // Admin dashboard statistics endpoint
 app.get('/api/admin/dashboard/stats', async (req, res) => {
@@ -123,6 +124,27 @@ app.get('/', (req, res) => {
 // Serve HTML files directly
 app.get('/pages/:page', (req, res) => {
     res.sendFile(path.join(__dirname, 'pages', req.params.page));
+});
+
+// Add graceful error handling for email service failures
+app.use((err, req, res, next) => {
+    console.error('Global error handler:', err);
+    
+    // Check if it's an email service error
+    if (err.message && err.message.includes('email')) {
+        return res.status(500).json({
+            error: 'Server error',
+            message: 'The email service is currently unavailable. Please try again later or contact support.'
+        });
+    }
+    
+    // Default error handler
+    res.status(500).json({
+        error: 'Server error',
+        message: process.env.NODE_ENV === 'production' 
+            ? 'An unexpected error occurred' 
+            : err.message
+    });
 });
 
 app.listen(PORT, () => {

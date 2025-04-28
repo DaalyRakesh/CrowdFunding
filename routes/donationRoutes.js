@@ -98,4 +98,22 @@ router.get('/recent', async (req, res) => {
     }
 });
 
+// Delete a donation (admin only)
+router.delete('/admin/donations/:id', async (req, res) => {
+    try {
+        const donation = await Donation.findById(req.params.id);
+        
+        if (!donation) {
+            return res.status(404).json({ message: 'Donation not found' });
+        }
+        
+        await Donation.findByIdAndDelete(req.params.id);
+        
+        res.status(200).json({ message: 'Donation deleted successfully' });
+    } catch (error) {
+        console.error('Delete donation error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 module.exports = router; 

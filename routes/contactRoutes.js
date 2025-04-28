@@ -4,6 +4,10 @@ const nodemailer = require('nodemailer');
 const fs = require('fs');
 const path = require('path');
 const Contact = require('../models/Contact');
+
+// Use real email service
+const emailService = require('../controllers/emailService');
+
 require('dotenv').config();
 
 // Setting up email transporter
@@ -147,27 +151,14 @@ router.post('/respond', async (req, res) => {
             });
         }
         
-        // Try to send email if transporter is configured
-        if (transporter && process.env.EMAIL_USER && process.env.EMAIL_USER !== 'your_email@gmail.com') {
-            // Compose email
-            const mailOptions = {
-                from: process.env.EMAIL_USER,
-                to: email,
-                subject: 'Response to Your Contact Submission - Feeding Humanity',
-                html: `
-                    <h3>Response to Your Contact Submission</h3>
-                    <p>Thank you for reaching out to Feeding Humanity. Here is our response to your inquiry:</p>
-                    <p style="padding: 15px; background-color: #f8f9fa; border-left: 4px solid #4a90e2;">${message}</p>
-                    <p>If you have any further questions, please don't hesitate to contact us again.</p>
-                    <br>
-                    <p>Best regards,</p>
-                    <p><strong>Feeding Humanity Team</strong></p>
-                `
-            };
-            
-            // Send email
-            await transporter.sendMail(mailOptions);
-            console.log('Response email sent successfully to:', email);
+        // Use the email service to send the response
+        const result = await emailService.sendContactResponse(email, message);
+        
+        if (!result.success) {
+            throw new Error(result.error || 'Failed to send email');
+        }
+        
+        console.log(`Response email sent to ${email}. Message ID: ${result.messageId}`);
             
             // Try to update the contact in the database
             try {
@@ -181,14 +172,11 @@ router.post('/respond', async (req, res) => {
                 success: true, 
                 message: 'Response sent successfully'
             });
-        } else {
-            throw new Error('Email configuration not complete');
-        }
     } catch (error) {
         console.error('Error sending response email:', error);
         res.status(500).json({ 
             success: false, 
-            message: 'Failed to send response email' 
+            message: 'Failed to send response email: ' + error.message
         });
     }
 });
