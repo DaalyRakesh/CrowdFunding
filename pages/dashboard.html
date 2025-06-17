@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Feeding Humanity</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard">
+        <header class="header">
+            <div class="logo">
+                <h1>Feeding <span>Humanity</span></h1>
+            </div>
+            <nav class="nav-menu">
+                <a href="#" onclick="showSection('donate')" class="active">DONATE</a>
+                <a href="#" onclick="showSection('payments')">PAYMENTS</a>
+                <a href="#" onclick="showSection('requirement')">REQUIREMENT</a>
+                <a href="#" onclick="showSection('feedback')">FEEDBACK</a>
+                
+                <a href="login.html" class="signout">SIGNOUT</a>
+            </nav>
+        </header>
+
+        <main class="main-content">
+            <!-- Donation Section -->
+            <div id="donate" class="content-section">
+                <div class="requirement-form">
+                    <h2>Donation</h2>
+                    <form id="donationForm">
+                        <div class="form-group">
+                            <label for="donationId">Donation ID</label>
+                            <input type="text" id="donationId" name="donationId" readonly>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="donationDescription">Donation Description</label>
+                            <input type="text" id="donationDescription" name="donationDescription" required placeholder="Enter donation description">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="category">Category</label>
+                            <select id="category" name="category" required>
+                                <option value="" disabled selected>Select category</option>
+                                <option value="Food">Food</option>
+                                <option value="Clothes">Clothes</option>
+                                <option value="Education">Education</option>
+                                <option value="Other">Other Resources</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="name">Name</label>
+                            <input type="text" id="name" name="name" required placeholder="Enter your name">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="emailId">Email ID</label>
+                            <input type="email" id="emailId" name="emailId" required placeholder="Enter your email">
+                        </div>
+
+                        <div class="form-buttons">
+                            <button type="submit" class="btn-submit">Submit</button>
+                            <button type="reset" class="btn-reset">Reset</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Payments Section -->
+            <div id="payments" class="content-section" style="display: none;">
+                <div class="payment-form">
+                    <h2>Payments</h2>
+                    <form id="paymentForm">
+                        <div class="form-group">
+                            <label for="paymentEmailId">Email ID</label>
+                            <input type="email" id="paymentEmailId" name="emailId" required readonly>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="paymentId">Payment ID</label>
+                            <input type="text" id="paymentId" name="paymentId" readonly>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="paymentDonationId">Donation ID</label>
+                            <select id="paymentDonationId" name="donationId" required>
+                                <option value="" disabled selected>Select donation</option>
+                                <!-- Options will be populated dynamically -->
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="paymentDonationTime">Donation Time and Date</label>
+                            <input type="text" id="paymentDonationTime" name="donationTime" readonly>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="amount">Amount</label>
+                            <input type="number" id="amount" name="amount" min="0" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="paymentCategory">Category</label>
+                            <select id="paymentCategory" name="category" required>
+                                <option value="" disabled selected>Select payment method</option>
+                                <option value="Cash">Cash</option>
+                                <option value="Card">Card</option>
+                                <option value="UPI">UPI</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group card-fields" style="display: none;">
+                            <label for="cardNo">Card No</label>
+                            <input type="text" id="cardNo" name="cardNo" pattern="[0-9]{16}" maxlength="16" placeholder="Enter 16-digit card number">
+                        </div>
+
+                        <div class="form-group card-fields" style="display: none;">
+                            <label for="expiryDate">Date of Expiry</label>
+                            <input type="text" id="expiryDate" name="expiryDate" placeholder="mm/dd/yyyy">
+                        </div>
+
+                        <div class="form-group card-fields" style="display: none;">
+                            <label for="cvvNo">CVV No</label>
+                            <input type="password" id="cvvNo" name="cvvNo" pattern="[0-9]{3}" maxlength="3">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="registeredEmail">Registered Email Id</label>
+                            <input type="email" id="registeredEmail" name="registeredEmail" required readonly>
+                        </div>
+
+                        <div class="form-buttons">
+                            <button type="submit" class="btn-submit">Submit</button>
+                            <button type="reset" class="btn-reset">Reset</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Requirements Section -->
+            <div id="requirement" class="content-section" style="display: none;">
+                <div class="requirement-form">
+                    <h2>Requirements</h2>
+                    <form id="requirementForm">
+                        <div class="form-group">
+                            <label for="orgName">Organisation Name</label>
+                            <input type="text" id="orgName" name="orgName" required placeholder="Enter organisation name">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="address">Address</label>
+                            <textarea id="address" name="address" required placeholder="Enter complete address" rows="3"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="mobileNo">Mobile Number</label>
+                            <input type="tel" id="mobileNo" name="mobileNo" required pattern="[0-9]{10}" placeholder="Enter 10-digit mobile number">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reqEmailId">Email ID</label>
+                            <input type="email" id="reqEmailId" name="emailId" required placeholder="Enter email address">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="contactPerson">Contact Person</label>
+                            <input type="text" id="contactPerson" name="contactPerson" required placeholder="Enter contact person name">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="requirementType">Requirement Type</label>
+                            <select id="requirementType" name="requirementType" required>
+                                <option value="" disabled selected>Select requirement type</option>
+                                <option value="Food">Food</option>
+                                <option value="Clothes">Clothes</option>
+                                <option value="Education">Education</option>
+                                <option value="Medical">Medical</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reqDonationId">Requirement ID</label>
+                            <input type="text" id="reqDonationId" name="donationId" readonly>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reqDonationTime">Requirement Time and Date</label>
+                            <input type="text" id="reqDonationTime" name="donationTime" readonly>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reqAmount">Amount</label>
+                            <input type="number" id="reqAmount" name="amount" value="0" min="0" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reqCategory">Payment Category</label>
+                            <select id="reqCategory" name="category" required>
+                                <option value="" disabled selected>Select payment method</option>
+                                <option value="Cash">Cash</option>
+                                <option value="Card">Card</option>
+                                <option value="UPI">UPI</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group card-fields" style="display: none;">
+                            <label for="reqCardNo">Card No</label>
+                            <input type="text" id="reqCardNo" name="cardNo" pattern="[0-9]{16}" maxlength="16" placeholder="Enter 16-digit card number">
+                        </div>
+
+                        <div class="form-group card-fields" style="display: none;">
+                            <label for="reqExpiryDate">Date of Expiry</label>
+                            <input type="text" id="reqExpiryDate" name="expiryDate" placeholder="mm/dd/yyyy">
+                        </div>
+
+                        <div class="form-group card-fields" style="display: none;">
+                            <label for="reqCvvNo">CVV No</label>
+                            <input type="password" id="reqCvvNo" name="cvvNo" pattern="[0-9]{3}" maxlength="3" placeholder="Enter CVV">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reqRegisteredEmail">Registered Email Id</label>
+                            <input type="email" id="reqRegisteredEmail" name="registeredEmail" required placeholder="Enter registered email">
+                        </div>
+
+                        <div class="form-buttons">
+                            <button type="submit" class="btn-submit">Submit</button>
+                            <button type="reset" class="btn-reset">Reset</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Feedback Section -->
+            <div id="feedback" class="content-section" style="display: none;">
+                <div class="requirement-form">
+                    <h2>Feedback</h2>
+                    <form id="feedbackForm">
+                        <div class="form-group">
+                            <label for="fullName">Full Name</label>
+                            <input type="text" id="fullName" name="fullName" required placeholder="Enter your full name">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="feedbackText">Feedback</label>
+                            <textarea id="feedbackText" name="feedbackText" required rows="4" placeholder="Enter your feedback"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phoneNo">Phone No</label>
+                            <input type="tel" id="phoneNo" name="phoneNo" required pattern="[0-9]{10}" placeholder="Enter your phone number">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="feedbackEmail">E-Mail</label>
+                            <input type="email" id="feedbackEmail" name="email" required placeholder="Enter your email">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Rate This</label>
+                            <div class="rating">
+                                <i class="far fa-star" data-rating="1"></i>
+                                <i class="far fa-star" data-rating="2"></i>
+                                <i class="far fa-star" data-rating="3"></i>
+                                <i class="far fa-star" data-rating="4"></i>
+                                <i class="far fa-star" data-rating="5"></i>
+                                <input type="hidden" id="ratingValue" name="rating" value="0">
+                            </div>
+                        </div>
+
+                        <div class="form-buttons">
+                            <button type="submit" class="btn-submit">Submit</button>
+                            <button type="reset" class="btn-reset">Reset</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Admin Section -->
+            <div id="admin" class="content-section" style="display: none;">
+                <div class="admin-panel">
+                    <h2>Admin Dashboard</h2>
+                    
+                    <div class="admin-tabs">
+                        <button class="tab-btn active" onclick="showAdminTab('users')">Users</button>
+                        <button class="tab-btn" onclick="showAdminTab('admin-donations')">Donations</button>
+                        <button class="tab-btn" onclick="showAdminTab('admin-payments')">Payments</button>
+                        <button class="tab-btn" onclick="showAdminTab('admin-requirements')">Requirements</button>
+                        <button class="tab-btn" onclick="showAdminTab('admin-feedback')">Feedback</button>
+                    </div>
+                    
+                    <div id="users" class="admin-tab-content">
+                        <h3>User Accounts</h3>
+                        <div class="admin-table-container">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Created At</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="users-table-body">
+                                    <!-- User data will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div id="admin-donations" class="admin-tab-content" style="display: none;">
+                        <h3>Donations</h3>
+                        <div class="admin-table-container">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Donation ID</th>
+                                        <th>Description</th>
+                                        <th>Category</th>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="donations-table-body">
+                                    <!-- Donation data will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div id="admin-payments" class="admin-tab-content" style="display: none;">
+                        <h3>Payments</h3>
+                        <div class="admin-table-container">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Donation ID</th>
+                                        <th>Amount</th>
+                                        <th>Category</th>
+                                        <th>Email</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="payments-table-body">
+                                    <!-- Payment data will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div id="admin-requirements" class="admin-tab-content" style="display: none;">
+                        <h3>Requirements</h3>
+                        <div class="admin-table-container">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Requirement ID</th>
+                                        <th>Organization</th>
+                                        <th>Type</th>
+                                        <th>Amount</th>
+                                        <th>Email</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="requirements-table-body">
+                                    <!-- Requirement data will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div id="admin-feedback" class="admin-tab-content" style="display: none;">
+                        <h3>Feedback</h3>
+                        <div class="admin-table-container">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Phone</th>
+                                        <th>Feedback</th>
+                                        <th>Rating</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="feedback-table-body">
+                                    <!-- Feedback data will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <style>
+        /* Admin Panel Styling */
+        .admin-panel {
+            background: #2a2a2a;
+            border-radius: 10px;
+            padding: 2rem;
+            margin-top: 2rem;
+            color: #fff;
+        }
+        
+        .admin-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 1rem;
+            overflow-x: auto;
+        }
+        
+        .tab-btn {
+            padding: 0.5rem 1rem;
+            background: #333;
+            border: none;
+            border-radius: 4px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .tab-btn:hover {
+            background: #444;
+        }
+        
+        .tab-btn.active {
+            background: #ffd700;
+            color: #333;
+        }
+        
+        .admin-tab-content {
+            display: none;
+        }
+        
+        .admin-tab-content.active {
+            display: block;
+        }
+        
+        .admin-table-container {
+            overflow-x: auto;
+        }
+        
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        .admin-table th, .admin-table td {
+            padding: 0.8rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .admin-table th {
+            background: #333;
+            color: #ffd700;
+            font-weight: bold;
+        }
+        
+        .admin-table tr:nth-child(odd) {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .admin-table tr:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .action-btn {
+            padding: 0.3rem 0.6rem;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-right: 0.5rem;
+            font-size: 0.8rem;
+        }
+        
+        .action-btn {
+            background: #ffd700;
+            color: #333;
+        }
+        
+        .action-btn.delete {
+            background: #ff6b6b;
+            color: #fff;
+        }
+        
+        .action-btn:hover {
+            opacity: 0.9;
+        }
+        
+        .search-bar {
+            margin-bottom: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .search-bar input {
+            flex: 1;
+            padding: 0.6rem;
+            border: 1px solid #444;
+            border-radius: 4px;
+            background: #333;
+            color: #fff;
+        }
+        
+        .search-bar button {
+            padding: 0.6rem 1rem;
+            background: #ffd700;
+            color: #333;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .search-bar button:hover {
+            background: #e6c200;
+        }
+        
+        /* Empty state message */
+        .empty-message {
+            text-align: center;
+            padding: 2rem;
+            color: #aaa;
+        }
+    </style>
+
+    <script>
+        // Generate Donation ID with format D-randomnumber
+        function generateDonationId() {
+            const prefix = 'D-';
+            const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+            return `${prefix}${random}`;
+        }
+
+        // Generate Requirement ID with format P-randomnumber
+        function generateRequirementId() {
+            const prefix = 'P-';
+            const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+            return `${prefix}${random}`;
+        }
+
+        // Show selected section and hide others
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            // Show selected section
+            document.getElementById(sectionId).style.display = 'block';
+            
+            // Update active nav link
+            document.querySelectorAll('.nav-menu a').forEach(link => {
+                link.classList.remove('active');
+                // Safely check if onclick attribute exists before using includes
+                const onclickAttr = link.getAttribute('onclick');
+                if (onclickAttr && onclickAttr.includes(sectionId)) {
+                    link.classList.add('active');
+                }
+            });
+            
+            // If switching to payments section, load payment data
+            if (sectionId === 'payments') {
+                loadUserDonations();
+                loadPaymentFormData();
+            }
+        }
+
+        // Handle form submission
+        document.getElementById('donationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form data
+            const formData = new FormData(this);
+            const donationData = Object.fromEntries(formData.entries());
+            
+            // Save donation ID and description to localStorage for payments form
+            localStorage.setItem('currentDonationId', donationData.donationId);
+            localStorage.setItem('currentDonationDescription', donationData.donationDescription);
+            
+            // Send to server
+            fetch('/api/donations/submit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(donationData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Donation submitted:', data);
+                
+                // Show success message
+                alert('Donation submitted successfully! Proceeding to payment...');
+                
+                // Switch to payments section
+                showSection('payments');
+                
+                // This will happen after loadUserDonations is called in showSection
+            })
+            .catch(error => {
+                console.error('Donation error:', error);
+                alert('An error occurred. Please try again.');
+            });
+        });
+
+        // Reset donation form with a fresh ID
+        function resetDonationForm() {
+            const form = document.getElementById('donationForm');
+            if (form) {
+                form.reset();
+                // Generate new donation ID
+                const donationId = generateDonationId();
+                document.getElementById('donationId').value = donationId;
+            }
+        }
+
+        // When category changes in payment form, show/hide card fields
+        document.getElementById('paymentCategory').addEventListener('change', function() {
+            const cardFields = document.querySelectorAll('#payment .card-fields');
+            const showFields = this.value === 'Card';
+            
+            cardFields.forEach(field => {
+                field.style.display = showFields ? 'block' : 'none';
+                const input = field.querySelector('input');
+                if (input) {
+                    input.required = showFields;
+                }
+                });
+            });
+
+        // Function to generate a payment ID with PA prefix
+        function generatePaymentId() {
+            const randomNum = Math.floor(10000 + Math.random() * 90000); // 5-digit random number
+            return `PA-${randomNum}`;
+        }
+
+        // Handle donation form reset
+        document.getElementById('donationForm').addEventListener('reset', function() {
+            // Generate a new donation ID after form reset
+            generateDonationId();
+        });
+
+        // Load payment form data when payment tab is selected
+        function loadPaymentFormData() {
+            // Get user email from localStorage
+            const userEmail = localStorage.getItem('userEmail');
+            
+            if (userEmail) {
+                // Set email field value
+                document.getElementById('paymentEmailId').value = userEmail;
+                
+                // Generate a payment ID
+                const paymentId = generatePaymentId();
+                document.getElementById('paymentId').value = paymentId;
+                
+                // Get current donation data from localStorage
+                const currentDonationId = localStorage.getItem('currentDonationId');
+                let donationDescription = localStorage.getItem('currentDonationDescription');
+                
+                // If donation description is empty, try to get from localStorage (helps after form reset)
+                if (!donationDescription || donationDescription === 'New Donation') {
+                    const storedDonationId = localStorage.getItem('currentDonationId');
+                    const storedDescription = localStorage.getItem('currentDonationDescription');
+                    
+                    if (storedDonationId && storedDescription) {
+                        currentDonationId = storedDonationId;
+                        donationDescription = storedDescription;
+                    }
+                }
+                
+                // Populate the donation select dropdown
+                const donationSelect = document.getElementById('paymentDonationId');
+                if (donationSelect) {
+                    donationSelect.innerHTML = '<option value="" disabled>Select donation</option>';
+                    
+                    // Add the current donation ID as the first option and select it
+                    if (currentDonationId) {
+                        const option = document.createElement('option');
+                        option.value = currentDonationId;
+                        option.textContent = `${currentDonationId} - ${donationDescription}`;
+                        option.dataset.description = donationDescription;
+                        option.selected = true;
+                        donationSelect.appendChild(option);
+                        
+                        // Also set the donation time
+                        const now = new Date();
+                        document.getElementById('paymentDonationTime').value = now.toLocaleString();
+                    }
+                    
+                    // Then fetch previous donations from API
+                    fetch(`/api/donations/user/${userEmail}`)
+                        .then(response => response.json())
+                        .then(donations => {
+                            // Add previous donations to the dropdown
+                            donations.forEach(donation => {
+                                // Skip if this is the current donation ID (already added)
+                                if (donation.donationId === currentDonationId) return;
+                                
+                                const option = document.createElement('option');
+                                option.value = donation.donationId;
+                                option.textContent = `${donation.donationId} - ${donation.donationDescription}`;
+                                option.dataset.description = donation.donationDescription;
+                                donationSelect.appendChild(option);
+                            });
+                        })
+                        .catch(error => {
+                            console.error('Error loading user donations:', error);
+                        });
+                }
+            }
+        }
+
+        // Get user's donations for payment form
+        function loadUserDonations() {
+            const userEmail = localStorage.getItem('userEmail');
+            
+            if (userEmail) {
+                // First add the current donation ID that was generated in the donate form
+                let currentDonationId = document.getElementById('donationId').value;
+                let donationDescription = document.getElementById('donationDescription').value || 'New Donation';
+                
+                // If donation description is empty, try to get from localStorage (helps after form reset)
+                if (!donationDescription || donationDescription === 'New Donation') {
+                    const storedDonationId = localStorage.getItem('currentDonationId');
+                    const storedDescription = localStorage.getItem('currentDonationDescription');
+                    
+                    if (storedDonationId && storedDescription) {
+                        currentDonationId = storedDonationId;
+                        donationDescription = storedDescription;
+                    }
+                }
+                
+                // Populate the donation select dropdown
+                const donationSelect = document.getElementById('paymentDonationId');
+                if (donationSelect) {
+                    donationSelect.innerHTML = '<option value="" disabled>Select donation</option>';
+                    
+                    // Add the current donation ID as the first option and select it
+                    if (currentDonationId) {
+                        const option = document.createElement('option');
+                        option.value = currentDonationId;
+                        option.textContent = `${currentDonationId} - ${donationDescription}`;
+                        option.dataset.description = donationDescription;
+                        option.selected = true;
+                        donationSelect.appendChild(option);
+                        
+                        // Also set the donation time
+                        const now = new Date();
+                        document.getElementById('paymentDonationTime').value = now.toLocaleString();
+                    }
+                    
+                    // Then fetch previous donations from API
+                    fetch(`/api/donations/user/${userEmail}`)
+                        .then(response => response.json())
+                        .then(donations => {
+                            // Add previous donations to the dropdown
+                            donations.forEach(donation => {
+                                // Skip if this is the current donation ID (already added)
+                                if (donation.donationId === currentDonationId) return;
+                                
+                                const option = document.createElement('option');
+                                option.value = donation.donationId;
+                                option.textContent = `${donation.donationId} - ${donation.donationDescription}`;
+                                option.dataset.description = donation.donationDescription;
+                                donationSelect.appendChild(option);
+                            });
+                        })
+                        .catch(error => {
+                            console.error('Error loading user donations:', error);
+                        });
+                }
+            }
+        }
+
+        // When donation is selected in payment form, update fields
+        document.getElementById('paymentDonationId').addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            
+            if (selectedOption && selectedOption.value) {
+                // Set current date and time
+                const now = new Date();
+                document.getElementById('paymentDonationTime').value = now.toLocaleString();
+            }
+        });
+
+        // Handle payment form submission
+        document.getElementById('paymentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form data
+            const formData = new FormData(this);
+            const paymentData = Object.fromEntries(formData.entries());
+            
+            // Prepare card details if using card payment
+            if (paymentData.category === 'Card') {
+                paymentData.cardDetails = {
+                    cardNo: paymentData.cardNo,
+                    expiryDate: paymentData.expiryDate,
+                    cvvNo: paymentData.cvvNo
+                };
+                
+                // Remove individual card fields to avoid duplication
+                delete paymentData.cardNo;
+                delete paymentData.expiryDate;
+                delete paymentData.cvvNo;
+            }
+            
+            // Send to server
+            fetch('/api/payments/submit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(paymentData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Payment submitted:', data);
+                
+                // Show success message
+                alert('Payment submitted successfully!');
+                
+                // Reset form
+                this.reset();
+                
+                // Reset category dropdown and trigger change event
+                const paymentCategory = document.getElementById('paymentCategory');
+                if (paymentCategory) {
+                    paymentCategory.dispatchEvent(new Event('change'));
+                }
+                
+                // Clear the stored donation data since payment is complete
+                localStorage.removeItem('currentDonationId');
+                localStorage.removeItem('currentDonationDescription');
+                
+                // Reset donation form with a fresh ID for future donations
+                resetDonationForm();
+                
+                // Generate a new payment ID
+                document.getElementById('paymentId').value = generatePaymentId();
+                
+                // Set current date and time
+                const now = new Date();
+                document.getElementById('paymentDonationTime').value = now.toLocaleString();
+            })
+            .catch(error => {
+                console.error('Payment error:', error);
+                alert('An error occurred. Please try again.');
+            });
+        });
+
+        // Handle requirement form submission
+        document.getElementById('requirementForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form data
+            const formData = new FormData(this);
+            const requirementData = Object.fromEntries(formData.entries());
+            
+            // Prepare card details if using card payment
+            if (requirementData.category === 'Card') {
+                requirementData.cardDetails = {
+                    cardNo: requirementData.cardNo,
+                    expiryDate: requirementData.expiryDate,
+                    cvvNo: requirementData.cvvNo
+                };
+                
+                // Remove individual card fields to avoid duplication
+                delete requirementData.cardNo;
+                delete requirementData.expiryDate;
+                delete requirementData.cvvNo;
+            }
+            
+            // Send to server
+            fetch('/api/requirements/submit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requirementData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Requirement submitted:', data);
+                
+                // Show success message
+                alert('Requirement submitted successfully!');
+                
+                // Reset form but keep readonly fields
+                const donationId = document.getElementById('reqDonationId').value;
+                const donationTime = document.getElementById('reqDonationTime').value;
+                
+                this.reset();
+                
+                document.getElementById('reqDonationId').value = donationId;
+                document.getElementById('reqDonationTime').value = donationTime;
+                
+                // Reset category dropdown and trigger change event
+                document.getElementById('reqCategory').dispatchEvent(new Event('change'));
+            })
+            .catch(error => {
+                console.error('Requirement error:', error);
+                alert('An error occurred. Please try again.');
+            });
+        });
+
+        // Show/hide card fields for requirement form
+        document.getElementById('reqCategory').addEventListener('change', function() {
+            const cardFields = document.querySelectorAll('#requirement .card-fields');
+            const showFields = this.value === 'Card';
+            
+            cardFields.forEach(field => {
+                field.style.display = showFields ? 'block' : 'none';
+                const input = field.querySelector('input');
+                if (input) {
+                    input.required = showFields;
+                }
+            });
+        });
+
+        // Handle feedback form submission
+        document.getElementById('feedbackForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form data
+            const formData = new FormData(this);
+            const feedbackData = Object.fromEntries(formData.entries());
+            
+            // Send to server
+            fetch('/api/feedback/submit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(feedbackData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Feedback submitted:', data);
+                
+                // Show success message
+                alert('Feedback submitted successfully!');
+                
+                // Reset form and stars
+                this.reset();
+                document.querySelectorAll('.rating i').forEach(star => {
+                    star.className = 'far fa-star';
+                });
+                document.getElementById('ratingValue').value = '0';
+            })
+            .catch(error => {
+                console.error('Feedback error:', error);
+                alert('An error occurred. Please try again.');
+            });
+        });
+
+        // Handle star rating
+        document.querySelector('.rating').addEventListener('click', function(e) {
+            if (e.target.tagName === 'I') {
+                const rating = e.target.dataset.rating;
+                const stars = document.querySelectorAll('.rating i');
+                
+                // Update hidden input value
+                document.getElementById('ratingValue').value = rating;
+                
+                // Update star display
+                stars.forEach(star => {
+                    const starRating = star.dataset.rating;
+                    star.className = starRating <= rating ? 'fas fa-star' : 'far fa-star';
+                });
+            }
+        });
+
+        // Check if user is admin and show admin panel if needed
+        function checkAdminStatus() {
+            // For demo purposes, set admin to true
+            localStorage.setItem('isAdmin', 'true');
+            
+            const isAdmin = localStorage.getItem('isAdmin') === 'true';
+            const adminLink = document.getElementById('adminLink');
+            
+            if (isAdmin) {
+                // Show admin navigation link
+                if (adminLink) {
+                    adminLink.style.display = 'inline-block';
+                }
+            } else {
+                // Hide admin navigation link
+                if (adminLink) adminLink.style.display = 'none';
+            }
+        }
+        
+        // Admin tab switching
+        function showAdminTab(tabId) {
+            // Hide all tab contents
+            document.querySelectorAll('.admin-tab-content').forEach(tab => {
+                tab.style.display = 'none';
+                tab.classList.remove('active');
+            });
+            
+            // Show the selected tab
+            const selectedTab = document.getElementById(tabId);
+            if (selectedTab) {
+                selectedTab.style.display = 'block';
+                selectedTab.classList.add('active');
+            }
+            
+            // Update active button
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.getAttribute('onclick').includes(tabId)) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Load the data for the selected tab
+            if (tabId === 'users') {
+                loadUsers();
+            } else if (tabId === 'admin-donations') {
+                loadDonations();
+            } else if (tabId === 'admin-payments') {
+                loadPayments();
+            } else if (tabId === 'admin-requirements') {
+                loadRequirements();
+            } else if (tabId === 'admin-feedback') {
+                loadFeedback();
+            }
+        }
+        
+        // Mock data for demo purposes
+        function loadUsers() {
+            const users = [
+                { _id: 1, fullname: 'John Doe', email: 'john@example.com', createdAt: new Date(), isAdmin: true },
+                { _id: 2, fullname: 'Jane Smith', email: 'jane@example.com', createdAt: new Date(), isAdmin: false },
+                { _id: 3, fullname: 'Robert Johnson', email: 'robert@example.com', createdAt: new Date(), isAdmin: false }
+            ];
+            
+            const tableBody = document.getElementById('users-table-body');
+            tableBody.innerHTML = '';
+            
+            users.forEach(user => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${user.fullname}</td>
+                    <td>${user.email}</td>
+                    <td>${new Date(user.createdAt).toLocaleString()}</td>
+                    <td>
+                        <button class="admin-action admin-edit" onclick="toggleAdminStatus(${user._id})">
+                            ${user.isAdmin ? 'Remove Admin' : 'Make Admin'}
+                        </button>
+                        <button class="admin-action admin-delete" onclick="deleteUser(${user._id})">Delete</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        function loadDonations() {
+            const donations = [
+                { _id: 1, donationId: 'D-0001', donationDescription: 'Food Donation', category: 'Food', name: 'John Doe', emailId: 'john@example.com', status: 'Pending', createdAt: new Date() },
+                { _id: 2, donationId: 'D-0002', donationDescription: 'Clothes Donation', category: 'Clothes', name: 'Jane Smith', emailId: 'jane@example.com', status: 'Completed', createdAt: new Date() },
+                { _id: 3, donationId: 'D-0003', donationDescription: 'Books Donation', category: 'Education', name: 'Robert Johnson', emailId: 'robert@example.com', status: 'Pending', createdAt: new Date() }
+            ];
+            
+            const tableBody = document.getElementById('donations-table-body');
+            tableBody.innerHTML = '';
+            
+            donations.forEach(donation => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${donation.donationId}</td>
+                    <td>${donation.donationDescription}</td>
+                    <td>${donation.category}</td>
+                    <td>${donation.name}</td>
+                    <td>${donation.emailId}</td>
+                    <td>${donation.status}</td>
+                    <td>${new Date(donation.createdAt).toLocaleString()}</td>
+                    <td>
+                        <button class="admin-action admin-edit" onclick="updateDonationStatus(${donation._id}, 'Completed')">Complete</button>
+                        <button class="admin-action admin-delete" onclick="updateDonationStatus(${donation._id}, 'Cancelled')">Cancel</button>
+                        <button class="admin-action admin-view" onclick="viewDonation(${donation._id})">View</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        function loadPayments() {
+            const payments = [
+                { _id: 1, donationId: 'D-0001', amount: 500, category: 'Card', emailId: 'john@example.com', status: 'Pending', createdAt: new Date() },
+                { _id: 2, donationId: 'D-0002', amount: 1000, category: 'UPI', emailId: 'jane@example.com', status: 'Completed', createdAt: new Date() },
+                { _id: 3, donationId: 'D-0003', amount: 750, category: 'Cash', emailId: 'robert@example.com', status: 'Pending', createdAt: new Date() }
+            ];
+            
+            const tableBody = document.getElementById('payments-table-body');
+            tableBody.innerHTML = '';
+            
+            payments.forEach(payment => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${payment.donationId}</td>
+                    <td>₹${payment.amount}</td>
+                    <td>${payment.category}</td>
+                    <td>${payment.emailId}</td>
+                    <td>${payment.status}</td>
+                    <td>${new Date(payment.createdAt).toLocaleString()}</td>
+                    <td>
+                        <button class="admin-action admin-edit" onclick="updatePaymentStatus(${payment._id}, 'Completed')">Complete</button>
+                        <button class="admin-action admin-delete" onclick="updatePaymentStatus(${payment._id}, 'Failed')">Fail</button>
+                        <button class="admin-action admin-view" onclick="viewPayment(${payment._id})">View</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        function loadRequirements() {
+            const requirements = [
+                { _id: 1, donationId: 'P-0001', orgName: 'Orphanage', requirementType: 'Food', amount: 1000, emailId: 'orphanage@example.com', status: 'Pending', createdAt: new Date() },
+                { _id: 2, donationId: 'P-0002', orgName: 'School', requirementType: 'Education', amount: 2000, emailId: 'school@example.com', status: 'In Progress', createdAt: new Date() },
+                { _id: 3, donationId: 'P-0003', orgName: 'Hospital', requirementType: 'Medical', amount: 5000, emailId: 'hospital@example.com', status: 'Fulfilled', createdAt: new Date() }
+            ];
+            
+            const tableBody = document.getElementById('requirements-table-body');
+            tableBody.innerHTML = '';
+            
+            requirements.forEach(req => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${req.donationId}</td>
+                    <td>${req.orgName}</td>
+                    <td>${req.requirementType}</td>
+                    <td>₹${req.amount}</td>
+                    <td>${req.emailId}</td>
+                    <td>${req.status}</td>
+                    <td>${new Date(req.createdAt).toLocaleString()}</td>
+                    <td>
+                        <button class="admin-action admin-edit" onclick="updateRequirementStatus(${req._id}, 'In Progress')">Progress</button>
+                        <button class="admin-action admin-view" onclick="updateRequirementStatus(${req._id}, 'Fulfilled')">Fulfill</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        function loadFeedback() {
+            const feedbacks = [
+                { _id: 1, fullName: 'John Doe', email: 'john@example.com', phoneNo: '1234567890', feedbackText: 'Great initiative!', rating: 5, createdAt: new Date() },
+                { _id: 2, fullName: 'Jane Smith', email: 'jane@example.com', phoneNo: '9876543210', feedbackText: 'Need more options for donation.', rating: 3, createdAt: new Date() },
+                { _id: 3, fullName: 'Robert Johnson', email: 'robert@example.com', phoneNo: '5555555555', feedbackText: 'Very helpful staff.', rating: 4, createdAt: new Date() }
+            ];
+            
+            const tableBody = document.getElementById('feedback-table-body');
+            tableBody.innerHTML = '';
+            
+            feedbacks.forEach(feedback => {
+                const row = document.createElement('tr');
+                const stars = '⭐'.repeat(feedback.rating);
+                row.innerHTML = `
+                    <td>${feedback.fullName}</td>
+                    <td>${feedback.email}</td>
+                    <td>${feedback.phoneNo}</td>
+                    <td>${feedback.feedbackText}</td>
+                    <td>${stars} (${feedback.rating})</td>
+                    <td>${new Date(feedback.createdAt).toLocaleString()}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // Admin action functions
+        function toggleAdminStatus(userId) {
+            alert(`Admin status toggled for user ID: ${userId}`);
+            loadUsers(); // Reload users to update the UI
+        }
+        
+        function deleteUser(userId) {
+            if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+                alert(`User deleted: ${userId}`);
+                loadUsers(); // Reload users to update the UI
+            }
+        }
+        
+        function updateDonationStatus(donationId, status) {
+            alert(`Donation ${donationId} status updated to: ${status}`);
+            loadDonations(); // Reload donations to update the UI
+        }
+        
+        function viewDonation(donationId) {
+            alert(`Viewing donation details for ID: ${donationId}`);
+        }
+        
+        function updatePaymentStatus(paymentId, status) {
+            alert(`Payment ${paymentId} status updated to: ${status}`);
+            loadPayments(); // Reload payments to update the UI
+        }
+        
+        function viewPayment(paymentId) {
+            alert(`Viewing payment details for ID: ${paymentId}`);
+        }
+        
+        function updateRequirementStatus(requirementId, status) {
+            alert(`Requirement ${requirementId} status updated to: ${status}`);
+            loadRequirements(); // Reload requirements to update the UI
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("DOM Content Loaded - Initializing dashboard...");
+            
+            // Mock user data for testing (remove in production)
+            // This is useful for locally testing the dashboard without a real login
+            if (!localStorage.getItem('userEmail')) {
+                localStorage.setItem('userEmail', 'test@example.com');
+                localStorage.setItem('userName', 'Test User');
+            }
+
+            // Generate donation ID
+            const donationIdField = document.getElementById('donationId');
+            if (donationIdField) {
+                donationIdField.value = generateDonationId();
+            } else {
+                console.error("Donation ID field not found");
+            }
+            
+            // Show donation section by default
+            showSection('donate');
+            
+            // Initialize requirement form
+            const reqDonationId = document.getElementById('reqDonationId');
+            const reqDonationTime = document.getElementById('reqDonationTime');
+            if (reqDonationId && reqDonationTime) {
+                reqDonationId.value = generateRequirementId();
+                const now = new Date();
+                reqDonationTime.value = now.toLocaleString();
+            }
+            
+            // Load user donations for payment form
+            loadUserDonations();
+
+            // Get user email from localStorage
+            const userEmail = localStorage.getItem('userEmail');
+            const userName = localStorage.getItem('userName');
+            
+            console.log("User data from localStorage:", { userEmail, userName });
+            
+            if (userEmail) {
+                // Set email in donation form
+                const donationEmailField = document.getElementById('emailId');
+                if (donationEmailField) {
+                    donationEmailField.value = userEmail;
+                    console.log("Set donation email to:", userEmail);
+                } else {
+                    console.log("Donation email field not found");
+                    // Try alternative selector
+                    const altDonationEmailField = document.querySelector('#donate #emailId');
+                    if (altDonationEmailField) {
+                        altDonationEmailField.value = userEmail;
+                        console.log("Set donation email using alternative selector to:", userEmail);
+                    }
+                }
+                
+                // Set email in payment form
+                const paymentEmailField = document.getElementById('paymentEmailId');
+                const registeredEmailField = document.getElementById('registeredEmail');
+                if (paymentEmailField) paymentEmailField.value = userEmail;
+                if (registeredEmailField) registeredEmailField.value = userEmail;
+                
+                // Set email in requirement form
+                const reqEmailField = document.getElementById('reqEmailId');
+                const reqRegisteredEmailField = document.getElementById('reqRegisteredEmail');
+                if (reqEmailField) reqEmailField.value = userEmail;
+                if (reqRegisteredEmailField) reqRegisteredEmailField.value = userEmail;
+                
+                // Set email in feedback form
+                const feedbackEmailField = document.getElementById('feedbackEmail');
+                if (feedbackEmailField) feedbackEmailField.value = userEmail;
+                
+                // Set name in donation form if available
+                const nameField = document.getElementById('name');
+                if (nameField && userName) {
+                    nameField.value = userName;
+                    console.log("Set donation name to:", userName);
+                } else {
+                    console.log("Name field not found or userName not available");
+                    console.log("nameField:", nameField);
+                    console.log("userName:", userName);
+                    
+                    // Try alternative selector
+                    const altNameField = document.querySelector('#donate #name');
+                    if (altNameField && userName) {
+                        altNameField.value = userName;
+                        console.log("Set donation name using alternative selector to:", userName);
+                    }
+                }
+                
+                // Set name in feedback form if available
+                const fullNameField = document.getElementById('fullName');
+                if (fullNameField && userName) {
+                    fullNameField.value = userName;
+                }
+            } else {
+                // If not logged in, redirect to login page
+                console.log("No user email found, redirecting to login");
+                window.location.href = 'login.html';
+            }
+            
+            // Check if user is admin
+            checkAdminStatus();
+            
+            // Initialize category dropdowns
+            const donateCategory = document.getElementById('category');
+            const paymentCategory = document.getElementById('paymentCategory');
+            const reqCategory = document.getElementById('reqCategory');
+            
+            if (donateCategory) donateCategory.dispatchEvent(new Event('change'));
+            if (paymentCategory) paymentCategory.dispatchEvent(new Event('change'));
+            if (reqCategory) reqCategory.dispatchEvent(new Event('change'));
+            
+            // Initialize admin panel if admin
+            if (localStorage.getItem('isAdmin') === 'true') {
+                // Select first admin tab by default when admin section is shown
+                document.querySelector('.tab-btn').classList.add('active');
+                document.getElementById('users').style.display = 'block';
+                document.getElementById('users').classList.add('active');
+                loadUsers();
+            }
+        });
+    </script>
+</body>
+</html> 

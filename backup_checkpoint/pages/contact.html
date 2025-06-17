@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - Feeding Humanity</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/contact.css">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <h1>Feeding <span>Humanity</span></h1>
+        </div>
+        <nav class="nav-menu">
+            <a href="../index.html">HOME</a>
+            <a href="mission.html">OUR MISSION</a>
+            <a href="news.html">NEWS & PRESS</a>
+            <a href="help.html">HOW TO HELP</a>
+            <a href="#" class="active">CONTACT</a>
+        </nav>
+    </header>
+
+    <main class="contact-content">
+        <div class="contact-container">
+            <section class="address-section">
+                <div class="address-info">
+                    <h2><span class="highlight">O</span>ur<span class="text-light">Address</span></h2>
+                    <div class="address-details">
+                        <div class="detail-row">
+                            <span class="label">Country:</span>
+                            <span class="value">INDIA (KARNATAKA)</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">City:</span>
+                            <span class="value">BANGLORE</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Zip Code:</span>
+                            <span class="value">560079</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Telephone:</span>
+                            <span class="value">91-8861520635</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Fax:</span>
+                            <span class="value">91-9448428354</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Register:</span>
+                            <a href="#" class="register-link">Click Here To make Donation Now</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="misc-info">
+                    <h2><span class="highlight">M</span>iscellaneous<span class="text-light">info</span></h2>
+                    <p>LETS ALL CONTRUBITE WHAT WE CAN TO HELP THE NEEDY PEOPLE,SO PLEASE SIGN_UP WITH OUR APPLICATION AND SIGNIN TO MAKE PAYMENTS</p>
+                </div>
+            </section>
+
+            <section class="contact-form-section">
+                <h2><span class="highlight">C</span>ontact<span class="text-light">Form</span></h2>
+                <div id="success-message" class="success-message" style="display: none;">
+                    <p>Thank you for your message! We will get back to you soon.</p>
+                </div>
+                <form class="contact-form" id="contactForm">
+                    <div class="form-group">
+                        <label for="name">Your Name:</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Your E-mail:</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="website">Your Website:</label>
+                        <input type="url" id="website" name="website">
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Your Message:</label>
+                        <textarea id="message" name="message" rows="5" required></textarea>
+                    </div>
+                    <div class="form-buttons">
+                        <button type="submit" class="btn-submit">Submit</button>
+                        <button type="reset" class="btn-reset">Clear Form</button>
+                    </div>
+                </form>
+            </section>
+
+            <div class="character-illustration">
+                <img src="../assets/support-character.png" alt="Support character illustration">
+            </div>
+        </div>
+
+        <footer class="hope-center">
+            <div class="footer-content">
+                <div class="footer-logo">HOPE<span>CENTER</span></div>
+                <nav class="footer-nav">
+                    <a href="../index.html">Home</a>
+                    <a href="mission.html">Our Mission</a>
+                    <a href="news.html">News & Press</a>
+                    <a href="help.html">How to Help</a>
+                    <a href="#">Contact</a>
+                </nav>
+                <div class="contact-info">
+                    <span class="phone">+1 800123 45 67</span>
+                    <div class="social-icons">
+                        <a href="#" class="social-icon">f</a>
+                        <a href="#" class="social-icon">t</a>
+                        <a href="#" class="social-icon">in</a>
+                    </div>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>Copyright © Domain Name All Rights Reserved</p>
+                <p>Design by TemplateMonster.com</p>
+            </div>
+        </footer>
+    </main>
+
+    <div class="auth-links">
+        <a href="login.html" class="auth-button">Login</a>
+        <a href="signup.html" class="auth-button">Sign Up</a>
+    </div>
+
+    <script>
+        document.getElementById('contactForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            // Get all form values
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const website = document.getElementById('website').value;
+            const message = document.getElementById('message').value;
+            
+            // Validate form
+            if (!name || !email || !message) {
+                alert('Please fill in all required fields');
+                return false;
+            }
+            
+            // Here you would typically send the data to your server
+            console.log('Form submitted with:', {
+                name: name,
+                email: email,
+                website: website,
+                message: message
+            });
+            
+            // Show success message
+            const form = document.getElementById('contactForm');
+            const successMessage = document.getElementById('success-message');
+            
+            // Hide form and show success message
+            form.style.display = 'none';
+            successMessage.style.display = 'block';
+            
+            // Clear form
+            form.reset();
+            
+            // After 3 seconds, hide success message and show form again
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+                form.style.display = 'flex';
+            }, 3000);
+            
+            return false;
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Feeding Humanity</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/login.css">
+    <style>
+        .auth-box.admin-mode {
+            border-top: 4px solid #f5a623;
+            box-shadow: 0 10px 25px rgba(245, 166, 35, 0.15);
+        }
+        
+        .auth-header .admin-badge {
+            display: inline-block;
+            background-color: #f5a623;
+            color: #fff;
+            padding: 3px 10px;
+            border-radius: 3px;
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+        }
+        
+        .error-message {
+            color: #ff6b6b;
+            margin-bottom: 15px;
+            text-align: center;
+            padding: 8px;
+            border-radius: 4px;
+            background-color: rgba(255, 107, 107, 0.1);
+            display: none;
+        }
+        
+        .btn-primary.admin-login {
+            background-color: #f5a623;
+        }
+        
+        .btn-primary.admin-login:hover {
+            background-color: #e09010;
+        }
+        
+        /* Password toggle styles */
+        .input-group {
+            position: relative;
+        }
+        
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #666;
+            z-index: 10;
+        }
+        
+        .toggle-password:hover {
+            color: #333;
+        }
+        
+        /* Home button styles */
+        .home-button-container {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
+        
+        .home-button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #4a90e2;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .home-button:hover {
+            background-color: #357abd;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="home-button-container">
+        <a href="../index.html" class="home-button">
+            <i class="fas fa-home"></i>
+            Home
+        </a>
+    </div>
+
+    <div class="auth-container">
+        <div class="auth-box" id="authBox">
+            <div class="auth-header">
+                <div id="adminBadge" style="display: none;" class="admin-badge">Admin Access</div>
+                <h2 id="loginTitle">Welcome Back</h2>
+                <p id="loginSubtitle">Login to your account</p>
+            </div>
+            <form class="auth-form" id="loginForm" autocomplete="off">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <div class="input-group">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="email" name="email" placeholder="Enter your email" pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}" title="Please enter a valid email address" required autocomplete="new-email">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" name="password" placeholder="Enter your password" required autocomplete="new-password">
+                        <span class="toggle-password" onclick="togglePasswordVisibility('password')">
+                            <i class="fas fa-eye"></i>
+                        </span>
+                    </div>
+                </div>
+                <div id="loginError" class="error-message"></div>
+                <div class="form-options">
+                    <label class="remember-me">
+                        <input type="checkbox" id="remember">
+                        <span>Remember me</span>
+                    </label>
+                    <a href="forgot-password.html" class="forgot-password">Forgot Password?</a>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block" id="loginButton">Login</button>
+                <div class="auth-footer">
+                    <p id="signupLinkContainer">Don't have an account? <a href="signup.html">Sign Up</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Check if the admin parameter is present in the URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const isAdminLogin = urlParams.get('admin') === 'true';
+        
+        // Update the UI based on login mode
+        if (isAdminLogin) {
+            document.getElementById('adminBadge').style.display = 'inline-block';
+            document.getElementById('loginTitle').textContent = 'Admin Login';
+            document.getElementById('loginSubtitle').textContent = 'Access administrator dashboard';
+            document.getElementById('loginButton').classList.add('admin-login');
+            document.getElementById('authBox').classList.add('admin-mode');
+            document.getElementById('signupLinkContainer').style.display = 'none'; // Hide signup link for admin login
+            
+            // Add honeypot fields to confuse autofill
+            const form = document.getElementById('loginForm');
+            const honeyPotDiv = document.createElement('div');
+            honeyPotDiv.style.opacity = '0';
+            honeyPotDiv.style.position = 'absolute';
+            honeyPotDiv.style.height = '0';
+            honeyPotDiv.style.overflow = 'hidden';
+            honeyPotDiv.innerHTML = `
+                <input type="text" name="fake_username" tabindex="-1">
+                <input type="password" name="fake_password" tabindex="-1">
+            `;
+            form.prepend(honeyPotDiv);
+            
+            // Clear any pre-filled values for admin login
+            setTimeout(() => {
+                document.getElementById('email').value = '';
+                document.getElementById('password').value = '';
+            }, 100);
+        }
+        
+        // Add special handling to prevent autofill
+        window.addEventListener('load', function() {
+            if (isAdminLogin) {
+                // Force clear the form fields again after page load
+                setTimeout(() => {
+                    document.getElementById('email').value = '';
+                    document.getElementById('password').value = '';
+                }, 500);
+            }
+        });
+        
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form values
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            console.log('Login attempt:', { 
+                email, 
+                passwordLength: password ? password.length : 0,
+                isAdminLogin: isAdminLogin 
+            });
+            
+            // Clear any previous errors
+            const errorElement = document.getElementById('loginError');
+            errorElement.style.display = 'none';
+            
+            // Set button to loading state
+            const loginButton = document.getElementById('loginButton');
+            const originalButtonText = loginButton.textContent;
+            loginButton.disabled = true;
+            loginButton.textContent = 'Logging in...';
+            
+            // Call the API to login
+            fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    email, 
+                    password,
+                    isAdminLogin: isAdminLogin // Tell the backend if this is an admin login attempt
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Login response:', data);
+                if (data.message === 'Login successful') {
+                    // Store user info in localStorage
+                    localStorage.setItem('userEmail', email);
+                    localStorage.setItem('userId', data.userId);
+                    localStorage.setItem('isAdmin', data.isAdmin);
+                    
+                    // For admin login, the admin must have admin privileges
+                    if (isAdminLogin && !data.isAdmin) {
+                        errorElement.textContent = 'You do not have administrator privileges';
+                        errorElement.style.display = 'block';
+                        loginButton.disabled = false;
+                        loginButton.textContent = originalButtonText;
+                        return;
+                    }
+                    
+                    // For regular login, the user must not be an admin
+                    if (!isAdminLogin && data.isAdmin) {
+                        errorElement.textContent = 'Please use the admin login for administrator accounts';
+                        errorElement.style.display = 'block';
+                        loginButton.disabled = false;
+                        loginButton.textContent = originalButtonText;
+                        return;
+                    }
+                    
+                    // If admin login was successful, set admin fullname directly
+                    if (isAdminLogin && data.fullname) {
+                        localStorage.setItem('userName', data.fullname);
+                        console.log("Stored admin data:", { email, name: data.fullname });
+                        
+                        // Redirect to admin dashboard
+                        window.location.href = 'admin-dashboard.html';
+                        return;
+                    }
+                    
+                    // For regular users, fetch user details
+                    fetch(`/api/auth/user?email=${email}`)
+                        .then(response => response.json())
+                        .then(user => {
+                            if (user && user.fullname) {
+                                localStorage.setItem('userName', user.fullname);
+                                console.log("Stored user data:", { email, name: user.fullname, isAdmin: data.isAdmin });
+                            } else {
+                                // If no name found, use email as fallback
+                                localStorage.setItem('userName', email.split('@')[0]);
+                                console.log("No user fullname found, using email prefix instead");
+                            }
+                            // Redirect to dashboard
+                            window.location.href = 'dashboard.html';
+                        })
+                        .catch(error => {
+                            console.error('Error fetching user details:', error);
+                            // Use email as fallback for name
+                            localStorage.setItem('userName', email.split('@')[0]);
+                            // Still redirect to dashboard even if getting user details fails
+                            window.location.href = 'dashboard.html';
+                        });
+                } else {
+                    // Show appropriate error message based on login type
+                    if (isAdminLogin) {
+                        errorElement.textContent = data.message || 'Invalid administrator credentials';
+                    } else {
+                        errorElement.textContent = data.message || 'Invalid email or password';
+                    }
+                    errorElement.style.display = 'block';
+                    loginButton.disabled = false;
+                    loginButton.textContent = originalButtonText;
+                }
+            })
+            .catch(error => {
+                console.error('Login error:', error);
+                errorElement.textContent = 'An error occurred during login. Please try again.';
+                errorElement.style.display = 'block';
+                loginButton.disabled = false;
+                loginButton.textContent = originalButtonText;
+            });
+        });
+
+        function togglePasswordVisibility(inputId) {
+            const passwordInput = document.getElementById(inputId);
+            const toggleIcon = document.querySelector('.toggle-password i');
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            
+            passwordInput.setAttribute('type', type);
+            
+            // Toggle the eye icon
+            if (type === 'password') {
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            } else {
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            }
+        }
+    </script>
+</body>
+</html>

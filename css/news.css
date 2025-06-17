@@ -1,0 +1,175 @@
+/* News Page Styles */
+.news-content {
+    padding: 80px 20px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Press Header */
+.press-header {
+    background-color: #f5f5f5;
+    padding: 40px;
+    border-radius: 10px;
+    margin-bottom: 50px;
+    position: relative;
+}
+
+.press-header h1 {
+    font-size: 2.5rem;
+    color: #333;
+    margin-bottom: 30px;
+}
+
+.press-header .highlight {
+    color: #ffd700;
+    font-size: 3rem;
+}
+
+.featured-image {
+    width: 100%;
+    height: 300px;
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+.featured-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(100%);
+}
+
+/* Timeline Navigation */
+.year-navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 40px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    overflow-x: auto;
+}
+
+.year {
+    color: #fff;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.year:hover {
+    background: rgba(255, 215, 0, 0.2);
+}
+
+.year.active {
+    background: #ffd700;
+    color: #1a1a1a;
+}
+
+/* News Entries */
+.news-entries {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.news-item {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 30px;
+    border-radius: 8px;
+    position: relative;
+    transition: transform 0.3s ease;
+}
+
+.news-item:hover {
+    transform: translateX(10px);
+}
+
+.news-item::before {
+    content: '';
+    position: absolute;
+    left: -20px;
+    top: 50%;
+    width: 10px;
+    height: 10px;
+    background: #ffd700;
+    border-radius: 50%;
+    transform: translateY(-50%);
+}
+
+.news-item .date {
+    color: #ffd700;
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+}
+
+.news-item h2 {
+    color: #fff;
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+}
+
+.news-item p {
+    color: #ccc;
+    line-height: 1.6;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .year-navigation {
+        padding: 15px;
+    }
+
+    .year {
+        padding: 8px 15px;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .news-content {
+        padding: 60px 15px 15px;
+    }
+
+    .press-header {
+        padding: 20px;
+    }
+
+    .featured-image {
+        height: 200px;
+    }
+
+    .year-navigation {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        gap: 10px;
+        padding: 10px;
+    }
+
+    .year {
+        flex: 0 0 auto;
+    }
+
+    .news-item {
+        padding: 20px;
+    }
+
+    .news-item::before {
+        left: -15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .press-header h1 {
+        font-size: 2rem;
+    }
+
+    .news-item h2 {
+        font-size: 1.2rem;
+    }
+
+    .news-item .date {
+        font-size: 1rem;
+    }
+} 

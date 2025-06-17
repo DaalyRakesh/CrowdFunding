@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Requirements - Feeding Humanity</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard">
+        <header class="header">
+            <div class="logo">
+                <h1>Feeding <span>Humanity</span></h1>
+            </div>
+            <nav class="nav-menu">
+                <a href="#">DONATE</a>
+                <a href="#">PAYMENTS</a>
+                <a href="#" class="active">REQUIREMENT</a>
+                <a href="#">FEEDBACK</a>
+                <a href="login.html" class="signout">SIGNOUT</a>
+            </nav>
+        </header>
+
+        <main class="main-content">
+            <div class="requirement-form">
+                <h2>Requirements</h2>
+                <form id="requirementForm">
+                    <div class="form-group">
+                        <label for="emailId">Email ID</label>
+                        <input type="email" id="emailId" name="emailId" value="" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="requirementId">Requirement ID</label>
+                        <input type="text" id="requirementId" name="requirementId" value="R-13" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="requirementTime">Requirement Time and Date</label>
+                        <input type="text" id="requirementTime" name="requirementTime" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="amount">Amount</label>
+                        <input type="number" id="amount" name="amount" value="0" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="category">Category</label>
+                        <select id="category" name="category" required>
+                            <option value="Food" selected>Food</option>
+                            <option value="Clothes">Clothes</option>
+                            <option value="Money">Money</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group food-field">
+                        <label for="foodType">Food Type</label>
+                        <input type="text" id="foodType" name="foodType" placeholder="Enter food type">
+                    </div>
+
+                    <div class="form-group food-field">
+                        <label for="quantity">Quantity (kg)</label>
+                        <input type="number" id="quantity" name="quantity" min="1">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="registeredEmail">Registered Email Id</label>
+                        <input type="email" id="registeredEmail" name="registeredEmail" required>
+                    </div>
+
+                    <div class="form-buttons">
+                        <button type="submit" class="btn-submit">Submit</button>
+                        <button type="reset" class="btn-reset">Reset</button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Set current date and time
+        function setCurrentDateTime() {
+            const now = new Date();
+            const date = now.toLocaleDateString();
+            const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('requirementTime').value = `${date} ${time}`;
+        }
+
+        // Set user's email from localStorage
+        function setUserEmail() {
+            const userEmail = localStorage.getItem('userEmail');
+            if (userEmail) {
+                document.getElementById('emailId').value = userEmail;
+            }
+        }
+
+        // Show/hide food-specific fields based on category
+        document.getElementById('category').addEventListener('change', function() {
+            const foodFields = document.querySelectorAll('.food-field');
+            const showFields = this.value === 'Food';
+            
+            foodFields.forEach(field => {
+                field.style.display = showFields ? 'block' : 'none';
+                const input = field.querySelector('input');
+                if (input) {
+                    input.required = showFields;
+                }
+            });
+        });
+
+        // Handle form submission
+        document.getElementById('requirementForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form data
+            const formData = new FormData(this);
+            const requirementData = Object.fromEntries(formData.entries());
+            
+            // Here you would typically send this data to your server
+            console.log('Requirement submitted:', requirementData);
+            
+            // Show success message
+            alert('Requirement submitted successfully!');
+            
+            // Reset form but keep readonly fields
+            const emailId = document.getElementById('emailId').value;
+            const requirementId = document.getElementById('requirementId').value;
+            const requirementTime = document.getElementById('requirementTime').value;
+            
+            this.reset();
+            
+            document.getElementById('emailId').value = emailId;
+            document.getElementById('requirementId').value = requirementId;
+            document.getElementById('requirementTime').value = requirementTime;
+            
+            // Reset category to default
+            document.getElementById('category').value = 'Food';
+            document.getElementById('category').dispatchEvent(new Event('change'));
+        });
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            setUserEmail();
+            setCurrentDateTime();
+            document.getElementById('category').dispatchEvent(new Event('change'));
+        });
+    </script>
+</body>
+</html> 

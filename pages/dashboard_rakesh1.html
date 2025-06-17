@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Feeding Humanity</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard">
+        <header class="header">
+            <div class="logo">
+                <h1>Feeding <span>Humanity</span></h1>
+            </div>
+            <nav class="nav-menu">
+                <a href="#" onclick="showSection('donate')" class="active">DONATE</a>
+                <a href="#" onclick="showSection('payments')">PAYMENTS</a>
+                <a href="#" onclick="showSection('requirement')">REQUIREMENT</a>
+                <a href="#" onclick="showSection('feedback')">FEEDBACK</a>
+                
+                <a href="login.html" class="signout">SIGNOUT</a>
+            </nav>
+        </header>
+
+        <main class="main-content">
+            <!-- Donation Section -->
+            <div id="donate" class="content-section">
+                <div class="requirement-form">
+                    <h2>Donation</h2>
+                    <form id="donationForm">
+                        <div class="form-group">
+                            <label for="donationId">Donation ID</label>
+                            <input type="text" id="donationId" name="donationId" readonly>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="donationDescription">Donation Description</label>
+                            <input type="text" id="donationDescription" name="donationDescription" required placeholder="Enter donation description">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="category">Category</label>
+                            <select id="category" name="category" required>
+                                <option value="" disabled selected>Select category</option>
+                                <option value="Food">Food</option>
+                                <option value="Clothes">Clothes</option>
+                                <option value="Education">Education</option>
+                                <option value="Other">Other Resources</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="name">Name</label>
+                            <input type="text" id="name" name="name" required placeholder="Enter your name">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="emailId">Email ID</label>
+                            <input type="email" id="emailId" name="emailId" required placeholder="Enter your email">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="registeredEmail">Registered Email Id</label>
+                            <input type="email" id="registeredEmail" name="registeredEmail" required readonly>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="donationTime">Donation Time and Date</label>
+                            <input type="text" id="donationTime" name="donationTime" readonly>
+                        </div>
+
+                        <div class="form-buttons">
+                            <button type="submit" class="btn-submit">Submit</button>
+                            <button type="reset" class="btn-reset">Reset</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Payments Section -->
+            <div id="payments" class="content-section" style="display: none;">
+                <div class="payment-form">
+                    <h2>Payments</h2>
+                    <form id="paymentForm">
+                        <div class="form-group">
+                            <label for="paymentDonationId">Donation ID</label>
+                            <input type="text" id="paymentDonationId" name="donationId" readonly>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="paymentMethod">Payment Method</label>
+                            <select id="paymentMethod" name="paymentMethod" required onchange="toggleCardDetails()">
+                                <option value="" disabled selected>Select payment method</option>
+                                <option value="Card">Card</option>
+                                <option value="UPI">UPI</option>
+                                <option value="Net Banking">Net Banking</option>
+                            </select>
+                        </div>
+
+                        <div id="cardDetails" style="display: none;">
+                            <div class="form-group">
+                                <label for="cardNo">Card Number</label>
+                                <input type="text" id="cardNo" name="cardNo" pattern="[0-9]{16}" maxlength="16" placeholder="Enter 16-digit card number">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="expiryDate">Expiry Date</label>
+                                <input type="text" id="expiryDate" name="expiryDate" pattern="(0[1-9]|1[0-2])\/([0-9]{2})" placeholder="MM/YY" maxlength="5">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="cvvNo">CVV</label>
+                                <input type="password" id="cvvNo" name="cvvNo" pattern="[0-9]{3}" maxlength="3" placeholder="Enter 3-digit CVV">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="registeredEmail">Registered Email Id</label>
+                            <input type="email" id="registeredEmail" name="registeredEmail" required readonly>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="paymentDonationTime">Donation Time and Date</label>
+                            <input type="text" id="paymentDonationTime" name="donationTime" readonly>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="amount">Amount</label>
+                            <input type="number" id="amount" name="amount" min="0" required>
+                        </div>
+
+                        <div class="form-buttons">
+                            <button type="submit" class="btn-submit">Submit</button>
+                            <button type="reset" class="btn-reset">Reset</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Requirements Section -->
+            <div id="requirement" class="content-section" style="display: none;">
+                <div class="requirement-form">
+                    <h2>Requirements</h2>
+                    <form id="requirementForm">
+                        <div class="form-group">
+                            <label for="orgName">Organisation Name</label>
+                            <input type="text" id="orgName" name="orgName" required placeholder="Enter organisation name">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="address">Address</label>
+                            <textarea id="address" name="address" required placeholder="Enter complete address" rows="3"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="mobileNo">Mobile Number</label>
+                            <input type="tel" id="mobileNo" name="mobileNo" required pattern="[0-9]{10}" placeholder="Enter 10-digit mobile number">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reqEmailId">Email ID</label>
+                            <input type="email" id="reqEmailId" name="emailId" required placeholder="Enter email address">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="aadharNumber">Aadhar Card Number</label>
+                            <input type="text" id="aadharNumber" name="aadharNumber" pattern="[0-9]{12}" maxlength="12" required placeholder="Enter 12-digit Aadhar number">
+                            <small>Enter 12-digit Aadhar number</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="requirementType">Requirement Type</label>
+                            <select id="requirementType" name="requirementType" required>
+                                <option value="" disabled selected>Select requirement type</option>
+                                <option value="Food">Food</option>
+                                <option value="Clothes">Clothes</option>
+                                <option value="Education">Education</option>
+                                <option value="Medical">Medical</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reqDonationId">Requirement ID</label>
+                            <input type="text" id="reqDonationId" name="donationId" readonly>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reqDonationTime">Requirement Time and Date</label>
+                            <input type="text" id="reqDonationTime" name="donationTime" readonly>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reqAmount">Monetary Required (₹)</label>
+                            <input type="number" id="reqAmount" name="amount" value="0" min="0" max="100000" step="0.01" required>
+                            <small>Maximum amount: ₹100,000</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reqRegisteredEmail">Registered Email Id</label>
+                            <input type="email" id="reqRegisteredEmail" name="registeredEmail" required placeholder="Enter registered email">
+                        </div>
+
+                        <div class="form-buttons">
+                            <button type="submit" class="btn-submit">Submit</button>
+                            <button type="reset" class="btn-reset">Reset</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Feedback Section -->
+            <div id="feedback" class="content-section" style="display: none;">
+                <div class="requirement-form">
+                    <h2>Feedback</h2>
+                    <form id="feedbackForm">
+                        <div class="form-group">
+                            <label for="fullName">Full Name</label>
+                            <input type="text" id="fullName" name="fullName" required placeholder="Enter your full name">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="feedbackText">Feedback</label>
+                            <textarea id="feedbackText" name="feedbackText" required rows="4" placeholder="Enter your feedback"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phoneNo">Phone No</label>
+                            <input type="tel" id="phoneNo" name="phoneNo" required pattern="[0-9]{10}" placeholder="Enter your phone number">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="feedbackEmail">E-Mail</label>
+                            <input type="email" id="feedbackEmail" name="email" required placeholder="Enter your email">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Rate This</label>
+                            <div class="rating">
+                                <i class="far fa-star" data-rating="1"></i>
+                                <i class="far fa-star" data-rating="2"></i>
+                                <i class="far fa-star" data-rating="3"></i>
+                                <i class="far fa-star" data-rating="4"></i>
+                                <i class="far fa-star" data-rating="5"></i>
+                                <input type="hidden" id="ratingValue" name="rating" value="0">
+                            </div>
+                        </div>
+
+                        <div class="form-buttons">
+                            <button type="submit" class="btn-submit">Submit</button>
+                            <button type="reset" class="btn-reset">Reset</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Admin Section -->
+            <div id="admin" class="content-section" style="display: none;">
+                <div class="admin-panel">
+                    <h2>Admin Dashboard</h2>
+                    
+                    <div class="admin-tabs">
+                        <button class="tab-btn active" onclick="showAdminTab('users')">Users</button>
+                        <button class="tab-btn" onclick="showAdminTab('admin-donations')">Donations</button>
+                        <button class="tab-btn" onclick="showAdminTab('admin-payments')">Payments</button>
+                        <button class="tab-btn" onclick="showAdminTab('admin-requirements')">Requirements</button>
+                        <button class="tab-btn" onclick="showAdminTab('admin-feedback')">Feedback</button>
+                    </div>
+                    
+                    <div id="users" class="admin-tab-content">
+                        <h3>User Accounts</h3>
+                        <div class="admin-table-container">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Created At</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="users-table-body">
+                                    <!-- User data will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div id="admin-donations" class="admin-tab-content" style="display: none;">
+                        <h3>Donations</h3>
+                        <div class="admin-table-container">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Donation ID</th>
+                                        <th>Description</th>
+                                        <th>Category</th>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="donations-table-body">
+                                    <!-- Donation data will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div id="admin-payments" class="admin-tab-content" style="display: none;">
+                        <h3>Payments</h3>
+                        <div class="admin-table-container">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Donation ID</th>
+                                        <th>Amount</th>
+                                        <th>Category</th>
+                                        <th>Email</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="payments-table-body">
+                                    <!-- Payment data will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div id="admin-requirements" class="admin-tab-content" style="display: none;">
+                        <h3>Requirements</h3>
+                        <div class="admin-table-container">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Requirement ID</th>
+                                        <th>Organization</th>
+                                        <th>Type</th>
+                                        <th>Amount</th>
+                                        <th>Email</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="requirements-table-body">
+                                    <!-- Requirement data will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div id="admin-feedback" class="admin-tab-content" style="display: none;">
+                        <h3>Feedback</h3>
+                        <div class="admin-table-container">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Phone</th>
+                                        <th>Feedback</th>
+                                        <th>Rating</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="feedback-table-body">
+                                    <!-- Feedback data will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <style>
+        /* Admin Panel Styling */
+        .admin-panel {
+            background: #2a2a2a;
+            border-radius: 10px;
+            padding: 2rem;
+            margin-top: 2rem;
+            color: #fff;
+        }
+        
+        .admin-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 1rem;
+            overflow-x: auto;
+        }
+        
+        .tab-btn {
+            padding: 0.5rem 1rem;
+            background: #333;
+            border: none;
+            border-radius: 4px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .tab-btn:hover {
+            background: #444;
+        }
+        
+        .tab-btn.active {
+            background: #ffd700;
+            color: #333;
+        }
+        
+        .admin-tab-content {
+            display: none;
+        }
+        
+        .admin-tab-content.active {
+            display: block;
+        }
+        
+        .admin-table-container {
+            overflow-x: auto;
+        }
+        
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        .admin-table th, .admin-table td {
+            padding: 0.8rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .admin-table th {
+            background: #333;
+            color: #ffd700;
+            font-weight: bold;
+        }
+        
+        .admin-table tr:nth-child(odd) {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .admin-table tr:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .action-btn {
+            padding: 0.3rem 0.6rem;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-right: 0.5rem;
+            font-size: 0.8rem;
+        }
+        
+        .action-btn {
+            background: #ffd700;
+            color: #333;
+        }
+        
+        .action-btn.delete {
+            background: #ff6b6b;
+            color: #fff;
+        }
+        
+        .action-btn:hover {
+            opacity: 0.9;
+        }
+        
+        .search-bar {
+            margin-bottom: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .search-bar input {
+            flex: 1;
+            padding: 0.6rem;
+            border: 1px solid #444;
+            border-radius: 4px;
+            background: #333;
+            color: #fff;
+        }
+        
+        .search-bar button {
+            padding: 0.6rem 1rem;
+            background: #ffd700;
+            color: #333;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .search-bar button:hover {
+            background: #e6c200;
+        }
+        
+        /* Empty state message */
+        .empty-message {
+            text-align: center;
+            padding: 2rem;
+            color: #aaa;
+        }
+    </style>
+
+    <script>
+        // Generate Donation ID with format D-randomnumber
+        function generateDonationId() {
+            const prefix = 'D-';
+            const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+            return `${prefix}${random}`;
+        }
+
+        // Set current date and time
+        function setCurrentDateTime() {
+            const now = new Date();
+            const date = now.toLocaleDateString();
+            const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            return `${date} ${time}`;
+        }
+
+        // Toggle card details fields
+        function toggleCardDetails() {
+            const paymentMethod = document.getElementById('paymentMethod').value;
+            const cardDetails = document.getElementById('cardDetails');
+            
+            if (paymentMethod === 'Card') {
+                cardDetails.style.display = 'block';
+            } else {
+                cardDetails.style.display = 'none';
+            }
+        }
+
+        // Set user's email from localStorage
+        function setUserEmail() {
+            const userEmail = localStorage.getItem('userEmail');
+            console.log('User email from localStorage:', userEmail);
+            
+            if (userEmail) {
+                const emailFields = [
+                    'registeredEmail',
+                    'reqRegisteredEmail',
+                    'emailId'
+                ];
+                
+                emailFields.forEach(fieldId => {
+                    const field = document.getElementById(fieldId);
+                    if (field) {
+                        field.value = userEmail;
+                        console.log(`Set email in ${fieldId}:`, userEmail);
+                    }
+                });
+            } else {
+                console.log('No email found in localStorage');
+            }
+        }
+
+        // Format expiry date input
+        document.getElementById('expiryDate').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                value = value.slice(0, 2) + '/' + value.slice(2);
+            }
+            e.target.value = value;
+        });
+
+        // Show selected section and hide others
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            // Show selected section
+            document.getElementById(sectionId).style.display = 'block';
+            
+            // Update active nav link
+            document.querySelectorAll('.nav-menu a').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('onclick')?.includes(sectionId)) {
+                    link.classList.add('active');
+                }
+            });
+
+            // Initialize form based on section
+            switch(sectionId) {
+                case 'donate':
+                    document.getElementById('donationId').value = generateDonationId();
+                    document.getElementById('donationTime').value = setCurrentDateTime();
+                    setUserEmail();
+                    break;
+                case 'payments':
+                    document.getElementById('paymentDonationId').value = generateDonationId();
+                    document.getElementById('paymentDonationTime').value = setCurrentDateTime();
+                    setUserEmail();
+                    break;
+                case 'requirement':
+                    document.getElementById('reqDonationId').value = generateDonationId();
+                    document.getElementById('reqDonationTime').value = setCurrentDateTime();
+                    setUserEmail();
+                    break;
+            }
+        }
+
+        // Handle donation form submission
+        document.getElementById('donationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form data
+            const formData = new FormData(this);
+            const donationData = Object.fromEntries(formData.entries());
+            
+            // Here you would typically send this data to your server
+            console.log('Donation submitted:', donationData);
+                
+                // Show success message
+            alert('Donation submitted successfully!');
+            
+            // Reset form but keep readonly fields
+            const donationId = document.getElementById('donationId').value;
+            const donationTime = document.getElementById('donationTime').value;
+            const userEmail = localStorage.getItem('userEmail');
+            
+            this.reset();
+            
+                document.getElementById('donationId').value = donationId;
+            document.getElementById('donationTime').value = donationTime;
+            if (userEmail) {
+                document.getElementById('registeredEmail').value = userEmail;
+            }
+        });
+
+        // Handle payment form submission
+        document.getElementById('paymentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form data
+            const formData = new FormData(this);
+            const paymentData = Object.fromEntries(formData.entries());
+            
+            // Here you would typically send this data to your server
+            console.log('Payment submitted:', paymentData);
+            
+            // Show success message
+            alert('Payment submitted successfully!');
+            
+            // Reset form but keep readonly fields
+            const donationId = document.getElementById('paymentDonationId').value;
+            const paymentTime = document.getElementById('paymentDonationTime').value;
+            const userEmail = localStorage.getItem('userEmail');
+            
+            this.reset();
+            
+            document.getElementById('paymentDonationId').value = donationId;
+            document.getElementById('paymentDonationTime').value = paymentTime;
+            if (userEmail) {
+                document.getElementById('registeredEmail').value = userEmail;
+            }
+            
+            // Hide card details after submission
+            document.getElementById('cardDetails').style.display = 'none';
+        });
+
+        // Handle requirement form submission
+        document.getElementById('requirementForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form data
+            const formData = new FormData(this);
+            const requirementData = Object.fromEntries(formData.entries());
+            
+            // Here you would typically send this data to your server
+            console.log('Requirement submitted:', requirementData);
+                
+                // Show success message
+                alert('Requirement submitted successfully!');
+                
+                // Reset form but keep readonly fields
+            const requirementId = document.getElementById('reqDonationId').value;
+            const requirementTime = document.getElementById('reqDonationTime').value;
+            const userEmail = localStorage.getItem('userEmail');
+                
+                this.reset();
+                
+            document.getElementById('reqDonationId').value = requirementId;
+            document.getElementById('reqDonationTime').value = requirementTime;
+            if (userEmail) {
+                document.getElementById('reqEmailId').value = userEmail;
+                document.getElementById('reqRegisteredEmail').value = userEmail;
+            }
+        });
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded, initializing forms...');
+            
+            // Set initial IDs and time
+            document.getElementById('donationId').value = generateDonationId();
+            document.getElementById('donationTime').value = setCurrentDateTime();
+            
+            document.getElementById('paymentDonationId').value = generateDonationId();
+            document.getElementById('paymentDonationTime').value = setCurrentDateTime();
+            
+            document.getElementById('reqDonationId').value = generateDonationId();
+            document.getElementById('reqDonationTime').value = setCurrentDateTime();
+            
+            // Set user email in all forms
+            setUserEmail();
+        });
+    </script>
+</body>
+</html> 
