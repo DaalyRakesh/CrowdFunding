@@ -7,7 +7,11 @@ echo "🚀 Starting deployment process..."
 export NPM_CONFIG_PRODUCTION=false
 export NODE_ENV=production
 
-# Install dependencies
+# Clean everything first
+echo "🧹 Cleaning old dependencies..."
+rm -rf node_modules package-lock.json
+
+# Install dependencies fresh
 echo "📦 Installing dependencies..."
 npm install
 
@@ -23,13 +27,19 @@ else
     echo "⚠️  Nodemon not found in node_modules/.bin/"
 fi
 
-# Verify bcryptjs installation
+# Verify bcryptjs installation and no bcrypt
 echo "🔍 Verifying bcryptjs installation..."
 if [ -d "node_modules/bcryptjs" ]; then
     echo "✅ bcryptjs installed successfully"
 else
     echo "❌ bcryptjs not found, installing..."
     npm install bcryptjs
+fi
+
+# Check for any bcrypt remnants
+if [ -d "node_modules/bcrypt" ]; then
+    echo "⚠️  Found bcrypt, removing..."
+    rm -rf node_modules/bcrypt
 fi
 
 # Start the application
