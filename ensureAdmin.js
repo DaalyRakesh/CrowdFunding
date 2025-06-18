@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const Admin = require('./models/Admin');
-const bcrypt = require('bcryptjs');
+const SimpleHash = require('./simple-hash');
 require('dotenv').config();
 
 async function ensureAdmin() {
@@ -44,8 +44,7 @@ async function ensureAdmin() {
 
         // Reset password
         const newPassword = 'NewPassword123$';
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(newPassword, salt);
+        const hashedPassword = SimpleHash.hash(newPassword);
         admin.password = hashedPassword;
         admin.resetPasswordToken = null;
         admin.resetPasswordExpires = null;

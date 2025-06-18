@@ -32,7 +32,8 @@ const AdminSchema = new mongoose.Schema({
 AdminSchema.pre('save', async function(next) {
     try {
         if (!this.isModified('password')) return next();
-        
+        // Only hash if not already hashed (no colon)
+        if (typeof this.password === 'string' && this.password.includes(':')) return next();
         this.password = await SimpleHash.hash(this.password, 10);
         console.log('Password hashed in pre-save hook');
         next();

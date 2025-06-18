@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const Admin = require('./models/Admin');
-const bcrypt = require('bcryptjs');
+const SimpleHash = require('./simple-hash');
 require('dotenv').config();
 
 async function resetAdminPassword() {
@@ -15,21 +15,25 @@ async function resetAdminPassword() {
 
         // Create new admin with fresh password
         const newPassword = 'Rakesh123$';
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(newPassword, salt);
 
         const admin = new Admin({
             username: 'rakeshmr1309@gmail.com',
-            password: hashedPassword,
             fullname: 'Admin User'
         });
 
+        // Hash the new password
+        const hashedPassword = SimpleHash.hash(newPassword);
+        
+        // Update the admin's password
+        admin.password = hashedPassword;
         await admin.save();
-        console.log('New admin account created with password:', newPassword);
-
-        // Verify the password works
-        const isMatch = await bcrypt.compare(newPassword, admin.password);
-        console.log('Password verification result:', isMatch);
+        
+        console.log('Admin password reset successfully!');
+        console.log('New password:', newPassword);
+        
+        // Verify the new password works
+        const isMatch = SimpleHash.verify(newPassword, admin.password);
+        console.log('Password verification test:', isMatch);
 
         // Disconnect from MongoDB
         await mongoose.disconnect();

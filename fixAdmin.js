@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const Admin = require('./models/Admin');
-const bcrypt = require('bcryptjs');
+const SimpleHash = require('./simple-hash');
 require('dotenv').config();
 
 async function fixAdmin() {
@@ -29,10 +29,10 @@ async function fixAdmin() {
         console.log('Password verification result:', isMatch);
 
         if (!isMatch) {
-            // If password verification fails, try direct bcrypt comparison
+            // If password verification fails, try direct SimpleHash comparison
             const storedAdmin = await Admin.findOne({ username: 'rakeshmr1309@gmail.com' });
-            const directMatch = await bcrypt.compare('Rakesh123$', storedAdmin.password);
-            console.log('Direct bcrypt comparison result:', directMatch);
+            const directMatch = SimpleHash.verify('Rakesh123$', storedAdmin.password);
+            console.log('Direct SimpleHash comparison result:', directMatch);
         }
 
         // Test login process

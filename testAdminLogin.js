@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const Admin = require('./models/Admin');
-const bcrypt = require('bcryptjs');
+const SimpleHash = require('./simple-hash');
 require('dotenv').config();
 
 async function testAdminLogin() {
@@ -22,27 +22,8 @@ async function testAdminLogin() {
             passwordLength: admin.password ? admin.password.length : 0
         });
 
-        // Test password
-        const testPassword = 'Rakesh123$';
-        console.log('Testing password:', testPassword);
-
-        // Hash the test password
-        const salt = await bcrypt.genSalt(10);
-        const hashedTestPassword = await bcrypt.hash(testPassword, salt);
-        console.log('Hashed test password:', hashedTestPassword);
-
-        // Compare with stored password
-        const isMatch = await bcrypt.compare(testPassword, admin.password);
-        console.log('Password match result:', isMatch);
-
-        // Update admin password with new hash
-        admin.password = hashedTestPassword;
-        await admin.save();
-        console.log('Admin password updated with new hash');
-
-        // Verify the new password works
-        const verifyMatch = await bcrypt.compare(testPassword, admin.password);
-        console.log('Verification match result:', verifyMatch);
+        // Test password hashing and verification
+        await testPasswordHashing(admin);
 
         // Disconnect from MongoDB
         await mongoose.disconnect();
@@ -50,6 +31,23 @@ async function testAdminLogin() {
     } catch (error) {
         console.error('Error testing admin login:', error);
     }
+}
+
+// Test password hashing and verification
+async function testPasswordHashing(admin) {
+    const testPassword = 'test123';
+    
+    // Hash the test password
+    const hashedTestPassword = SimpleHash.hash(testPassword);
+    console.log('Test password hashed:', hashedTestPassword);
+    
+    // Verify the password
+    const isMatch = SimpleHash.verify(testPassword, admin.password);
+    console.log('Password match:', isMatch);
+    
+    // Test with wrong password
+    const verifyMatch = SimpleHash.verify(testPassword, admin.password);
+    console.log('Wrong password match:', verifyMatch);
 }
 
 testAdminLogin(); 

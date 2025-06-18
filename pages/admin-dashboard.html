@@ -1167,34 +1167,6 @@
         .action-bar button {
             margin-left: 10px;
         }
-        
-        /* Ensure email columns are visible */
-        .admin-table th:nth-child(3),
-        .admin-table td:nth-child(3) {
-            display: table-cell !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-            color: #000 !important;
-            background-color: #fff !important;
-        }
-        
-        /* Specific email column styling for different tables */
-        .admin-table th:nth-child(5),
-        .admin-table td:nth-child(5) {
-            display: table-cell !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-            color: #000 !important;
-            background-color: #fff !important;
-        }
-        
-        /* Debug styling to make email columns more visible */
-        .admin-table td:nth-child(3),
-        .admin-table td:nth-child(5) {
-            font-weight: 500 !important;
-            background-color: #f8f9fa !important;
-            border-left: 2px solid #007bff !important;
-        }
     </style>
 </head>
 <body>
@@ -1262,72 +1234,72 @@
                         <option value="month" selected>This Month</option>
                         <option value="year">This Year</option>
                     </select>
-        </div>
-    </div>
-    
+                </div>
+            </div>
+
             <div class="dashboard-stats">
                 <div class="stat-card">
                     <div class="stat-icon">
                         <i class="fas fa-users"></i>
-            </div>
+                    </div>
                     <div class="stat-info">
                         <h3>Total Users</h3>
                         <p class="stat-value" id="totalUsers">0</p>
                         <p class="stat-change positive">+5% from last month</p>
-        </div>
-    </div>
-    
+                    </div>
+                </div>
+
                 <div class="stat-card">
                     <div class="stat-icon">
                         <i class="fas fa-hand-holding-heart"></i>
-                </div>
+                    </div>
                     <div class="stat-info">
                         <h3>Total Donations</h3>
                         <p class="stat-value" id="totalDonations">$0</p>
                         <p class="stat-change positive">+12% from last month</p>
                     </div>
-                    </div>
+                </div>
 
                 <div class="stat-card">
                     <div class="stat-icon">
                         <i class="fas fa-project-diagram"></i>
-            </div>
+                    </div>
                     <div class="stat-info">
                         <h3>Active Projects</h3>
                         <p class="stat-value" id="activeProjects">0</p>
                         <p class="stat-change positive">+3% from last month</p>
-        </div>
-    </div>
-    
+                    </div>
+                </div>
+
                 <div class="stat-card">
                     <div class="stat-icon">
                         <i class="fas fa-chart-line"></i>
-        </div>
+                    </div>
                     <div class="stat-info">
                         <h3>Success Rate</h3>
                         <p class="stat-value" id="successRate">0%</p>
                         <p class="stat-change positive">+2% from last month</p>
-    </div>
-            </div>
+                    </div>
                 </div>
+            </div>
 
             <div class="dashboard-charts">
                 <div class="chart-container">
                     <h3>Donation Trends</h3>
                     <canvas id="donationChart"></canvas>
-            </div>
+                </div>
                 <div class="chart-container">
                     <h3>User Growth</h3>
                     <canvas id="userChart"></canvas>
-        </div>
-    </div>
-    
+                </div>
+            </div>
+
             <div class="recent-activity">
                 <h3>Recent Activity</h3>
                 <div class="activity-list" id="recentActivity">
                     <!-- Activity items will be loaded here -->
-            </div>
                 </div>
+            </div>
         </main>
     </div>
     
@@ -1633,7 +1605,1006 @@
                                     <th>Req. ID</th>
                                     <th>Organization</th>
                                     <th>Contact Person</th>
+                                    <th>Type</th>
+                                    <th>Amount</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Requirements data will be loaded here -->
+                                <tr>
+                                    <td colspan="7" style="text-align: center;">Loading requirements...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div id="recent-feedback" class="tab-content">
+                        <table class="admin-table" id="recentFeedbackTable">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>User</th>
+                                    <th>Type</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Feedback data will be loaded here -->
+                                <tr>
+                                    <td colspan="5" style="text-align: center;">Loading feedback...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            
+            // Set content
+            contentArea.innerHTML = dashboardHTML;
+            
+            // Add event listeners to tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Update active tab button
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Show the corresponding tab content
+                    const tabId = this.getAttribute('data-tab');
+                    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+            
+            // Load data for dashboard
+            fetchDashboardStats();
+            loadRecentDonations();
+            loadRecentPayments();
+            loadRecentRequirements();
+            loadRecentFeedback();
+        }
+        
+        // Fetch statistics for dashboard
+        function fetchDashboardStats() {
+            // Fetch donation count
+            fetch('/api/donations/count')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch donation count');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    document.getElementById('totalDonations').textContent = data.count || '0';
+                })
+                .catch(error => {
+                    console.error('Error fetching donation count:', error);
+                    document.getElementById('totalDonations').textContent = '0';
+                });
+            
+            // Fetch payment total
+            fetch('/api/payments/total')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch payment total');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    document.getElementById('totalPayments').textContent = '₹' + (data.total || '0');
+                })
+                .catch(error => {
+                    console.error('Error fetching payment total:', error);
+                    document.getElementById('totalPayments').textContent = '₹0';
+                });
+            
+            // Fetch requirements count
+            fetch('/api/requirements/count')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch requirements count');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    document.getElementById('totalRequirements').textContent = data.count || '0';
+                })
+                .catch(error => {
+                    console.error('Error fetching requirements count:', error);
+                    document.getElementById('totalRequirements').textContent = '0';
+                });
+            
+            // Fetch feedback count
+            fetch('/api/feedback/count')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch feedback count');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    document.getElementById('totalFeedback').textContent = data.count || '0';
+                })
+                .catch(error => {
+                    console.error('Error fetching feedback count:', error);
+                    document.getElementById('totalFeedback').textContent = '0';
+                });
+            
+            // Fetch users count
+            fetch('/api/admin/users/count')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch users count');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    document.getElementById('totalUsers').textContent = data.count || '0';
+                })
+                .catch(error => {
+                    console.error('Error fetching users count:', error);
+                    document.getElementById('totalUsers').textContent = '0';
+                });
+        }
+        
+        // Load recent donations
+        function loadRecentDonations() {
+            const tableBody = document.querySelector('#recentDonationsTable tbody');
+            
+            // Fetch recent donations from API
+            fetch('/api/donations/recent')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch recent donations');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.length > 0) {
+                        // Clear loading message
+                        tableBody.innerHTML = '';
+                        
+                        // Add each donation to the table
+                        data.forEach(donation => {
+                            const row = document.createElement('tr');
+                            
+                            // Format the date
+                            const date = new Date(donation.createdAt);
+                            const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+                            
+                            row.innerHTML = `
+                                <td>${donation._id.substring(0, 8)}</td>
+                                <td style="color: #000 !important; font-weight: bold;">${donation.donorName || donation.name || 'N/A'}</td>
+                                <td style="color: #000 !important;">${donation.donorEmail || donation.email || 'N/A'}</td>
+                                <td style="color: #000 !important;">${donation.donationType || donation.category || 'N/A'}</td>
+                                <td>${formattedDate}</td>
+                                <td>
+                                    <button class="action-btn view-btn" data-id="${donation._id}">View</button>
+                                    <button class="action-btn edit-btn" data-id="${donation._id}">Edit</button>
+                                </td>
+                            `;
+                            
+                            tableBody.appendChild(row);
+                        });
+                        
+                        // Add event listeners for view and edit buttons
+                        document.querySelectorAll('#recentDonationsTable .view-btn').forEach(btn => {
+                            btn.addEventListener('click', function() {
+                                const donationId = this.getAttribute('data-id');
+                                viewDonationDetails(donationId);
+                            });
+                        });
+                        
+                        document.querySelectorAll('#recentDonationsTable .edit-btn').forEach(btn => {
+                            btn.addEventListener('click', function() {
+                                const donationId = this.getAttribute('data-id');
+                                editDonation(donationId);
+                            });
+                        });
+                    } else {
+                        tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No donations found</td></tr>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching recent donations:', error);
+                    tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Error loading donations from database</td></tr>';
+                });
+        }
+        
+        // Set up real-time updates for donations
+        function setupDonationsListener() {
+            // Check for new donations every 30 seconds
+            setInterval(() => {
+                fetch('/api/donations/recent?timestamp=' + Date.now())
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.length > 0) {
+                            // Update dashboard stats
+                            fetch('/api/donations/count')
+                                .then(response => response.json())
+                                .then(countData => {
+                                    document.getElementById('totalDonations').textContent = countData.count || '0';
+                                });
+                                
+                            // Update the donations table if new data is available
+                            const tableBody = document.querySelector('#recentDonationsTable tbody');
+                            
+                            // Clear table and add new data
+                            tableBody.innerHTML = '';
+                            data.forEach(donation => {
+                                const row = document.createElement('tr');
+                                
+                                // Format the date
+                                const date = new Date(donation.createdAt);
+                                const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+                                
+                                row.innerHTML = `
+                                    <td>${donation._id.substring(0, 8)}</td>
+                                    <td style="color: #000 !important; font-weight: bold;">${donation.donorName || donation.name || 'N/A'}</td>
+                                    <td style="color: #000 !important;">${donation.donorEmail || donation.email || 'N/A'}</td>
+                                    <td style="color: #000 !important;">${donation.donationType || donation.category || 'N/A'}</td>
+                                    <td>${formattedDate}</td>
+                                `;
+                                
+                                tableBody.appendChild(row);
+                            });
+                            
+                            // Show notification
+                            if (document.querySelector('.nav-item.active').getAttribute('data-tab') !== 'dashboard') {
+                                showNotification('New donation received');
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error checking for new donations:', error);
+                    });
+            }, 30000);
+        }
+        
+        // Load recent payments
+        function loadRecentPayments() {
+            const tableBody = document.querySelector('#recentPaymentsTable tbody');
+            
+            // Fetch recent payments from API
+            fetch('/api/payments/recent')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length > 0) {
+                        // Clear loading message
+                        tableBody.innerHTML = '';
+                        
+                        // Add each payment to the table
+                        data.forEach(payment => {
+                            const row = document.createElement('tr');
+                            
+                            // Format the date
+                            const date = new Date(payment.createdAt);
+                            const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+                            
+                            // Format the amount
+                            const amount = `₹${parseFloat(payment.amount).toFixed(2)}`;
+                            
+                            row.innerHTML = `
+                                <td>${payment._id.substring(0, 8)}</td>
+                                <td style="color: #000 !important;">${payment.donationId ? payment.donationId.substring(0, 8) : 'N/A'}</td>
+                                <td style="color: #000 !important; font-weight: bold;">${amount}</td>
+                                <td style="color: #000 !important;">${payment.paymentMethod}</td>
+                                <td style="color: #000 !important;">${payment.userEmail || 'Anonymous'}</td>
+                                <td style="color: #000 !important;">${formattedDate}</td>
+                            `;
+                            
+                            tableBody.appendChild(row);
+                        });
+                    } else {
+                        tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No payments found</td></tr>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching recent payments:', error);
+                    tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Error loading payments</td></tr>';
+                });
+            
+            // Set up real-time updates for payments
+            setupPaymentsListener();
+        }
+        
+        // Set up real-time listener for new payments
+        function setupPaymentsListener() {
+            // Check for new payments every 30 seconds
+            setInterval(() => {
+                fetch('/api/payments/recent?timestamp=' + Date.now())
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.length > 0) {
+                            // Update dashboard stats
+                            fetch('/api/payments/total')
+                                .then(response => response.json())
+                                .then(totalData => {
+                                    document.getElementById('totalPayments').textContent = `₹${parseFloat(totalData.total).toFixed(2)}`;
+                                });
+                                
+                            // Update the payments table
+                            const tableBody = document.querySelector('#recentPaymentsTable tbody');
+                            
+                            // Clear table and add new data
+                            tableBody.innerHTML = '';
+                            data.forEach(payment => {
+                                const row = document.createElement('tr');
+                                
+                                // Format the date
+                                const date = new Date(payment.createdAt);
+                                const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+                                
+                                // Format the amount
+                                const amount = `₹${parseFloat(payment.amount).toFixed(2)}`;
+                                
+                                row.innerHTML = `
+                                    <td>${payment._id.substring(0, 8)}</td>
+                                    <td style="color: #000 !important;">${payment.donationId ? payment.donationId.substring(0, 8) : 'N/A'}</td>
+                                    <td style="color: #000 !important; font-weight: bold;">${amount}</td>
+                                    <td style="color: #000 !important;">${payment.paymentMethod}</td>
+                                    <td style="color: #000 !important;">${payment.userEmail || 'Anonymous'}</td>
+                                    <td style="color: #000 !important;">${formattedDate}</td>
+                                `;
+                                
+                                tableBody.appendChild(row);
+                            });
+                            
+                            // Show notification
+                            if (document.querySelector('.nav-item.active').getAttribute('data-tab') !== 'dashboard') {
+                                showNotification('New payment received');
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error checking for new payments:', error);
+                    });
+            }, 30000);
+        }
+        
+        // Load recent requirements
+        function loadRecentRequirements() {
+            const tableBody = document.querySelector('#recentRequirementsTable tbody');
+            
+            // Fetch recent requirements from API
+            fetch('/api/requirements/recent')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length > 0) {
+                        // Clear loading message
+                        tableBody.innerHTML = '';
+                        
+                        // Add each requirement to the table
+                        data.forEach(requirement => {
+                            const row = document.createElement('tr');
+                            
+                            // Format the date
+                            const date = new Date(requirement.createdAt);
+                            const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+                            
+                            // Format the amount
+                            const amount = requirement.requiredAmount ? `₹${parseFloat(requirement.requiredAmount).toFixed(2)}` : 'N/A';
+                            
+                            row.innerHTML = `
+                                <td>${requirement._id.substring(0, 8)}</td>
+                                <td>${requirement.organizationName}</td>
+                                <td>${requirement.contactPerson}</td>
+                                <td>${requirement.requirementType}</td>
+                                <td>${amount}</td>
+                                <td>${formattedDate}</td>
+                            `;
+                            
+                            tableBody.appendChild(row);
+                        });
+                    } else {
+                        tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No requirements found</td></tr>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching recent requirements:', error);
+                    tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Error loading requirements</td></tr>';
+                });
+            
+            // Set up real-time updates for requirements
+            setupRequirementsListener();
+        }
+        
+        // Set up real-time listener for new requirements
+        function setupRequirementsListener() {
+            // Check for new requirements every 30 seconds
+            setInterval(() => {
+                fetch('/api/requirements/recent?timestamp=' + Date.now())
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.length > 0) {
+                            // Update dashboard stats
+                            fetch('/api/requirements/count')
+                                .then(response => response.json())
+                                .then(countData => {
+                                    document.getElementById('totalRequirements').textContent = countData.count || '0';
+                                });
+                                
+                            // Update the requirements table
+                            const tableBody = document.querySelector('#recentRequirementsTable tbody');
+                            
+                            // Clear table and add new data
+                            tableBody.innerHTML = '';
+                            data.forEach(requirement => {
+                                const row = document.createElement('tr');
+                                
+                                // Format the date
+                                const date = new Date(requirement.createdAt);
+                                const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+                                
+                                // Format the amount
+                                const amount = requirement.requiredAmount ? `₹${parseFloat(requirement.requiredAmount).toFixed(2)}` : 'N/A';
+                                
+                                row.innerHTML = `
+                                    <td>${requirement._id.substring(0, 8)}</td>
+                                    <td>${requirement.organizationName}</td>
+                                    <td>${requirement.contactPerson}</td>
+                                    <td>${requirement.requirementType}</td>
+                                    <td>${amount}</td>
+                                    <td>${formattedDate}</td>
+                                `;
+                                
+                                tableBody.appendChild(row);
+                            });
+                            
+                            // Show notification
+                            if (document.querySelector('.nav-item.active').getAttribute('data-tab') !== 'dashboard') {
+                                showNotification('New requirement received');
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error checking for new requirements:', error);
+                    });
+            }, 30000);
+        }
+        
+        // Load recent feedback
+        function loadRecentFeedback() {
+            const tableBody = document.querySelector('#recentFeedbackTable tbody');
+            
+            // Fetch recent feedback from API
+            fetch('/api/admin/feedback/recent')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch recent feedback');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.length === 0) {
+                        tableBody.innerHTML = '<tr><td colspan="4" class="no-data">No feedback available</td></tr>';
+                        return;
+                    }
+                    
+                    // Clear loading message
+                    tableBody.innerHTML = '';
+                    
+                    // Add each feedback to the table
+                    data.forEach(feedback => {
+                        const row = document.createElement('tr');
+                        
+                        // Format the date
+                        const date = new Date(feedback.createdAt).toLocaleDateString();
+                        
+                        row.innerHTML = `
+                            <td>${feedback._id.substring(0, 8)}</td>
+                            <td>${feedback.fullName || 'Anonymous'}</td>
+                            <td>${feedback.phoneNo || '-'}</td>
+                            <td>${date}</td>
+                        `;
+                        
+                        tableBody.appendChild(row);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading recent feedback:', error);
+                    tableBody.innerHTML = 
+                        '<tr><td colspan="4" class="error-data">Error loading feedback data. Please try again later.</td></tr>';
+                });
+        }
+        
+        /**
+         * Displays the feedback details in a modal
+         * @param {number} feedbackId - The ID of the feedback to view
+         */
+        function viewFeedbackDetails(feedbackId) {
+            // Create and show modal
+            const modalHTML = `
+                <div id="feedback-detail-modal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2>Feedback Details</h2>
+                            <span class="close">&times;</span>
+                        </div>
+                        <div class="modal-body">
+                            <div id="feedback-detail-content">
+                                <div class="loading">Loading feedback details...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Add modal to the body
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            
+            // Show the modal
+            const modal = document.getElementById('feedback-detail-modal');
+            modal.style.display = 'block';
+            
+            // Add close button event listener
+            document.querySelector('#feedback-detail-modal .close').addEventListener('click', function() {
+                closeModal();
+            });
+            
+            // Fetch feedback details
+            fetch(`/api/feedback/${feedbackId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch feedback details');
+                    }
+                    return response.json();
+                })
+                .then(feedback => {
+                    // Format date
+                    const date = new Date(feedback.timestamp || feedback.createdAt);
+                    const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+                    
+                    // Format status
+                    let statusText = '';
+                    let statusClass = '';
+                    
+                    switch (feedback.status) {
+                        case 'new':
+                            statusText = 'New';
+                            statusClass = 'status-new';
+                            break;
+                        case 'in_progress':
+                            statusText = 'In Progress';
+                            statusClass = 'status-pending';
+                            break;
+                        case 'resolved':
+                            statusText = 'Resolved';
+                            statusClass = 'status-completed';
+                            break;
+                        default:
+                            statusText = 'New';
+                            statusClass = 'status-new';
+                    }
+                    
+                    // Create content HTML
+                    let responsesHTML = '';
+                    if (feedback.responses && feedback.responses.length > 0) {
+                        responsesHTML = `
+                            <div class="feedback-responses">
+                                <h3>Responses</h3>
+                                <div class="responses-list">
+                        `;
+                        
+                        feedback.responses.forEach(response => {
+                            const responseDate = new Date(response.timestamp);
+                            const responseFormattedDate = `${responseDate.toLocaleDateString()} ${responseDate.toLocaleTimeString()}`;
+                            
+                            responsesHTML += `
+                                <div class="response-item">
+                                    <div class="response-header">
+                                        <span class="response-from">${response.adminName || 'Admin'}</span>
+                                        <span class="response-date">${responseFormattedDate}</span>
+                                    </div>
+                                    <div class="response-message">${response.message}</div>
+                                </div>
+                            `;
+                        });
+                        
+                        responsesHTML += `
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    document.getElementById('feedback-detail-content').innerHTML = `
+                        <div class="feedback-details">
+                            <div class="detail-header">
+                                <div class="detail-title">
+                                    <h3>General Feedback</h3>
+                                    <span class="status-badge ${statusClass}">${statusText}</span>
+                        </div>
+                                <div class="detail-date">${formattedDate}</div>
+                            </div>
+                            
+                            <div class="user-info">
+                                <p><strong>From:</strong> ${feedback.fullName || feedback.name || 'Anonymous'}</p>
+                                <p><strong>Email:</strong> ${feedback.email || '-'}</p>
+                                ${feedback.phoneNo ? `<p><strong>Phone:</strong> ${feedback.phoneNo}</p>` : ''}
+                                ${feedback.rating ? `<p><strong>Rating:</strong> ${feedback.rating}/5</p>` : ''}
+                            </div>
+                            
+                            <div class="feedback-message">
+                                <h3>Message</h3>
+                                <div class="message-content">
+                                    ${feedback.feedbackText || feedback.message || '(No message provided)'}
+                                </div>
+                            </div>
+                            
+                            ${responsesHTML}
+                            
+                            <div class="detail-actions">
+                                <button class="btn primary-btn" onclick="respondToFeedback('${feedbackId}')">Respond</button>
+                                ${feedback.status !== 'resolved' ? 
+                                    `<button class="btn success-btn" onclick="markFeedbackResolved('${feedbackId}')">Mark as Resolved</button>` : 
+                                    ''
+                                }
+                                <button class="btn secondary-btn" onclick="closeModal()">Close</button>
+                            </div>
+                        </div>
+                    `;
+                })
+                .catch(error => {
+                    console.error('Error fetching feedback details:', error);
+                    document.getElementById('feedback-detail-content').innerHTML = `
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <p>Failed to load feedback details. Please try again.</p>
+                            <button class="btn primary-btn" onclick="viewFeedbackDetails('${feedbackId}')">Retry</button>
+                        </div>
+                    `;
+                });
+        }
+        
+        /**
+         * Opens the feedback response modal to allow admins to respond to feedback
+         * @param {number} feedbackId - The ID of the feedback to respond to
+         */
+        function respondToFeedback(feedbackId) {
+            // Get the modal
+            const modal = document.getElementById('feedback-response-modal');
+            const messageContainer = document.getElementById('feedback-message-container');
+            
+            // Show loading state
+            messageContainer.innerHTML = '<div class="loading">Loading feedback details...</div>';
+            
+            // Display the modal
+            modal.style.display = 'block';
+            
+            // Fetch the feedback details
+            fetch(`/api/feedback/${feedbackId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch feedback details');
+                    }
+                    return response.json();
+                })
+                .then(feedback => {
+                    // Format the date
+                    const date = new Date(feedback.timestamp || feedback.createdAt).toLocaleString();
+                    
+                    // Create the HTML for the feedback message
+                    messageContainer.innerHTML = `
+                        <div class="feedback-meta">
+                            <p><strong>From:</strong> ${feedback.fullName || feedback.name || 'Anonymous'}</p>
+                            <p><strong>Date:</strong> ${date}</p>
+                            <p><strong>Type:</strong> General</p>
+                        </div>
+                        <div class="feedback-text">
+                            <p>${feedback.feedbackText || feedback.message || 'No message provided'}</p>
+                        </div>
+                    `;
+                    
+                    // Update the form action to include the feedback ID
+                    const form = document.getElementById('feedback-response-form');
+                    form.setAttribute('data-id', feedback._id || feedback.id);
+                    
+                    // Add event listener to the form submit
+                    form.addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        
+                        // Get the response message
+                        const responseMessage = document.getElementById('response-message').value;
+                        
+                        // Show loading state
+                        const submitBtn = this.querySelector('button[type="submit"]');
+                        const originalText = submitBtn.textContent;
+                        submitBtn.disabled = true;
+                        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+                        
+                        // Get admin name from localStorage
+                        const adminName = localStorage.getItem('userName') || 'Admin';
+                        
+                        // Send the response
+                        fetch(`/api/feedback/${feedbackId}/respond`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                message: responseMessage,
+                                adminName: adminName
+                            })
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Failed to send response');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            // Close the modal
+                            closeModal();
+                            
+                            // Reset the form
+                            form.reset();
+                            
+                            // Show success notification
+                            showNotification('Response sent successfully', 'success');
+                            
+                            // Reload feedback data
+                            loadAllFeedback();
+                        })
+                        .catch(error => {
+                            console.error('Error sending response:', error);
+                            
+                            // Enable the submit button
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = originalText;
+                            
+                            // Show error notification
+                            showNotification('Failed to send response. Please try again.', 'error');
+                        });
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching feedback details:', error);
+                    messageContainer.innerHTML = `
+                        <div class="error-message">
+                            <p>Failed to load feedback details: ${error.message}</p>
+                            <button class="btn primary-btn" onclick="respondToFeedback('${feedbackId}')">Retry</button>
+                        </div>
+                    `;
+                });
+        }
+        
+        // Function to show notification
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.classList.add('notification', `notification-${type}`);
+            notification.textContent = message;
+            
+            // Add notification to the body
+            document.body.appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.classList.add('fade-out');
+                setTimeout(() => {
+                    notification.remove();
+                }, 500);
+            }, 3000);
+        }
+        
+        // Functions for individual tab content
+        function loadDonationsContent() {
+            const contentArea = document.getElementById('adminContent');
+            
+            contentArea.innerHTML = `
+                <h2 class="page-title"><i class="fas fa-gift"></i> Donations</h2>
+                
+                <div class="data-tabs">
+                    <div class="tab-buttons">
+                        <button class="tab-btn active" data-tab="all-donations">All Donations</button>
+                    </div>
+                    
+                    <div id="all-donations" class="tab-content active">
+                        <table class="admin-table" id="allDonationsTable">
+                            <thead>
+                                <tr>
+                                    <th>Donation ID</th>
+                                    <th>Name</th>
                                     <th>Email</th>
+                                    <th>Category</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="7" style="text-align: center;">Loading donations...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            
+            // Add event listeners to tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Update active tab button
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Show the corresponding tab content
+                    const tabId = this.getAttribute('data-tab');
+                    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+            
+            // Load donations data
+            loadAllDonations();
+        }
+        
+        function loadPaymentsContent() {
+            const contentArea = document.getElementById('adminContent');
+            
+            contentArea.innerHTML = `
+                <h2 class="page-title"><i class="fas fa-credit-card"></i> Payments</h2>
+                
+                <div class="data-tabs">
+                    <div class="tab-buttons">
+                        <button class="tab-btn active" data-tab="all-payments">All Payments</button>
+                    </div>
+                    
+                    <div id="all-payments" class="tab-content active">
+                        <table class="admin-table" id="allPaymentsTable">
+                            <thead>
+                                <tr>
+                                    <th>Payment ID</th>
+                                    <th>Donation ID</th>
+                                    <th>Amount</th>
+                                    <th>Method</th>
+                                    <th>Email</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="7" style="text-align: center;">Loading payments...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            
+            // Add event listeners to tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Update active tab button
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Show the corresponding tab content
+                    const tabId = this.getAttribute('data-tab');
+                    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+            
+            // Load payments data
+            loadAllPayments();
+        }
+        
+        // Load all payments data
+        function loadAllPayments() {
+            const tableBody = document.querySelector('#allPaymentsTable tbody');
+            
+            // Show loading state
+            tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Loading payments...</td></tr>';
+            
+            // Fetch all payments from API
+            fetch('/api/payments/all')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length > 0) {
+                        // Clear loading message
+                        tableBody.innerHTML = '';
+                        
+                        // Add each payment to the table
+                        data.forEach(payment => {
+                            const row = document.createElement('tr');
+                            
+                            // Format the date
+                            const date = new Date(payment.createdAt);
+                            const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+                            
+                            // Format the amount
+                            const amount = `₹${parseFloat(payment.amount).toFixed(2)}`;
+                            
+                            row.innerHTML = `
+                                <td>${payment._id.substring(0, 8)}</td>
+                                <td style="color: #000 !important;">${payment.donationId ? payment.donationId.substring(0, 8) : 'N/A'}</td>
+                                <td style="color: #000 !important; font-weight: bold;">${amount}</td>
+                                <td style="color: #000 !important;">${payment.paymentMethod}</td>
+                                <td style="color: #000 !important;">${payment.userEmail || 'Anonymous'}</td>
+                                <td style="color: #000 !important;">${formattedDate}</td>
+                                
+                                <td>
+                                    <button class="action-btn view-btn" data-id="${payment._id}">View</button>
+                                </td>
+                            `;
+                            
+                            tableBody.appendChild(row);
+                        });
+                        
+                        // Add event listeners for view buttons
+                        document.querySelectorAll('#allPaymentsTable .view-btn').forEach(btn => {
+                            btn.addEventListener('click', function() {
+                                const paymentId = this.getAttribute('data-id');
+                                viewPaymentDetails(paymentId);
+                            });
+                        });
+                    } else {
+                        tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No payments found</td></tr>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching payments:', error);
+                    tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Error loading payments</td></tr>';
+                    
+                    // For development/testing, use mock data if API fails
+                    const mockData = getMockPayments();
+                    if (mockData.length > 0) {
+                        tableBody.innerHTML = '';
+                        mockData.forEach(payment => {
+                            const row = document.createElement('tr');
+                            const date = new Date(payment.createdAt);
+                            const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+                            const amount = `₹${parseFloat(payment.amount).toFixed(2)}`;
+                            
+                            row.innerHTML = `
+                                <td>${payment._id.substring(0, 8)}</td>
+                                <td>${payment.donationId}</td>
+                                <td>${amount}</td>
+                                <td>${payment.category}</td>
+                                <td>${payment.emailId}</td>
+                                <td>${formattedDate}</td>
+                                
+                                <td>
+                                    <button class="action-btn view-btn" data-id="${payment._id}">View</button>
+                                </td>
+                            `;
+                            
+                            tableBody.appendChild(row);
+                        });
+                        
+                        // Add event listeners for mock data
+                        document.querySelectorAll('#allPaymentsTable .view-btn').forEach(btn => {
+                            btn.addEventListener('click', function() {
+                                const paymentId = this.getAttribute('data-id');
+                                viewPaymentDetails(paymentId);
+                            });
+                        });
+                    }
+                });
+        }
+        
+        function loadRequirementsContent() {
+            const contentArea = document.getElementById('adminContent');
+            
+            contentArea.innerHTML = `
+                <h2 class="page-title"><i class="fas fa-hand-holding-heart"></i> Requirements</h2>
+                
+                <div class="data-tabs">
+                    <div class="tab-buttons">
+                        <button class="tab-btn active" data-tab="all-requirements">All Requirements</button>
+                    </div>
+                    
+                    <div id="all-requirements" class="tab-content active">
+                        <table class="admin-table" id="allRequirementsTable">
+                            <thead>
+                                <tr>
+                                    <th>Req. ID</th>
+                                    <th>Organization</th>
+                                    <th>Contact Person</th>
                                     <th>Type</th>
                                     <th>Amount</th>
                                     <th>Date</th>
