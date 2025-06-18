@@ -5,6 +5,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
 const dns = require('dns');
+const https = require('https');
+const fs = require('fs');
 const mongoose = require('./js/db');
 
 // Fix DNS resolution issues - this helps with MongoDB Atlas SRV connection
@@ -155,4 +157,29 @@ app.use((err, req, res, next) => {
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
+    console.log(`HTTP: http://localhost:${PORT}`);
+    
+    // Try to start HTTPS server if certificates exist
+    try {
+        const privateKey = fs.readFileSync('ssl/private.key', 'utf8');
+        const certificate = fs.readFileSync('ssl/certificate.crt', 'utf8');
+        
+        const credentials = { key: privateKey, cert: certificate };
+        const httpsServer = https.createServer(credentials, app);
+        
+        httpsServer.listen(443, () => {
+            console.log(`HTTPS: https://localhost:443`);
+            console.log('✅ HTTPS server is running - autofill will work for payment forms');
+        });
+    } catch (error) {
+        console.log('⚠️  HTTPS not available - SSL certificates not found');
+        console.log('   To enable HTTPS (recommended for production):');
+        console.log('   1. Create an "ssl" folder in your project root');
+        console.log('   2. Add your SSL certificate files:');
+        console.log('      - ssl/private.key (private key file)');
+        console.log('      - ssl/certificate.crt (certificate file)');
+        console.log('   3. Restart the server');
+        console.log('   For development, you can generate self-signed certificates using:');
+        console.log('   openssl req -x509 -newkey rsa:4096 -keyout ssl/private.key -out ssl/certificate.crt -days 365 -nodes');
+    }
 });

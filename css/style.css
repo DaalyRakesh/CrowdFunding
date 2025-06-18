@@ -150,7 +150,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: url('../assets/hero-image.jpg');
+    /* background-image removed - no image file available */
     background-size: cover;
     background-position: center;
     filter: grayscale(100%);

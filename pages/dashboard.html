@@ -61,6 +61,25 @@
                             <input type="email" id="emailId" name="emailId" required placeholder="Enter your email">
                         </div>
 
+                        <div class="form-group card-fields" style="display: none;">
+                            <label for="cardNo">Card Number</label>
+                            <input type="text" id="cardNo" name="cardNo" maxlength="19" placeholder="Enter card number manually" autocomplete="cc-number">
+                            <small class="form-text">Enter your card number manually (numbers only, no automatic formatting)</small>
+                            <small class="form-text" style="color: #ff6b6b; font-weight: bold;">Note: Autofill is disabled for security reasons on non-HTTPS connections. This is a browser security feature to protect your card information.</small>
+                        </div>
+
+                        <div class="form-group card-fields" style="display: none;">
+                            <label for="expiryDate">Expiry Date</label>
+                            <input type="text" id="expiryDate" name="expiryDate" placeholder="MM/YY" maxlength="5" autocomplete="cc-exp">
+                            <small class="form-text">Enter card expiry date (MM/YY format)</small>
+                        </div>
+
+                        <div class="form-group card-fields" style="display: none;">
+                            <label for="cvvNo">CVV</label>
+                            <input type="password" id="cvvNo" name="cvvNo" pattern="[0-9]{3,4}" maxlength="4" placeholder="123" autocomplete="cc-csc">
+                            <small class="form-text">Enter the 3 or 4-digit security code</small>
+                        </div>
+
                         <div class="form-buttons">
                             <button type="submit" class="btn-submit">Submit</button>
                             <button type="reset" class="btn-reset">Reset</button>
@@ -73,6 +92,17 @@
             <div id="payments" class="content-section" style="display: none;">
                 <div class="payment-form">
                     <h2>Payments</h2>
+                    
+                    <!-- Security Notice -->
+                    <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px; padding: 15px; margin-bottom: 20px;">
+                        <h4 style="margin: 0 0 10px 0; color: #856404;">🔒 Security Notice</h4>
+                        <p style="margin: 0; color: #856404; font-size: 14px;">
+                            <strong>Autofill is disabled for card fields</strong> because this form doesn't have a secure connection (HTTPS). 
+                            This is a browser security feature to protect your payment information. 
+                            You can still manually enter your card details, or contact us to enable HTTPS for enhanced security.
+                        </p>
+                    </div>
+                    
                     <form id="paymentForm">
                         <div class="form-group">
                             <label for="paymentEmailId">Email ID</label>
@@ -108,23 +138,27 @@
                                 <option value="" disabled selected>Select payment method</option>
                                 <option value="Cash">Cash</option>
                                 <option value="Card">Card</option>
-                                <option value="UPI">UPI</option>
                             </select>
+                            <button type="button" onclick="testCardFields()" style="margin-top: 10px; padding: 5px 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Test Card Fields</button>
                         </div>
 
                         <div class="form-group card-fields" style="display: none;">
-                            <label for="cardNo">Card No</label>
-                            <input type="text" id="cardNo" name="cardNo" pattern="[0-9]{16}" maxlength="16" placeholder="Enter 16-digit card number">
+                            <label for="cardNo">Card Number</label>
+                            <input type="text" id="cardNo" name="cardNo" maxlength="19" placeholder="Enter card number manually" required autocomplete="cc-number">
+                            <small class="form-text">Enter your card number manually (numbers only, no automatic formatting)</small>
+                            <small class="form-text" style="color: #ff6b6b; font-weight: bold;">Note: Autofill is disabled for security reasons on non-HTTPS connections. This is a browser security feature to protect your card information.</small>
                         </div>
 
                         <div class="form-group card-fields" style="display: none;">
-                            <label for="expiryDate">Date of Expiry</label>
-                            <input type="text" id="expiryDate" name="expiryDate" placeholder="mm/dd/yyyy">
+                            <label for="expiryDate">Expiry Date</label>
+                            <input type="text" id="expiryDate" name="expiryDate" placeholder="MM/YY" maxlength="5" required autocomplete="cc-exp">
+                            <small class="form-text">Enter card expiry date (MM/YY format)</small>
                         </div>
 
                         <div class="form-group card-fields" style="display: none;">
-                            <label for="cvvNo">CVV No</label>
-                            <input type="password" id="cvvNo" name="cvvNo" pattern="[0-9]{3}" maxlength="3">
+                            <label for="cvvNo">CVV</label>
+                            <input type="password" id="cvvNo" name="cvvNo" pattern="[0-9]{3,4}" maxlength="4" placeholder="123" required autocomplete="cc-csc">
+                            <small class="form-text">Enter the 3 or 4-digit security code</small>
                         </div>
 
                         <div class="form-group">
@@ -195,31 +229,6 @@
                         <div class="form-group">
                             <label for="reqAmount">Amount</label>
                             <input type="number" id="reqAmount" name="amount" value="0" min="0" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="reqCategory">Payment Category</label>
-                            <select id="reqCategory" name="category" required>
-                                <option value="" disabled selected>Select payment method</option>
-                                <option value="Cash">Cash</option>
-                                <option value="Card">Card</option>
-                                <option value="UPI">UPI</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group card-fields" style="display: none;">
-                            <label for="reqCardNo">Card No</label>
-                            <input type="text" id="reqCardNo" name="cardNo" pattern="[0-9]{16}" maxlength="16" placeholder="Enter 16-digit card number">
-                        </div>
-
-                        <div class="form-group card-fields" style="display: none;">
-                            <label for="reqExpiryDate">Date of Expiry</label>
-                            <input type="text" id="reqExpiryDate" name="expiryDate" placeholder="mm/dd/yyyy">
-                        </div>
-
-                        <div class="form-group card-fields" style="display: none;">
-                            <label for="reqCvvNo">CVV No</label>
-                            <input type="password" id="reqCvvNo" name="cvvNo" pattern="[0-9]{3}" maxlength="3" placeholder="Enter CVV">
                         </div>
 
                         <div class="form-group">
@@ -633,17 +642,52 @@
 
         // When category changes in payment form, show/hide card fields
         document.getElementById('paymentCategory').addEventListener('change', function() {
-            const cardFields = document.querySelectorAll('#payment .card-fields');
+            console.log('Payment category changed to:', this.value);
+            const cardFields = document.querySelectorAll('#payments .card-fields');
+            console.log('Found card fields:', cardFields.length);
             const showFields = this.value === 'Card';
+            console.log('Show card fields:', showFields);
             
             cardFields.forEach(field => {
-                field.style.display = showFields ? 'block' : 'none';
+                if (showFields) {
+                    field.style.display = 'block';
+                    field.classList.add('show');
+                    console.log('Showing card field:', field.querySelector('label').textContent);
+                } else {
+                    field.style.display = 'none';
+                    field.classList.remove('show');
+                    console.log('Hiding card field:', field.querySelector('label').textContent);
+                }
                 const input = field.querySelector('input');
                 if (input) {
                     input.required = showFields;
                 }
-                });
             });
+        });
+
+        // Test function to manually show/hide card fields
+        function testCardFields() {
+            console.log('Testing card fields...');
+            const cardFields = document.querySelectorAll('#payments .card-fields');
+            console.log('Found card fields:', cardFields.length);
+            
+            cardFields.forEach((field, index) => {
+                const label = field.querySelector('label');
+                console.log(`Card field ${index + 1}:`, label ? label.textContent : 'No label');
+                console.log('Current display:', field.style.display);
+                
+                // Toggle visibility
+                if (field.style.display === 'none' || field.style.display === '') {
+                    field.style.display = 'block';
+                    field.classList.add('show');
+                    console.log('Showing field:', label ? label.textContent : 'Unknown');
+                } else {
+                    field.style.display = 'none';
+                    field.classList.remove('show');
+                    console.log('Hiding field:', label ? label.textContent : 'Unknown');
+                }
+            });
+        }
 
         // Function to generate a payment ID with PA prefix
         function generatePaymentId() {
@@ -804,6 +848,9 @@
         document.getElementById('paymentForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
+            // Prevent any validation popups
+            e.stopPropagation();
+            
             // Get form data
             const formData = new FormData(this);
             const paymentData = Object.fromEntries(formData.entries());
@@ -911,9 +958,6 @@
                 
                 document.getElementById('reqDonationId').value = donationId;
                 document.getElementById('reqDonationTime').value = donationTime;
-                
-                // Reset category dropdown and trigger change event
-                document.getElementById('reqCategory').dispatchEvent(new Event('change'));
             })
             .catch(error => {
                 console.error('Requirement error:', error);
@@ -921,19 +965,27 @@
             });
         });
 
-        // Show/hide card fields for requirement form
+        // Show/hide card fields for requirement form - REMOVED (reqCategory field no longer exists)
+        /*
         document.getElementById('reqCategory').addEventListener('change', function() {
             const cardFields = document.querySelectorAll('#requirement .card-fields');
             const showFields = this.value === 'Card';
             
             cardFields.forEach(field => {
-                field.style.display = showFields ? 'block' : 'none';
+                if (showFields) {
+                    field.style.display = 'block';
+                    field.classList.add('show');
+                } else {
+                    field.style.display = 'none';
+                    field.classList.remove('show');
+                }
                 const input = field.querySelector('input');
                 if (input) {
                     input.required = showFields;
                 }
             });
         });
+        */
 
         // Handle feedback form submission
         document.getElementById('feedbackForm').addEventListener('submit', function(e) {
@@ -1328,11 +1380,9 @@
             // Initialize category dropdowns
             const donateCategory = document.getElementById('category');
             const paymentCategory = document.getElementById('paymentCategory');
-            const reqCategory = document.getElementById('reqCategory');
             
             if (donateCategory) donateCategory.dispatchEvent(new Event('change'));
             if (paymentCategory) paymentCategory.dispatchEvent(new Event('change'));
-            if (reqCategory) reqCategory.dispatchEvent(new Event('change'));
             
             // Initialize admin panel if admin
             if (localStorage.getItem('isAdmin') === 'true') {
@@ -1342,6 +1392,112 @@
                 document.getElementById('users').classList.add('active');
                 loadUsers();
             }
+
+            // Enhanced card field formatting and validation
+            // Card number formatting disabled - users enter manually
+            /*
+            function formatCardNumber(input) {
+                let value = input.value.replace(/\D/g, ''); // Remove non-digits
+                value = value.replace(/(\d{4})(?=\d)/g, '$1 '); // Add spaces every 4 digits
+                input.value = value;
+            }
+            */
+
+            function formatExpiryDate(input) {
+                let value = input.value.replace(/\D/g, ''); // Remove non-digits
+                if (value.length >= 2) {
+                    value = value.substring(0, 2) + '/' + value.substring(2, 4);
+                }
+                input.value = value;
+            }
+
+            function validateExpiryDate(input) {
+                const value = input.value;
+                if (value.length === 5) {
+                    const month = parseInt(value.substring(0, 2));
+                    const year = parseInt('20' + value.substring(3, 5));
+                    const currentDate = new Date();
+                    const currentYear = currentDate.getFullYear();
+                    const currentMonth = currentDate.getMonth() + 1;
+
+                    if (month < 1 || month > 12) {
+                        input.setCustomValidity('Invalid month (01-12)');
+                    } else if (year < currentYear || (year === currentYear && month < currentMonth)) {
+                        input.setCustomValidity('Card has expired');
+                    } else {
+                        input.setCustomValidity('');
+                    }
+                } else {
+                    input.setCustomValidity('');
+                }
+            }
+
+            // Add validation for card number field - numbers only
+            const cardNumberFields = document.querySelectorAll('#cardNo, #reqCardNo');
+            cardNumberFields.forEach(field => {
+                // Prevent all popup messages
+                field.setAttribute('novalidate', 'true');
+                field.removeAttribute('pattern');
+                field.removeAttribute('required');
+                
+                // Override browser validation completely
+                field.addEventListener('invalid', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                });
+                
+                field.addEventListener('input', function() {
+                    // Remove any non-numeric characters silently
+                    this.value = this.value.replace(/[^0-9]/g, '');
+                });
+                
+                field.addEventListener('keypress', function(e) {
+                    // Prevent non-numeric keys from being entered
+                    if (!/[0-9]/.test(e.key)) {
+                        e.preventDefault();
+                    }
+                });
+                
+                // Prevent form validation popup
+                field.addEventListener('change', function(e) {
+                    e.preventDefault();
+                });
+                
+                // Custom validation without popup
+                field.addEventListener('blur', function() {
+                    if (this.value && !/^[0-9]+$/.test(this.value)) {
+                        this.value = this.value.replace(/[^0-9]/g, '');
+                    }
+                });
+                
+                // Override any browser validation
+                field.addEventListener('beforeinput', function(e) {
+                    if (!/[0-9]/.test(e.data)) {
+                        e.preventDefault();
+                    }
+                });
+                
+                // Additional prevention methods
+                field.addEventListener('keydown', function(e) {
+                    // Allow only numbers, backspace, delete, arrows, tab
+                    const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Tab'];
+                    if (!/[0-9]/.test(e.key) && !allowedKeys.includes(e.key)) {
+                        e.preventDefault();
+                    }
+                });
+            });
+            
+            const expiryDateFields = document.querySelectorAll('#expiryDate, #reqExpiryDate');
+
+            expiryDateFields.forEach(field => {
+                field.addEventListener('input', function() {
+                    formatExpiryDate(this);
+                });
+                field.addEventListener('blur', function() {
+                    validateExpiryDate(this);
+                });
+            });
         });
     </script>
 </body>
