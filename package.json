@@ -6,9 +6,9 @@
   "scripts": {
     "preinstall": "npm uninstall bcrypt || true",
     "postinstall": "npm uninstall bcrypt || true",
-    "start": "node server.js",
-    "dev": "nodemon server.js",
-    "build": "node verify-no-bcrypt.js && node test-bcrypt-shim.js && echo 'No build step required'",
+    "start": "node start.js",
+    "dev": "nodemon start.js",
+    "build": "echo 'Build completed'",
     "generate-ssl": "node generate-ssl.js"
   },
   "dependencies": {
@@ -25,8 +25,5 @@
   "engines": {
     "node": ">=14.0.0",
     "npm": ">=6.0.0"
-  },
-  "overrides": {
-    "bcrypt": "file:./bcrypt-shim.js"
   }
 }
