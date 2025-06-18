@@ -2,22 +2,14 @@ services:
   - type: web
     name: feeding-humanity
     env: node
-    buildCommand: |
-      echo "🧹 Starting aggressive bcrypt removal..."
-      rm -rf node_modules package-lock.json
-      npm cache clean --force
-      npm install --no-optional
-      npm uninstall bcrypt || true
-      rm -rf node_modules/bcrypt || true
-      echo "🔍 Checking for bcrypt..."
-      if [ -d "node_modules/bcrypt" ]; then
-        echo "❌ bcrypt still found, removing..."
-        rm -rf node_modules/bcrypt
-      fi
-      echo "✅ Build completed successfully"
+    buildCommand: npm install
     startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
       - key: NPM_CONFIG_PRODUCTION
+        value: false
+      - key: NODE_OPTIONS
+        value: "--max-old-space-size=512"
+      - key: NPM_CONFIG_BUILD_FROM_SOURCE
         value: false 
