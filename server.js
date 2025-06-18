@@ -1,6 +1,18 @@
 // Load environment variables first
 require('dotenv').config();
 
+// BCRYPT SHIM - Intercept any bcrypt requires and redirect to bcryptjs
+const Module = require('module');
+const originalRequire = Module.prototype.require;
+
+Module.prototype.require = function(id) {
+    if (id === 'bcrypt') {
+        console.log('🔄 Intercepting bcrypt require, redirecting to bcryptjs');
+        return require('bcryptjs');
+    }
+    return originalRequire.apply(this, arguments);
+};
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');

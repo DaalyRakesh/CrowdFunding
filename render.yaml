@@ -3,10 +3,14 @@ services:
     name: feeding-humanity
     env: node
     buildCommand: |
+      echo "🧹 Starting aggressive bcrypt removal..."
       rm -rf node_modules package-lock.json
+      npm cache clean --force
       npm install
       npm uninstall bcrypt || true
+      rm -rf node_modules/bcrypt || true
       node verify-no-bcrypt.js
+      echo "✅ Build completed successfully"
     startCommand: npm start
     envVars:
       - key: NODE_ENV
