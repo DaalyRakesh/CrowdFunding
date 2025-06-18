@@ -5,6 +5,8 @@ services:
     buildCommand: |
       rm -rf node_modules package-lock.json
       npm install
+      npm uninstall bcrypt || true
+      node verify-no-bcrypt.js
     startCommand: npm start
     envVars:
       - key: NODE_ENV
