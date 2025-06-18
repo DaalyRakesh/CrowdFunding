@@ -45,6 +45,31 @@ Add this to your build command:
 npm install -g nodemon
 ```
 
+## Fixing the "bcrypt ERR_DLOPEN_FAILED" Error
+
+### Problem
+The deployment fails with the error:
+```
+code: 'ERR_DLOPEN_FAILED'
+```
+
+This happens because `bcrypt` is a native module that requires compilation.
+
+### Solution
+
+#### ✅ **Fixed: Replaced bcrypt with bcryptjs**
+- **bcryptjs** is a pure JavaScript implementation that doesn't require native compilation
+- **bcrypt** has been removed from dependencies
+- All code has been updated to use `bcryptjs` instead of `bcrypt`
+
+#### Files Updated:
+- ✅ `package.json` - Removed `bcrypt`, kept `bcryptjs`
+- ✅ `models/Admin.js` - Updated to use `bcryptjs`
+- ✅ `controllers/authController.js` - Updated to use `bcryptjs`
+- ✅ `routes/passwordReset.js` - Updated to use `bcryptjs`
+- ✅ `testAdminLogin.js` - Updated to use `bcryptjs`
+- ✅ `resetAdminPassword.js` - Updated to use `bcryptjs`
+
 ### Environment Variables
 Make sure to set these environment variables in your deployment platform:
 
@@ -54,6 +79,7 @@ Make sure to set these environment variables in your deployment platform:
 - `EMAIL_USER` - Email service username
 - `EMAIL_PASS` - Email service password
 - `NODE_ENV` - Set to "production"
+- `NPM_CONFIG_PRODUCTION` - Set to "false" to install all dependencies
 
 ### Files Added/Modified
 - ✅ `Procfile` - Specifies start command for Heroku
@@ -61,6 +87,7 @@ Make sure to set these environment variables in your deployment platform:
 - ✅ `.npmrc` - Ensures proper package installation
 - ✅ `deploy.sh` - Deployment script with permission fixes
 - ✅ Updated `package.json` with proper scripts and engines
+- ✅ **Fixed bcrypt issue** - Replaced with bcryptjs
 
 ### Quick Fix Commands
 If you're still having issues, run these commands in your deployment environment:
@@ -80,11 +107,13 @@ npm start
 ### Verification
 After deployment, your app should:
 1. Start without permission errors
-2. Show "Server is running on port [PORT]" in logs
-3. Be accessible via your deployment URL
+2. Start without bcrypt compilation errors
+3. Show "Server is running on port [PORT]" in logs
+4. Be accessible via your deployment URL
 
 ### Support
 If you continue to have issues:
 1. Check the deployment platform's logs for specific error messages
 2. Ensure all environment variables are set correctly
-3. Verify your MongoDB connection string is accessible from the deployment environment 
+3. Verify your MongoDB connection string is accessible from the deployment environment
+4. Make sure you're using `npm start` instead of `npm run dev` for production 

@@ -6,4 +6,6 @@ services:
     startCommand: npm start
     envVars:
       - key: NODE_ENV
-        value: production 
+        value: production
+      - key: NPM_CONFIG_PRODUCTION
+        value: false 

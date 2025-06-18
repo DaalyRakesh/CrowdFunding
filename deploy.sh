@@ -3,6 +3,10 @@
 # Deployment script for Feeding Humanity
 echo "🚀 Starting deployment process..."
 
+# Set environment variables
+export NPM_CONFIG_PRODUCTION=false
+export NODE_ENV=production
+
 # Install dependencies
 echo "📦 Installing dependencies..."
 npm install
@@ -17,6 +21,15 @@ if [ -f "node_modules/.bin/nodemon" ]; then
     chmod +x node_modules/.bin/nodemon
 else
     echo "⚠️  Nodemon not found in node_modules/.bin/"
+fi
+
+# Verify bcryptjs installation
+echo "🔍 Verifying bcryptjs installation..."
+if [ -d "node_modules/bcryptjs" ]; then
+    echo "✅ bcryptjs installed successfully"
+else
+    echo "❌ bcryptjs not found, installing..."
+    npm install bcryptjs
 fi
 
 # Start the application

@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const Admin = require('./models/Admin');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 require('dotenv').config();
 
 async function resetAdminPassword() {
