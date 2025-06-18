@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
 const User = require('../models/User');
-const bcrypt = require('bcryptjs');
+const SimpleHash = require('../simple-hash');
 const Admin = require('../models/Admin');
 
 // Use real email service
@@ -175,8 +175,7 @@ router.post('/reset-password/:token', async (req, res) => {
         if (user) {
             console.log('User found for password reset:', user.email);
         // Hash the new password
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
+        const hashedPassword = await SimpleHash.hash(password, 10);
         
         // Update the password and clear reset token
         user.password = hashedPassword;
@@ -203,8 +202,7 @@ router.post('/reset-password/:token', async (req, res) => {
         if (admin) {
             console.log('Admin found for password reset:', admin.username);
             // Hash the new password
-            const salt = await bcrypt.genSalt(10);
-            const hashedPassword = await bcrypt.hash(password, salt);
+            const hashedPassword = await SimpleHash.hash(password, 10);
             
             // Update the password and clear reset token
             admin.password = hashedPassword;

@@ -1,6 +1,6 @@
 const User = require('../models/User');
 const Admin = require('../models/Admin');
-const bcrypt = require('bcryptjs');
+const SimpleHash = require('../simple-hash');
 const mongoose = require('mongoose');
 const crypto = require('crypto');
 const emailService = require('./emailService');
@@ -27,7 +27,7 @@ const loginUser = async (req, res) => {
         }
 
         // Compare the provided password with the stored hashed password
-        const isPasswordValid = await bcrypt.compare(password, user.password);
+        const isPasswordValid = await SimpleHash.compare(password, user.password);
 
         if (isPasswordValid) {
             // Authentication successful
@@ -128,8 +128,7 @@ const registerUser = async (req, res) => {
 
         // Hash the password
         console.log('Hashing password...');
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
+        const hashedPassword = await SimpleHash.hash(password, 10);
 
         // Create a new user
         console.log('Creating new user object...');
@@ -493,8 +492,7 @@ const resetPassword = async (req, res) => {
         }
         
         // Hash the new password
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
+        const hashedPassword = await SimpleHash.hash(password, 10);
         
         // Update user's password and clear reset token fields
         user.password = hashedPassword;

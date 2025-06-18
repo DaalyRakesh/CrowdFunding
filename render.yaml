@@ -2,7 +2,12 @@ services:
   - type: web
     name: feeding-humanity
     env: node
-    buildCommand: npm install
+    buildCommand: |
+      echo "🧹 Starting completely clean build..."
+      rm -rf node_modules package-lock.json
+      npm cache clean --force
+      npm install --no-optional --no-audit
+      echo "✅ Build completed successfully"
     startCommand: npm start
     envVars:
       - key: NODE_ENV
@@ -12,4 +17,8 @@ services:
       - key: NODE_OPTIONS
         value: "--max-old-space-size=512"
       - key: NPM_CONFIG_BUILD_FROM_SOURCE
-        value: false 
+        value: false
+    buildFilter:
+      paths:
+        - node_modules/
+        - package-lock.json 

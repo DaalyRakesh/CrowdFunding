@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+const SimpleHash = require('../simple-hash');
 
 const AdminSchema = new mongoose.Schema({
     username: {
@@ -33,8 +33,7 @@ AdminSchema.pre('save', async function(next) {
     try {
         if (!this.isModified('password')) return next();
         
-        const salt = await bcrypt.genSalt(10);
-        this.password = await bcrypt.hash(this.password, salt);
+        this.password = await SimpleHash.hash(this.password, 10);
         console.log('Password hashed in pre-save hook');
         next();
     } catch (error) {
@@ -47,7 +46,7 @@ AdminSchema.pre('save', async function(next) {
 AdminSchema.methods.comparePassword = async function(candidatePassword) {
     try {
         console.log('Comparing passwords in comparePassword method');
-        const result = await bcrypt.compare(candidatePassword, this.password);
+        const result = await SimpleHash.compare(candidatePassword, this.password);
         console.log('Password comparison result:', result);
         return result;
     } catch (error) {
